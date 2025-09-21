@@ -136,25 +136,7 @@ http://localhost:5000
 
 ---
 
-## 🎨 Ekran Görüntüleri
 
-<div align="center">
-
-### Ana Ekran
-![Ana Ekran](https://via.placeholder.com/800x500/0f141a/ffffff?text=Pomodev+Ana+Ekran)
-
-### Koyu Tema
-![Koyu Tema](https://via.placeholder.com/800x500/0f141a/ffffff?text=Koyu+Tema)
-
-### Açık Tema
-![Açık Tema](https://via.placeholder.com/800x500/f6f8fb/0b1220?text=Açık+Tema)
-
-### Görev Yönetimi
-![Görev Yönetimi](https://via.placeholder.com/800x500/0f141a/ffffff?text=Görev+Yönetimi)
-
-</div>
-
----
 
 ## 🏗️ Proje Yapısı
 
