@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pomodev</title>
+  <meta name="theme-color" content="#0f141a" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/modern-normalize/2.0.0/modern-normalize.min.css" />
+  <link rel="stylesheet" href="/static/style.css" />
+  <style>
+    /* Slaytlar için basit stil */
+    .info-slider {
+      position: relative;
+      height: 200px;
+      overflow: hidden;
+    }
+    .slide {
+      opacity: 0;
+      transition: opacity 0.6s ease;
+      pointer-events: none;
+      position: absolute;
+      width: 100%;
+      top: 0;
+      left: 0;
+    }
+    .slide.slide-active {
+      opacity: 1;
+      position: relative;
+      pointer-events: auto;
+    }
+
+    /* Modal için basit görünürlük */
+    .modal {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.5);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 100;
+    }
+    .modal.hidden {
+      display: none;
+    }
+    .modal-content {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      max-width: 400px;
+      width: 90%;
+    }
+  </style>
+</head>
+<body>
+  <header class="app-header">
+    <div class="container">
+      <div class="brand">
+        <div class="logo">✔️ Pomodev</div>
+        <span class="tagline">Odaklan, üret, tekrar et.</span>
+      </div>
+      <div class="top-buttons">
+        <select id="accentSelect" aria-label="Accent">
+          <option value="blue">Mavi</option>
+          <option value="purple">Mor</option>
+          <option value="coral">Mercan</option>
+        </select>
+        <button id="themeToggle" title="Tema">🌙</button>
+        <button id="fullscreenBtn" title="Tam Ekran">⛶</button>
+        <button id="notificationsBtn" title="Bildirimler">🔔</button>
+        <button id="settingsBtn">⚙️ Settings</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="container hero-inner">
+      <div class="hero-copy">
+        <h1>Sade. Hızlı. Profesyonel Pomodoro.</h1>
+        <p>Derin odak için tasarlanmış modern arayüz: hedeflerini planla, zamanlayıcıyı başlat, işini bitir.</p>
+        <div class="hero-cta">
+          <a href="#workspace" class="btn-cta">Odaklanmaya Başla</a>
+          <button id="howItWorksBtn" class="btn-ghost" type="button">Nasıl Çalışır?</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features Section -->
+  <section class="features">
+    <div class="container features-grid">
+      <article class="feature-card">
+        <div class="feature-icon">🧠</div>
+        <h3>Derin Odak</h3>
+        <p>25 dakikalık yoğun odak bloklarıyla, dikkati dağıtan unsurları oyundan çıkar.</p>
+      </article>
+      <article class="feature-card">
+        <div class="feature-icon">📈</div>
+        <h3>Ölç ve İyileştir</h3>
+        <p>Her gün kaç pomodoro tamamladığını gör, ritmini ince ayarla ve verimini artır.</p>
+      </article>
+      <article class="feature-card">
+        <div class="feature-icon">🎨</div>
+        <h3>Kişiselleştir</h3>
+        <p>Açık/koyu tema ve vurgu rengiyle çalışma alanını zevkine göre düzenle.</p>
+      </article>
+    </div>
+  </section>
+
+  <main id="workspace">
+    <div class="container">
+      <!-- Premium Layout Container -->
+      <div class="premium-layout">
+        <!-- Sol Panel: İstatistikler ve Hedefler -->
+        <aside class="left-panel">
+          <div class="panel-section glass">
+            <h3>📊 İstatistikler</h3>
+            <div class="stats-grid">
+              <div class="stat-card">
+                <div class="stat-value" id="todayPomodoros">0</div>
+                <div class="stat-label">Bugün</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-value" id="weekPomodoros">0</div>
+                <div class="stat-label">Bu Hafta</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-value" id="currentStreak">0</div>
+                <div class="stat-label">Streak</div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="panel-section glass">
+            <h3>🎯 Günlük Hedef</h3>
+            <div class="goal-container">
+              <div class="goal-input-group">
+                <input type="number" id="dailyGoal" min="1" max="20" value="8" />
+                <button onclick="updateGoal()" class="goal-btn">Güncelle</button>
+              </div>
+              <div class="progress-container">
+                <div class="progress-bar">
+                  <div class="progress-fill" id="goalProgressBar"></div>
+                </div>
+                <span class="progress-text" id="goalProgress">0/8</span>
+              </div>
+            </div>
+          </div>
+        </aside>
+
+        <!-- Orta Panel: Timer -->
+        <main class="main-panel">
+          <div class="timer-container glass">
+            <div class="mode-switcher">
+              <button class="mode active" onclick="setMode('pomodoro')">Pomodoro</button>
+              <button class="mode" onclick="setMode('short')">Short Break</button>
+              <button class="mode" onclick="setMode('long')">Long Break</button>
+            </div>
+            <div class="timer-display">
+              <div class="timer-time" id="timer">25:00</div>
+              <div class="timer-mode" id="focusMsg">#1<br />Time to focus!</div>
+            </div>
+            <div class="timer-controls">
+              <button class="start-btn" onclick="startTimer()">START</button>
+              <button class="reset-btn" onclick="resetTimer()">RESET</button>
+            </div>
+          </div>
+        </main>
+
+        <!-- Sağ Panel: Üretkenlik -->
+        <aside class="right-panel">
+          <div class="panel-section glass">
+            <h3>📈 Üretkenlik</h3>
+            <div class="productivity-content">
+              <div class="most-productive">
+                <h4>En Verimli Saatler</h4>
+                <div id="mostProductiveHours" class="hours-list">
+                  <!-- JavaScript ile doldurulacak -->
+                </div>
+              </div>
+              <div class="hourly-chart">
+                <h4>Saatlik Dağılım</h4>
+                <div id="hourlyChart" class="chart-container">
+                  <!-- JavaScript ile doldurulacak -->
+                </div>
+              </div>
+            </div>
+          </div>
+        </aside>
+      </div>
+
+      <!-- Görevler Bölümü -->
+      <section class="tasks-section">
+        <div class="tasks glass">
+          <div class="task-header">
+            <h2>📋 Görevler</h2>
+            <div class="task-controls">
+              <select id="categoryFilter">
+                <option value="all">Tüm Kategoriler</option>
+                <option value="work">İş</option>
+                <option value="personal">Kişisel</option>
+                <option value="learning">Öğrenme</option>
+              </select>
+              <button id="taskMenuBtn">⋮</button>
+            </div>
+          </div>
+          <div class="task-box" onclick="addTask()">➕ Görev Ekle</div>
+          <div id="taskList" class="task-list"></div>
+        </div>
+      </section>
+    </div>
+
+    <section class="container info-section" id="learn">
+      <div class="info-slider">
+        <div class="slide slide-active">
+          <h2>Pomodoro Nedir?</h2>
+          <p>Pomodoro Tekniği, işi 25 dakikalık yoğun odak bloklarına (pomodoro) ve kısa molalara bölen kanıtlanmış bir zaman yönetimi yaklaşımıdır.</p>
+          <ul>
+            <li>Net hedef → 25 dk odak → 5 dk mola → 4 setten sonra 15-30 dk uzun mola</li>
+            <li>Tek seferde tek görev: bölünmeyen, bildirimleri kapatılmış çalışma</li>
+            <li>Ölç, gözlemle, iyileştir: her gün daha iyi akış</li>
+          </ul>
+        </div>
+        <div class="slide">
+          <h2>Hedefler ve Faydalar</h2>
+          <ul>
+            <li>Ertelemeyi azaltır, başlangıcı kolaylaştırır</li>
+            <li>Odak ve derin çalışmayı artırır</li>
+            <li>Enerji yönetimini dengeler, tükenmişliği azaltır</li>
+            <li>Üretkenlik ve tahmin edilebilirlik kazandırır</li>
+          </ul>
+        </div>
+        <div class="slide">
+          <h2>Temel Kurallar</h2>
+          <ul>
+            <li>Pomodoro bölünmez: ara verilecekse zamanlayıcı durdurulur</li>
+            <li>Görev küçükse birleştir; büyükse alt hedeflere böl</li>
+            <li>4 pomodoro sonrası mutlaka uzun mola</li>
+          </ul>
+        </div>
+        <div class="slide">
+          <h2>Günlük Akış Önerisi</h2>
+          <ul>
+            <li>Sabah: 1-2 saat derin odak (en zor iş)</li>
+            <li>Öğlen: idari işler ve toplantılar</li>
+            <li>Gün sonu: gözden geçirme, yarına hazırlık</li>
+          </ul>
+        </div>
+        <div class="slide">
+          <h2>İpuçları</h2>
+          <ul>
+            <li>Hedefi yaz: her pomodoro başlamadan 1 cümle</li>
+            <li>Çeldiricileri yok et: bildirimler kapalı, tek sekme</li>
+            <li>Ritmi koru: aynı saatlerde çalış, alışkanlık oluştur</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <div class="footer-brand">✔️ Pomodev</div>
+      <div class="footer-meta">© <span id="year"></span> Pomodev. Tüm hakları saklıdır.</div>
+    </div>
+  </footer>
+
+  <!-- Nasıl Çalışır Modalı -->
+  <div id="howItWorksModal" class="modal hidden">
+    <div class="modal-content">
+      <h2>Nasıl Çalışır?</h2>
+      <h3>Pomodoro Tekniği</h3>
+      <ol>
+        <li>Görevi seç ve netleştir.</li>
+        <li>25 dakikalık pomodoroyu başlat ve sadece bu işe odaklan.</li>
+        <li>Bitince 5 dakika kısa mola ver.</li>
+        <li>4 pomodoro tamamlandığında 15-30 dakika uzun mola ver.</li>
+      </ol>
+      <h3>Bu Sitede Akış</h3>
+      <ul>
+        <li>Mod Seçimi: Pomodoro, Kısa/Uzun mola modlarını üstte değiştir.</li>
+        <li>Zamanlayıcı: START ile başlat/durdur; süreler Ayarlar’dan değişir.</li>
+        <li>Görevler: ‘Görev Ekle’ ile liste oluştur, ilerlemeni takip et.</li>
+        <li>Tema/Renk: Sağ üstten koyu/açık ve vurgu rengi seç.</li>
+      </ul>
+      <div class="modal-actions">
+        <button class="btn cancel" id="closeHowItWorks">Kapat</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ✅ Settings Modal -->
+  <div id="settingsModal" class="modal hidden">
+    <div class="modal-content">
+      <h2>⚙ Ayarlar</h2>
+
+      <div class="section">
+        <h3>⏱ Zamanlayıcı</h3>
+        <label>Pomodoro <input type="number" id="pomodoroDuration" value="25" min="1" max="60" /></label><br />
+        <label>Kısa Mola <input type="number" id="shortBreak" value="5" min="1" max="30" /></label><br />
+        <label>Uzun Mola <input type="number" id="longBreak" value="15" min="1" max="60" /></label><br />
+        <label>Uzun Mola Aralığı <input type="number" id="longBreakInterval" value="4" min="1" max="10" /></label><br />
+        <label><input type="checkbox" id="autoStartBreaks" /> Molalar Otomatik Başlasın</label><br />
+        <label><input type="checkbox" id="autoStartPomodoros" /> Pomodorolar Otomatik Başlasın</label><br />
+      </div>
+
+      <div class="section">
+        <h3>📋 Görev</h3>
+        <label><input type="checkbox" id="autoCheckTasks" /> Görevleri Otomatik İşaretle</label><br />
+        <label><input type="checkbox" id="autoSwitchTasks" checked /> Görevleri Otomatik Geç</label><br />
+      </div>
+
+      <div class="section">
+        <h3>🔊 Ses</h3>
+        <label>Alarm Sesi:
+          <select id="alarmSound">
+            <option value="kitchen">Kitchen</option>
+            <option value="bell">Bell</option>
+            <option value="clock">Clock</option>
+          </select>
+        </label><br />
+        <label>Tekrar Sayısı:
+          <input type="number" id="alarmRepeat" value="1" min="1" />
+        </label><br />
+        <label>Alarm Ses Seviyesi:
+          <input type="range" id="alarmVolume" min="0" max="100" value="50" />
+        </label><br />
+        <label>Tık Sesi:
+          <select id="tickSound">
+            <option value="none">Yok</option>
+            <option value="clock">Saat</option>
+          </select>
+        </label><br />
+        <label>Tık Ses Seviyesi:
+          <input type="range" id="tickVolume" min="0" max="100" value="50" />
+        </label><br />
+      </div>
+
+
+      <button id="closeSettings">Kapat</button>
+    </div>
+  </div>
+
+  <!-- Görev Modalı -->
+  <div id="taskModal" class="modal hidden">
+    <div class="modal-content">
+
+      <h2 class="modal-title">🆕 Yeni Görev Ekle</h2>
+
+      <!-- Görev Başlığı -->
+      <label class="modal-label" for="taskTitle">🎯 Görev Başlığı</label>
+      <input class="modal-input" type="text" id="taskTitle" placeholder="Ne üzerinde çalışıyorsun?" />
+
+      <!-- Pomodoro Sayısı -->
+      <label class="modal-label" for="pomodoroCount">🍅 Tahmini Pomodoro</label>
+      <div class="pomodoro-control">
+        <button type="button" class="pomodoro-btn" onclick="decrementPomodoro()">−</button>
+        <input type="number" id="pomodoroCount" min="1" value="1" class="pomodoro-input" readonly />
+        <button type="button" class="pomodoro-btn" onclick="incrementPomodoro()">+</button>
+      </div>
+
+      <!-- Kategori -->
+      <label class="modal-label" for="taskCategory">📁 Kategori</label>
+      <select class="modal-input" id="taskCategory">
+        <option value="work">İş</option>
+        <option value="personal">Kişisel</option>
+        <option value="learning">Öğrenme</option>
+      </select>
+
+      <!-- Öncelik -->
+      <label class="modal-label" for="priority">⭐ Öncelik</label>
+      <select class="modal-input" id="priority">
+        <option value="low">Düşük</option>
+        <option value="normal" selected>Normal</option>
+        <option value="important">Önemli</option>
+        <option value="urgent">Acil</option>
+      </select>
+
+      <!-- Tarih -->
+      <label class="modal-label" for="dueDate">📅 Bitiş Tarihi</label>
+      <input class="modal-input" type="date" id="dueDate" />
+
+      <!-- Not -->
+      <label class="modal-label" for="taskNote">📝 Not (isteğe bağlı)</label>
+      <textarea class="modal-input" id="taskNote" rows="2" placeholder="Ek bilgi ya da açıklama girin..."></textarea>
+
+      <!-- Proje -->
+      <label class="modal-label" for="taskProject">📁 Proje (isteğe bağlı)</label>
+      <input class="modal-input" type="text" id="taskProject" placeholder="Örn: Final Projesi" />
+
+      <!-- Etiketler -->
+      <label class="modal-label" for="taskTags">🏷️ Etiketler (virgülle ayır)</label>
+      <input class="modal-input" type="text" id="taskTags" placeholder="örn: çalışma, araştırma, UI" />
+
+      <!-- Butonlar -->
+      <div class="modal-actions">
+        <button class="btn cancel" onclick="closeTaskModal()">İptal</button>
+        <button class="btn save" onclick="saveTask()">Kaydet</button>
+      </div>
+
+    </div> <!-- modal-content kapanışı -->
+  </div> <!-- taskModal kapanışı -->
+
+  <!-- Alarm Audio -->
+  <audio id="alarm" preload="auto">
+    <source src="{{ url_for('static', filename='sounds/kitchen.wav') }}" type="audio/wav">
+  </audio>
+
+  <!-- Slayt geçiş scripti -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      let currentSlide = 0;
+      const slides = document.querySelectorAll('.info-slider .slide');
+
+      function showSlide(index) {
+        slides.forEach((slide, i) => {
+          slide.classList.toggle('slide-active', i === index);
+        });
+      }
+
+      function nextSlide() {
+        currentSlide = (currentSlide + 1) % slides.length;
+        showSlide(currentSlide);
+      }
+
+      showSlide(currentSlide);
+      setInterval(nextSlide, 5000);
+    });
+  </script>
+
+  <script src="/static/script.js"></script>
+</body>
+</html>
