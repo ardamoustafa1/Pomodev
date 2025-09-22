@@ -1,0 +1,29 @@
+{
+  "name": "Pomodev",
+  "description": "Modern Pomodoro Timer - Odaklan, üret, tekrar et",
+  "repository": "https://github.com/yourusername/pomodev",
+  "logo": "https://raw.githubusercontent.com/yourusername/pomodev/main/static/logo.png",
+  "keywords": ["pomodoro", "timer", "productivity", "flask", "python"],
+  "success_url": "/",
+  "buildpacks": [
+    {
+      "url": "heroku/python"
+    }
+  ],
+  "formation": {
+    "web": {
+      "quantity": 1,
+      "size": "free"
+    }
+  },
+  "env": {
+    "FLASK_APP": {
+      "description": "Flask application file",
+      "value": "app.py"
+    },
+    "FLASK_ENV": {
+      "description": "Flask environment",
+      "value": "production"
+    }
+  }
+}
