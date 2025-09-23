@@ -12,7 +12,7 @@
 [![CSS3](https://img.shields.io/badge/CSS3-1572B6?style=flat-square&logo=css3&logoColor=white)](https://developer.mozilla.org/en-US/docs/Web/CSS)
 [![JavaScript](https://img.shields.io/badge/JavaScript-ES6+-yellow?style=flat-square&logo=javascript)](https://developer.mozilla.org/en-US/docs/Web/JavaScript)
 
-[🚀 Canlı Demo](#-canlı-demo) • [📖 Özellikler](#-özellikler) • [🛠️ Kurulum](#️-kurulum) • [📱 Kullanım](#-kullanım) • [🎨 Ekran Görüntüleri](#-ekran-görüntüleri)
+ • [📖 Özellikler](#-özellikler)  • [📱 Kullanım](#-kullanım) • [🎨 Ekran Görüntüleri](#-ekran-görüntüleri)
 
 </div>
 
@@ -73,8 +73,11 @@ Pomodoro Tekniği, işi 25 dakikalık yoğun odak bloklarına (pomodoro) ve kıs
 - **Tam ekran modu** - Dikkat dağıtıcı unsurları gizle
 - **Ses kontrolleri** - Alarm ve tık sesi seviyeleri
 
+<<<<<<< HEAD
 ---
 
+=======
+>>>>>>> b7e82d7ae300716dcb4480e469e98383ca24c49c
 ## 📱 Kullanım
 
 ### 🚀 Hızlı Başlangıç
@@ -138,22 +141,26 @@ pomodev/
 
 ---
 
+<<<<<<< HEAD
 ## 🚀 Canlı Demo
 
 [![Canlı Demo](https://img.shields.io/badge/🚀_Canlı_Demo-Tıklayın-blue?style=for-the-badge)](https://pomodev.onrender.com)
 
 ---
 
+=======
+>>>>>>> b7e82d7ae300716dcb4480e469e98383ca24c49c
 ## 👨‍💻 Geliştirici
 
 **ARDA** - *Full Stack Developer*
 
-- GitHub: [@kullaniciadi](https://github.com/kullaniciadi)
-- LinkedIn: [Profiliniz](https://linkedin.com/in/profiliniz)
-- Email: your.email@example.com
+- GitHub: [@ardamoustafa1](https://github.com/ardamoustafa1)
+- LinkedIn: [Arda Moustafa](www.linkedin.com/in/arda-moustafa-746335335)
+- Email: ardamoustafa_@hotmail.com
 
 ---
 
+<<<<<<< HEAD
 ## 🙏 Teşekkürler
 
 - [Pomodoro Tekniği](https://francescocirillo.com/pages/pomodoro-technique) - Francesco Cirillo
@@ -164,9 +171,10 @@ pomodev/
 ---
 
 <div align="center">
+=======
+>>>>>>> b7e82d7ae300716dcb4480e469e98383ca24c49c
 
 **⭐ Bu projeyi beğendiyseniz yıldız vermeyi unutmayın!**
 
-Made with ❤️ by [ARDA](https://github.com/kullaniciadi)
+Made with ❤️ by [ARDA](https://github.com/ardamoustafa1)
 
-</div>
