@@ -126,7 +126,6 @@ pomodev/
 - **HTML5** - Yapısal markup
 - **CSS3** - Modern styling (Grid, Flexbox, Custom Properties)
 - **Vanilla JavaScript** - Framework-free JS
-- **Glassmorphism** - Modern UI tasarım
 
 ### Özellikler
 - **LocalStorage** - Veri kalıcılığı
