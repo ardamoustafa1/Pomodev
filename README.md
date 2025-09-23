@@ -12,7 +12,7 @@
 [![CSS3](https://img.shields.io/badge/CSS3-1572B6?style=flat-square&logo=css3&logoColor=white)](https://developer.mozilla.org/en-US/docs/Web/CSS)
 [![JavaScript](https://img.shields.io/badge/JavaScript-ES6+-yellow?style=flat-square&logo=javascript)](https://developer.mozilla.org/en-US/docs/Web/JavaScript)
 
- • [📖 Özellikler](#-özellikler)  • [📱 Kullanım](#-kullanım) • [🎨 Ekran Görüntüleri](#-ekran-görüntüleri)
+[🚀 Canlı Demo](#-canlı-demo) • [📖 Özellikler](#-özellikler) • [📱 Kullanım](#-kullanım) • [🎨 Ekran Görüntüleri](#-ekran-görüntüleri)
 
 </div>
 
@@ -73,11 +73,8 @@ Pomodoro Tekniği, işi 25 dakikalık yoğun odak bloklarına (pomodoro) ve kıs
 - **Tam ekran modu** - Dikkat dağıtıcı unsurları gizle
 - **Ses kontrolleri** - Alarm ve tık sesi seviyeleri
 
-<<<<<<< HEAD
 ---
 
-=======
->>>>>>> b7e82d7ae300716dcb4480e469e98383ca24c49c
 ## 📱 Kullanım
 
 ### 🚀 Hızlı Başlangıç
@@ -98,8 +95,6 @@ Pomodoro Tekniği, işi 25 dakikalık yoğun odak bloklarına (pomodoro) ve kıs
 - **Görevler**: Kategori filtreleme ve öncelik sıralaması
 
 ---
-
-
 
 ## 🏗️ Proje Yapısı
 
@@ -141,40 +136,26 @@ pomodev/
 
 ---
 
-<<<<<<< HEAD
 ## 🚀 Canlı Demo
 
 [![Canlı Demo](https://img.shields.io/badge/🚀_Canlı_Demo-Tıklayın-blue?style=for-the-badge)](https://pomodev.onrender.com)
 
 ---
 
-=======
->>>>>>> b7e82d7ae300716dcb4480e469e98383ca24c49c
 ## 👨‍💻 Geliştirici
 
 **ARDA** - *Full Stack Developer*
 
 - GitHub: [@ardamoustafa1](https://github.com/ardamoustafa1)
-- LinkedIn: [Arda Moustafa](www.linkedin.com/in/arda-moustafa-746335335)
+- LinkedIn: [ArdaMoustafa](https://www.linkedin.com/in/arda-moustafa-746335335)
 - Email: ardamoustafa_@hotmail.com
 
 ---
 
-<<<<<<< HEAD
-## 🙏 Teşekkürler
-
-- [Pomodoro Tekniği](https://francescocirillo.com/pages/pomodoro-technique) - Francesco Cirillo
-- [Flask](https://flask.palletsprojects.com) - Web framework
-- [Inter Font](https://rsms.me/inter/) - Modern tipografi
-- [Modern Normalize](https://github.com/sindresorhus/modern-normalize) - CSS reset
-
----
-
 <div align="center">
-=======
->>>>>>> b7e82d7ae300716dcb4480e469e98383ca24c49c
 
 **⭐ Bu projeyi beğendiyseniz yıldız vermeyi unutmayın!**
 
 Made with ❤️ by [ARDA](https://github.com/ardamoustafa1)
 
+</div>
