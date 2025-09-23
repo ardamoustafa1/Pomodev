@@ -12,7 +12,7 @@
 [![CSS3](https://img.shields.io/badge/CSS3-1572B6?style=flat-square&logo=css3&logoColor=white)](https://developer.mozilla.org/en-US/docs/Web/CSS)
 [![JavaScript](https://img.shields.io/badge/JavaScript-ES6+-yellow?style=flat-square&logo=javascript)](https://developer.mozilla.org/en-US/docs/Web/JavaScript)
 
-[🚀 Canlı Demo](#-canlı-demo) • [📖 Özellikler](#-özellikler) • [🛠️ Kurulum](#️-kurulum) • [📱 Kullanım](#-kullanım) • [🎨 Ekran Görüntüleri](#-ekran-görüntüleri)
+ • [📖 Özellikler](#-özellikler)  • [📱 Kullanım](#-kullanım) • [🎨 Ekran Görüntüleri](#-ekran-görüntüleri)
 
 </div>
 
@@ -135,12 +135,6 @@ pomodev/
 - **Audio API** - Ses kontrolü
 
 ---
-
-## 🚀 Canlı Demo
-
-[![Canlı Demo](https://pomodev.onrender.com)
-
-
 
 ## 👨‍💻 Geliştirici
 
