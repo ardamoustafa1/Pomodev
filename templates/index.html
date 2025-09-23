@@ -12,7 +12,13 @@
     window.dataLayer = window.dataLayer || [];
     function gtag(){dataLayer.push(arguments);}
     gtag('js', new Date());
-    gtag('config', 'G-1LKTPZV07N');
+    gtag('config', 'G-1LKTPZV07N', {
+      'send_page_view': true,
+      'anonymize_ip': true
+    });
+    
+    // Debug için console'a log yazdır
+    console.log('Google Analytics loaded: G-1LKTPZV07N');
   </script>
   
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet" />
