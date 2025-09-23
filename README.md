@@ -73,48 +73,6 @@ Pomodoro Tekniği, işi 25 dakikalık yoğun odak bloklarına (pomodoro) ve kıs
 - **Tam ekran modu** - Dikkat dağıtıcı unsurları gizle
 - **Ses kontrolleri** - Alarm ve tık sesi seviyeleri
 
----
-
-## 🛠️ Kurulum
-
-### Gereksinimler
-- Python 3.7 veya üzeri
-- Modern web tarayıcısı
-
-### 1. Projeyi İndirin
-```bash
-git clone https://github.com/kullaniciadi/pomodev.git
-cd pomodev
-```
-
-### 2. Sanal Ortam Oluşturun (Önerilen)
-```bash
-python -m venv venv
-
-# Windows
-venv\Scripts\activate
-
-# macOS/Linux
-source venv/bin/activate
-```
-
-### 3. Bağımlılıkları Yükleyin
-```bash
-pip install -r requirements.txt
-```
-
-### 4. Uygulamayı Başlatın
-```bash
-python app.py
-```
-
-### 5. Tarayıcıda Açın
-```
-http://localhost:5000
-```
-
----
-
 ## 📱 Kullanım
 
 ### 🚀 Hızlı Başlangıç
@@ -180,68 +138,22 @@ pomodev/
 
 ## 🚀 Canlı Demo
 
-[![Canlı Demo](https://img.shields.io/badge/🚀_Canlı_Demo-Tıklayın-blue?style=for-the-badge)](https://your-demo-url.com)
+[![Canlı Demo](https://pomodev.onrender.com)
 
-> **Not**: Demo URL'ini kendi hosting servisinizle değiştirin.
 
----
-
-## 🤝 Katkıda Bulunma
-
-1. Bu repository'yi fork edin
-2. Feature branch oluşturun (`git checkout -b feature/amazing-feature`)
-3. Değişikliklerinizi commit edin (`git commit -m 'Add amazing feature'`)
-4. Branch'inizi push edin (`git push origin feature/amazing-feature`)
-5. Pull Request oluşturun
-
-### 🐛 Bug Bildirimi
-- [Issues](https://github.com/kullaniciadi/pomodev/issues) sayfasından bug bildirebilirsiniz
-- Lütfen detaylı açıklama ve ekran görüntüsü ekleyin
-
----
-
-## 📄 Lisans
-
-Bu proje MIT lisansı altında lisanslanmıştır. Detaylar için [LICENSE](LICENSE) dosyasına bakın.
-
----
 
 ## 👨‍💻 Geliştirici
 
 **ARDA** - *Full Stack Developer*
 
-- GitHub: [@kullaniciadi](https://github.com/kullaniciadi)
-- LinkedIn: [Profiliniz](https://linkedin.com/in/profiliniz)
-- Email: your.email@example.com
+- GitHub: [@ardamoustafa1](https://github.com/ardamoustafa1)
+- LinkedIn: [Arda Moustafa](www.linkedin.com/in/arda-moustafa-746335335)
+- Email: ardamoustafa_@hotmail.com
 
 ---
 
-## 🙏 Teşekkürler
-
-- [Pomodoro Tekniği](https://francescocirillo.com/pages/pomodoro-technique) - Francesco Cirillo
-- [Flask](https://flask.palletsprojects.com) - Web framework
-- [Inter Font](https://rsms.me/inter/) - Modern tipografi
-- [Modern Normalize](https://github.com/sindresorhus/modern-normalize) - CSS reset
-
----
-
-## 📈 Gelecek Özellikler
-
-- [ ] **Veritabanı entegrasyonu** - SQLite/PostgreSQL desteği
-- [ ] **Kullanıcı hesapları** - Çoklu kullanıcı desteği
-- [ ] **Mobil uygulama** - React Native/Flutter
-- [ ] **Takım özellikleri** - Grup pomodoro seansları
-- [ ] **API entegrasyonu** - Üçüncü parti servisler
-- [ ] **Gelişmiş raporlama** - PDF export, grafikler
-- [ ] **Tema editörü** - Özel tema oluşturma
-- [ ] **PWA desteği** - Offline çalışma
-
----
-
-<div align="center">
 
 **⭐ Bu projeyi beğendiyseniz yıldız vermeyi unutmayın!**
 
-Made with ❤️ by [ARDA](https://github.com/kullaniciadi)
+Made with ❤️ by [ARDA](https://github.com/ardamoustafa1)
 
-</div>
