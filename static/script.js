@@ -4,6 +4,11 @@ let isRunning = false;
 let currentMode = 'pomodoro';
 let cycleCount = 0;
 
+// Arka plan kontrolü için değişkenler
+let backgroundStartTime = 0;
+let backgroundDuration = 0;
+let isPageVisible = true;
+
 const durations = {
     pomodoro: 25 * 60,
     short: 5 * 60,
@@ -40,6 +45,7 @@ document.addEventListener('DOMContentLoaded', () => {
     setupNotifications();
     setupFullscreen();
     setupKeyboardShortcuts();
+    setupPageVisibility();
     loadData();
     const yearSpan = document.getElementById('year');
     if (yearSpan) yearSpan.textContent = new Date().getFullYear();
@@ -125,64 +131,7 @@ function startTimer() {
     startBtn.textContent = 'PAUSE';
     updateTickSound();
 
-    timer = setInterval(() => {
-        if (remainingTime <= 0) {
-            clearInterval(timer);
-            isRunning = false;
-            startBtn.textContent = 'START';
-            tickAudio.pause();
-            playAlarm();
-
-            if (currentMode === 'pomodoro') {
-                cycleCount++;
-                todayPomodoros++;
-                weekPomodoros++;
-                
-                // Pomodoro geçmişine ekle
-                pomodoroHistory.push({
-                    timestamp: new Date().toISOString(),
-                    mode: 'pomodoro',
-                    duration: durations.pomodoro / 60 // dakika cinsinden
-                });
-                
-                // İstatistikleri güncelle
-                updateStatistics();
-                saveData();
-                
-                // Bildirim gönder
-                if (notificationsEnabled) {
-                    showNotification('Pomodoro Tamamlandı! 🎉', 'Mola zamanı!');
-                }
-
-                if (autoCheckTasks) {
-                    console.log("✅ Görev otomatik işaretlendi.");
-                }
-
-                if (autoSwitchTasks) {
-                    console.log("➡️ Sonraki göreve geçiliyor.");
-                }
-
-                if (autoStartBreaks) {
-                    const interval = parseInt(document.getElementById('longBreakInterval').value || 4);
-                    if (cycleCount % interval === 0) {
-                        setMode('long');
-                    } else {
-                        setMode('short');
-                    }
-                    startTimer();
-                }
-            } else {
-                if (autoStartPomodoros) {
-                    setMode('pomodoro');
-                    startTimer();
-                }
-            }
-            return;
-        }
-
-        remainingTime--;
-        displayTime();
-    }, 1000);
+    timer = setInterval(timerTick, 1000);
 }
 
 function resetTimer() {
@@ -861,6 +810,129 @@ function previewSound(soundType, soundName) {
         audio.pause();
     }, 2000);
 }
+
+// ===== ARKA PLAN KONTROLÜ =====
+function setupPageVisibility() {
+    // Sayfa görünürlük değişikliklerini dinle
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    
+    // Sayfa kapatılırken veri kaydet
+    window.addEventListener('beforeunload', () => {
+        if (isRunning) {
+            saveData();
+        }
+    });
+}
+
+function handleVisibilityChange() {
+    if (document.hidden) {
+        // Sayfa arka plana alındı
+        isPageVisible = false;
+        if (isRunning) {
+            backgroundStartTime = Date.now();
+            console.log('⏸️ Sayfa arka plana alındı - Zamanlayıcı duraklatıldı');
+        }
+    } else {
+        // Sayfa tekrar aktif oldu
+        isPageVisible = true;
+        if (isRunning && backgroundStartTime > 0) {
+            // Arka planda geçen süreyi hesapla
+            backgroundDuration = Math.floor((Date.now() - backgroundStartTime) / 1000);
+            
+            // Kalan süreden arka planda geçen süreyi çıkar
+            remainingTime = Math.max(0, remainingTime - backgroundDuration);
+            
+            console.log(`⏰ Sayfa tekrar aktif - Arka planda geçen süre: ${backgroundDuration}s`);
+            console.log(`⏰ Kalan süre: ${remainingTime}s`);
+            
+            // Eğer süre bittiyse alarm çal
+            if (remainingTime <= 0) {
+                clearInterval(timer);
+                isRunning = false;
+                document.querySelector('.start-btn').textContent = 'START';
+                tickAudio.pause();
+                playAlarm();
+                handleTimerComplete();
+            } else {
+                // Zamanlayıcıyı yeniden başlat
+                clearInterval(timer);
+                timer = setInterval(timerTick, 1000);
+            }
+            
+            backgroundStartTime = 0;
+            backgroundDuration = 0;
+        }
+        
+        // Zamanı güncelle
+        displayTime();
+    }
+}
+
+function timerTick() {
+    if (remainingTime <= 0) {
+        clearInterval(timer);
+        isRunning = false;
+        document.querySelector('.start-btn').textContent = 'START';
+        tickAudio.pause();
+        playAlarm();
+
+        if (currentMode === 'pomodoro') {
+            cycleCount++;
+            todayPomodoros++;
+            weekPomodoros++;
+            
+            // Pomodoro geçmişine ekle
+            pomodoroHistory.push({
+                timestamp: new Date().toISOString(),
+                mode: 'pomodoro',
+                duration: durations.pomodoro / 60 // dakika cinsinden
+            });
+            
+            // İstatistikleri güncelle
+            updateStatistics();
+            saveData();
+            
+            // Bildirim gönder
+            if (notificationsEnabled) {
+                showNotification('Pomodoro Tamamlandı! 🎉', 'Mola zamanı!');
+            }
+
+            if (autoCheckTasks) {
+                console.log("✅ Görev otomatik işaretlendi.");
+            }
+
+            if (autoSwitchTasks) {
+                console.log("➡️ Sonraki göreve geçiliyor.");
+            }
+
+            if (autoStartBreaks) {
+                const interval = parseInt(document.getElementById('longBreakInterval').value || 4);
+                if (cycleCount % interval === 0) {
+                    setMode('long');
+                } else {
+                    setMode('short');
+                }
+                startTimer();
+            }
+        } else {
+            if (autoStartPomodoros) {
+                setMode('pomodoro');
+                startTimer();
+            }
+        }
+        return;
+    }
+
+    remainingTime--;
+    displayTime();
+    
+    // Tık sesi çal
+    if (tickAudio && !tickAudio.paused) {
+        tickAudio.currentTime = 0;
+        tickAudio.play().catch(() => {});
+    }
+}
+
 
 // Sayfa yüklendiğinde filtrelemeyi ayarla
 document.addEventListener('DOMContentLoaded', () => {
