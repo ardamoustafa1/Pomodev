@@ -13,7 +13,12 @@ def static_files(filename):
 
 @app.route('/ads.txt')
 def ads_txt():
-    return send_from_directory('.', 'ads.txt')
+    try:
+        # Önce root dizinden dene
+        return send_from_directory('.', 'ads.txt', mimetype='text/plain')
+    except:
+        # Sonra static dizinden dene
+        return send_from_directory('static', 'ads.txt', mimetype='text/plain')
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
