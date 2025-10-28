@@ -53,6 +53,7 @@ document.addEventListener('DOMContentLoaded', () => {
     setupCalendarQuickAdd();
     setupSessionSummary();
     setupStreakReminder();
+    setupFloatingMini();
     loadData();
     const yearSpan = document.getElementById('year');
     if (yearSpan) yearSpan.textContent = new Date().getFullYear();
@@ -1052,6 +1053,181 @@ function checkStreakReminder() {
             }
         }
     }
+}
+
+// ===== FLOATING MINI PLAYER =====
+function setupFloatingMini() {
+    const floatingMini = document.getElementById('floatingMini');
+    const floatingToggle = document.getElementById('floatingToggle');
+    const floatingClose = document.getElementById('floatingClose');
+    const floatingPlayPause = document.getElementById('floatingPlayPause');
+    
+    // Floating player toggle button (ana sayfadan aç/kapa)
+    const floatingBtn = document.getElementById('floatingBtn');
+    let popupWindow = null;
+    
+    if (floatingBtn) {
+        floatingBtn.addEventListener('click', () => {
+            // Eğer popup zaten açıksa kapat
+            if (popupWindow && !popupWindow.closed) {
+                popupWindow.close();
+                popupWindow = null;
+                return;
+            }
+            
+            // Yeni popup window aç
+            const width = 280;
+            const height = 220;
+            const left = window.screen.width - width - 20;
+            const top = window.screen.height - height - 80;
+            
+            popupWindow = window.open('/mini-player', 'PomodoroMini', 
+                `width=${width},height=${height},left=${left},top=${top},resizable=yes,scrollbars=no,toolbar=no,menubar=no,location=no`);
+            
+            if (popupWindow) {
+                // Popup kapanınca null yap
+                const checkClosed = setInterval(() => {
+                    if (popupWindow.closed) {
+                        clearInterval(checkClosed);
+                        popupWindow = null;
+                    }
+                }, 500);
+            }
+        });
+    }
+    
+    // Floating player'ı sürükle
+    let isDragging = false;
+    let currentX;
+    let currentY;
+    let initialX;
+    let initialY;
+    
+    floatingMini.addEventListener('mousedown', (e) => {
+        isDragging = true;
+        initialX = e.clientX - (floatingMini.offsetLeft || 0);
+        initialY = e.clientY - (floatingMini.offsetTop || 0);
+        document.addEventListener('mousemove', dragFloating);
+        document.addEventListener('mouseup', stopDragging);
+    });
+    
+    function dragFloating(e) {
+        if (isDragging) {
+            e.preventDefault();
+            currentX = e.clientX - initialX;
+            currentY = e.clientY - initialY;
+            
+            const maxX = window.innerWidth - floatingMini.offsetWidth;
+            const maxY = window.innerHeight - floatingMini.offsetHeight;
+            
+            floatingMini.style.left = Math.min(Math.max(0, currentX), maxX) + 'px';
+            floatingMini.style.top = Math.min(Math.max(0, currentY), maxY) + 'px';
+            floatingMini.style.right = 'auto';
+            floatingMini.style.bottom = 'auto';
+        }
+    }
+    
+    function stopDragging() {
+        isDragging = false;
+        document.removeEventListener('mousemove', dragFloating);
+        document.removeEventListener('mouseup', stopDragging);
+    }
+    
+    // Ana sayfaya git butonu
+    floatingToggle.addEventListener('click', () => {
+        window.focus();
+        window.scrollTo(0, 0);
+    });
+    
+    // Kapat butonu
+    floatingClose.addEventListener('click', () => {
+        floatingMini.style.display = 'none';
+    });
+    
+    // Play/Pause butonu
+    floatingPlayPause.addEventListener('click', () => {
+        const startBtn = document.querySelector('.start-btn');
+        if (startBtn) {
+            startBtn.click();
+        }
+    });
+    
+    // Floating player'ı güncelle
+    function updateFloatingMini() {
+        const timeDisplay = document.getElementById('timer');
+        const modeDisplay = document.getElementById('currentMode');
+        const startBtn = document.querySelector('.start-btn');
+        
+        // Zamanı formatla (mm:ss)
+        const minutes = Math.floor(remainingTime / 60);
+        const seconds = remainingTime % 60;
+        const timeString = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        
+        // Ana sayfadaki floating mini
+        const floatingTimeEl = document.getElementById('floatingTime');
+        const floatingModeEl = document.getElementById('floatingMode');
+        const floatingTitleEl = document.getElementById('floatingTitle');
+        const floatingPlayPauseEl = document.getElementById('floatingPlayPause');
+        
+        if (floatingTimeEl) {
+            floatingTimeEl.textContent = timeString;
+        }
+        
+        if (floatingModeEl) {
+            let modeText = '';
+            if (currentMode === 'pomodoro') modeText = 'Pomodoro';
+            else if (currentMode === 'short') modeText = 'Kısa Mola';
+            else if (currentMode === 'long') modeText = 'Uzun Mola';
+            floatingModeEl.textContent = modeText;
+        }
+        
+        if (floatingTitleEl) {
+            let modeText = '';
+            if (currentMode === 'pomodoro') modeText = 'Pomodoro';
+            else if (currentMode === 'short') modeText = 'Kısa Mola';
+            else if (currentMode === 'long') modeText = 'Uzun Mola';
+            floatingTitleEl.textContent = modeText;
+        }
+        
+        if (floatingPlayPauseEl) {
+            floatingPlayPauseEl.textContent = isRunning ? '⏸' : '▶';
+        }
+        
+        // Popup window'daki mini player'ı güncelle
+        if (popupWindow && !popupWindow.closed && popupWindow.document) {
+            try {
+                const popupTimeEl = popupWindow.document.getElementById('time');
+                const popupModeEl = popupWindow.document.getElementById('mode');
+                const popupTitleEl = popupWindow.document.getElementById('title');
+                const popupPlayPauseEl = popupWindow.document.getElementById('playPause');
+                
+                if (popupTimeEl) popupTimeEl.textContent = timeString;
+                
+                if (popupModeEl) {
+                    let modeText = '';
+                    if (currentMode === 'pomodoro') modeText = 'Pomodoro';
+                    else if (currentMode === 'short') modeText = 'Kısa Mola';
+                    else if (currentMode === 'long') modeText = 'Uzun Mola';
+                    popupModeEl.textContent = modeText;
+                }
+                
+                if (popupTitleEl) {
+                    let modeText = '';
+                    if (currentMode === 'pomodoro') modeText = 'Pomodoro';
+                    else if (currentMode === 'short') modeText = 'Kısa Mola';
+                    else if (currentMode === 'long') modeText = 'Uzun Mola';
+                    popupTitleEl.textContent = modeText;
+                }
+                
+                if (popupPlayPauseEl) popupPlayPauseEl.textContent = isRunning ? '⏸' : '▶';
+            } catch (e) {
+                // Popup window erişim hatası
+            }
+        }
+    }
+    
+    // Her saniye güncelle
+    setInterval(updateFloatingMini, 1000);
 }
 
 // ===== GÖREV KATEGORİ FİLTRELEME =====

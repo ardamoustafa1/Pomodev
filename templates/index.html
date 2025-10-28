@@ -175,9 +175,11 @@
         </select>
         <button id="themeToggle" title="Tema">🌙</button>
         <button id="fullscreenBtn" title="Tam Ekran">⛶</button>
+        <button id="floatingBtn" title="Mini Oynatıcı">📱</button>
         <button id="notificationsBtn" title="Bildirimler">🔔</button>
         <button id="shareStatsBtn" title="Paylaş">📊</button>
         <a href="/blog" style="text-decoration:none;"><button id="blogBtn" title="Blog">📚</button></a>
+        <a href="/hakkimizda" style="text-decoration:none;"><button id="aboutBtn" title="Hakkımızda">ℹ️</button></a>
         <button id="settingsBtn">⚙️ Settings</button>
       </div>
     </div>
@@ -597,6 +599,22 @@
     <button class="btn cancel" id="installCancelBtn" style="width:100%;">Daha Sonra</button>
   </div>
 
+  <!-- Floating Mini Player -->
+  <div id="floatingMini" style="display:none;">
+    <div class="floating-mini-header">
+      <span id="floatingTitle">Pomodoro</span>
+      <button id="floatingToggle" title="Ana Sayfaya Git">🔗</button>
+    </div>
+    <div class="floating-mini-content">
+      <div id="floatingTime" class="floating-time">25:00</div>
+      <div class="floating-mode" id="floatingMode">Pomodoro</div>
+    </div>
+    <div class="floating-mini-buttons">
+      <button id="floatingPlayPause">▶</button>
+      <button id="floatingClose">✕</button>
+    </div>
+  </div>
+
   <script src="/static/script.js"></script>
   <script>
     if ('serviceWorker' in navigator) {
@@ -646,5 +664,15 @@
       deferredPrompt = null;
     });
   </script>
+  <footer style="text-align: center; padding: 20px; margin-top: 40px; border-top: 1px solid rgba(255,255,255,0.1); color: #8b949e; font-size: 0.9em;">
+    <p>&copy; 2024 Pomodev. Ücretsiz Pomodoro Zamanlayıcı</p>
+    <div style="margin-top: 10px; display: flex; justify-content: center; gap: 20px; flex-wrap: wrap;">
+      <a href="/hakkimizda" style="color: #58a6ff; text-decoration: none;">Hakkımızda</a>
+      <a href="/kullanim-kilavuzu" style="color: #58a6ff; text-decoration: none;">Kullanım Kılavuzu</a>
+      <a href="/blog" style="color: #58a6ff; text-decoration: none;">Blog</a>
+      <a href="/gizlilik-politikasi" style="color: #58a6ff; text-decoration: none;">Gizlilik Politikası</a>
+      <a href="/kullanim-sartlari" style="color: #58a6ff; text-decoration: none;">Kullanım Şartları</a>
+    </div>
+  </footer>
 </body>
 </html>

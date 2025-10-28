@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>⏱ Pomodoro Mini</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+@keyframes glow{0%,100%{text-shadow:0 0 20px rgba(77,163,255,0.5),0 0 40px rgba(77,163,255,0.3);}50%{text-shadow:0 0 30px rgba(77,163,255,0.8),0 0 60px rgba(77,163,255,0.5);}}
+@keyframes pulse{0%,100%{transform:scale(1);}50%{transform:scale(1.05);}}
+body{font-family:Inter,'Segoe UI',sans-serif;background:linear-gradient(135deg,#0a0e17,#1a1f2e,#0d1117);
+     color:#f0f0f0;padding:20px;height:100vh;overflow:hidden;display:flex;flex-direction:column;
+     justify-content:center;position:relative;border:none;}
+body::before{content:'';position:absolute;top:-50%;left:-50%;width:200%;height:200%;
+             background:radial-gradient(circle at 50% 50%,rgba(77,163,255,0.15) 0%,transparent 50%);
+             animation:pulse 4s ease-in-out infinite;pointer-events:none;}
+.time-container{position:relative;z-index:2;margin-bottom:20px;}
+.time{font-size:48px;font-weight:900;color:#fff;font-family:'SF Mono','Courier New',monospace;
+      letter-spacing:4px;text-align:center;margin-bottom:8px;
+      background:linear-gradient(135deg,#4da3ff 0%,#6366f1 50%,#8b5cf6 100%);
+      -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+      animation:glow 3s ease-in-out infinite;}
+.mode{font-size:11px;color:#cbd5e1;text-align:center;margin-bottom:0;font-weight:600;
+      letter-spacing:2px;text-transform:uppercase;opacity:0.9;}
+.buttons{display:flex;gap:12px;justify-content:center;position:relative;z-index:2;}
+.buttons button{padding:14px 24px;border:none;border-radius:12px;cursor:pointer;font-size:14px;
+                font-weight:700;transition:all 0.3s cubic-bezier(0.4,0,0.2,1);position:relative;
+                overflow:hidden;box-shadow:0 6px 16px rgba(0,0,0,0.3);backdrop-filter:blur(12px);
+                min-width:60px;}
+.buttons button::before{content:'';position:absolute;top:50%;left:50%;width:0;height:0;
+                        background:rgba(255,255,255,0.25);border-radius:50%;
+                        transform:translate(-50%,-50%);transition:width 0.4s,height 0.4s;}
+.buttons button:hover::before{width:300px;height:300px;}
+.buttons button:hover{transform:translateY(-3px);box-shadow:0 10px 30px rgba(0,0,0,0.4);}
+.buttons button:active{transform:translateY(-1px);}
+#playPause{background:linear-gradient(135deg,#4da3ff,#6366f1);color:white;min-width:110px;
+           border:1px solid rgba(77,163,255,0.3);box-shadow:0 0 20px rgba(77,163,255,0.3),
+           0 6px 16px rgba(0,0,0,0.3);}
+#playPause:hover{background:linear-gradient(135deg,#6366f1,#8b5cf6);
+                 box-shadow:0 0 30px rgba(77,163,255,0.5),0 10px 30px rgba(0,0,0,0.4);}
+#closeBtn{background:rgba(239,68,68,0.25);color:#ff6b6b;padding:14px 18px;
+          border:1px solid rgba(239,68,68,0.4);min-width:50px;}
+#closeBtn:hover{background:rgba(239,68,68,0.35);
+                box-shadow:0 0 25px rgba(239,68,68,0.4),0 10px 30px rgba(0,0,0,0.4);}
+</style>
+</head>
+<body>
+<div class="time-container">
+  <div id="time" class="time">25:00</div>
+  <div id="mode" class="mode">Pomodoro</div>
+</div>
+<div class="buttons">
+  <button id="playPause">▶</button>
+  <button id="closeBtn">✕</button>
+</div>
+<script>
+const parentUrl = window.opener ? window.opener.location.href : '';
+let updateInterval;
+function updateFromParent(){if(!window.opener)return;
+const timer=window.opener.document.getElementById('timer');
+const currentMode=window.opener.document.getElementById('currentMode');
+const startBtn=window.opener.document.querySelector('.start-btn');
+if(timer)document.getElementById('time').textContent=timer.textContent;
+if(currentMode){const mode=currentMode.textContent||'Pomodoro';document.getElementById('mode').textContent=mode;}
+if(startBtn){const isRunning=startBtn.textContent==='PAUSE';
+document.getElementById('playPause').textContent=isRunning?'⏸':'▶';}}
+document.getElementById('playPause').addEventListener('click',()=>{if(window.opener){const startBtn=window.opener.document.querySelector('.start-btn');if(startBtn)startBtn.click();}});
+document.getElementById('closeBtn').addEventListener('click',()=>window.close());
+updateInterval=setInterval(updateFromParent,500);
+updateFromParent();
+</script>
+</body>
+</html>
+

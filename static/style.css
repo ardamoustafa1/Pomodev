@@ -364,13 +364,18 @@ body { background-image: radial-gradient(1200px 800px at 20% -10%, rgba(77,163,2
 }
 
 /* ===== Üstteki Butonlar ===== */
+.top-buttons {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .top-buttons button, .top-buttons select {
   background: var(--panel-strong);                  /* Buton arka plan rengi koyu gri */
   border: none;                        /* Buton kenarlığı yok */
   border-radius: 10px;                  /* Buton köşeleri yuvarlatılmış */
   padding: 8px 12px;                   /* Buton iç boşluğu (üst-alt 8px, sağ-sol 12px) */
   color: var(--text);                     /* Buton yazı rengi */
-  margin-left: 10px;                  /* Butonlar arasına soldan boşluk bırak */
   cursor: pointer;                    /* Üzerine gelince fare işaretçisi el simgesi olur */
   transition: background-color 0.3s ease, color 0.3s ease;  /* Arka plan ve yazı renginde yumuşak geçiş */
   font-weight: 700;                   /* Buton yazısı kalın */
@@ -444,10 +449,62 @@ body { background-image: radial-gradient(1200px 800px at 20% -10%, rgba(77,163,2
   box-shadow: 0 6px 16px rgba(77, 163, 255, 0.4);
 }
 
+/* Start button tema renklerine göre shadow */
+[data-accent="purple"] .start-btn {
+  box-shadow: 0 4px 12px rgba(167, 139, 250, 0.3);
+}
+
+[data-accent="purple"] .start-btn:hover {
+  box-shadow: 0 6px 20px rgba(124, 58, 237, 0.5);
+}
+
+[data-accent="coral"] .start-btn {
+  box-shadow: 0 4px 12px rgba(251, 113, 133, 0.3);
+}
+
+[data-accent="coral"] .start-btn:hover {
+  box-shadow: 0 6px 20px rgba(225, 29, 72, 0.5);
+}
+
 .reset-btn:hover {
   transform: translateY(-1px);
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
   background: rgba(255, 255, 255, 0.15);
+}
+
+/* Google Calendar Button */
+#quickAddCalendar {
+  background: linear-gradient(135deg, var(--primary), var(--primary-strong));
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  padding: 10px 16px;
+  font-size: 1.2rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(77, 163, 255, 0.25);
+}
+
+#quickAddCalendar:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(77, 163, 255, 0.4);
+}
+
+/* Tema renklerine göre shadow değişimi */
+[data-accent="purple"] #quickAddCalendar {
+  box-shadow: 0 4px 12px rgba(167, 139, 250, 0.3);
+}
+
+[data-accent="purple"] #quickAddCalendar:hover {
+  box-shadow: 0 6px 20px rgba(124, 58, 237, 0.5);
+}
+
+[data-accent="coral"] #quickAddCalendar {
+  box-shadow: 0 4px 12px rgba(251, 113, 133, 0.3);
+}
+
+[data-accent="coral"] #quickAddCalendar:hover {
+  box-shadow: 0 6px 20px rgba(225, 29, 72, 0.5);
 }
 
 
@@ -1280,4 +1337,119 @@ button:hover {
   padding: 18px 20px;
   margin: 24px 0 12px;
   text-align: left;
+}
+
+/* ===== Floating Mini Player ===== */
+#floatingMini {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 200px;
+  background: linear-gradient(135deg, rgba(24,31,40,0.98), rgba(24,31,40,0.95));
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 16px;
+  padding: 12px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.6);
+  z-index: 9999;
+  backdrop-filter: blur(10px);
+  cursor: move;
+}
+
+.floating-mini-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.floating-mini-header #floatingTitle {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.floating-mini-header button {
+  background: transparent;
+  border: none;
+  color: var(--text);
+  cursor: pointer;
+  font-size: 1rem;
+  padding: 0;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: background 0.2s;
+}
+
+.floating-mini-header button:hover {
+  background: rgba(255,255,255,0.1);
+}
+
+.floating-mini-content {
+  margin-bottom: 10px;
+}
+
+.floating-time {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--primary);
+  font-family: 'Courier New', monospace;
+  letter-spacing: 1px;
+}
+
+.floating-mode {
+  font-size: 0.75rem;
+  color: var(--muted);
+  margin-top: 4px;
+}
+
+.floating-mini-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.floating-mini-buttons button {
+  flex: 1;
+  padding: 8px;
+  background: rgba(255,255,255,0.1);
+  border: none;
+  border-radius: 8px;
+  color: var(--text);
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 600;
+  transition: all 0.2s;
+}
+
+.floating-mini-buttons button:hover {
+  background: rgba(255,255,255,0.2);
+  transform: translateY(-1px);
+}
+
+.floating-mini-buttons button:active {
+  transform: translateY(0);
+}
+
+#floatingPlayPause {
+  background: linear-gradient(135deg, var(--primary), var(--primary-strong));
+  color: white;
+}
+
+#floatingPlayPause:hover {
+  background: linear-gradient(135deg, var(--primary-strong), var(--primary));
+  box-shadow: 0 4px 12px rgba(77, 163, 255, 0.4);
+}
+
+#floatingClose {
+  background: rgba(244,63,94,0.2);
+  color: #ff4d6d;
+}
+
+#floatingClose:hover {
+  background: rgba(244,63,94,0.3);
 }

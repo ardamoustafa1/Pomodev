@@ -19,6 +19,26 @@ def blog_pomodoro():
 def blog_deepwork():
     return render_template('blog_deepwork.html')
 
+@app.route('/mini-player')
+def mini_player():
+    return render_template('mini_player.html')
+
+@app.route('/hakkimizda')
+def about():
+    return render_template('about.html')
+
+@app.route('/kullanim-kilavuzu')
+def guide():
+    return render_template('guide.html')
+
+@app.route('/gizlilik-politikasi')
+def privacy():
+    return render_template('privacy.html')
+
+@app.route('/kullanim-sartlari')
+def terms():
+    return render_template('terms.html')
+
 @app.route('/static/<path:filename>')
 def static_files(filename):
     return send_from_directory('static', filename)
