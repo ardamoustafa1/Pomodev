@@ -418,23 +418,36 @@ body { background-image: radial-gradient(1200px 800px at 20% -10%, rgba(77,163,2
 }
 
 /* ===== Başlat Butonu ===== */
-.start-btn {
+.start-btn,
+.reset-btn {
   background: linear-gradient(135deg, var(--primary), var(--primary-strong));
   color: #fff;                    /* Beyaz yazı */
-  font-size: 1.5rem;             /* Orta büyük yazı */
-  padding: 15px 40px;            /* İç boşluk */
+  font-size: 1.1rem;             /* Daha küçük yazı */
+  padding: 10px 24px;            /* Daha az iç boşluk */
   border: none;                  /* Kenarlık yok */
-  border-radius: 14px;           /* Köşeleri yuvarlat */
+  border-radius: 10px;           /* Köşeleri yuvarlat */
   cursor: pointer;               /* Fare el simgesi */
-  font-weight: 700;              /* Kalın yazı */
+  font-weight: 600;              /* Normal kalınlık */
   transition: transform 0.08s ease, box-shadow 0.3s ease;  /* Renk değişimi animasyonu */
-  margin-bottom: 10px;           /* Alt boşluk */
-  box-shadow: 0 8px 24px rgba(77, 163, 255, 0.35);  /* Hafif gölge */
+  margin-bottom: 8px;            /* Alt boşluk */
+  box-shadow: 0 4px 12px rgba(77, 163, 255, 0.25);  /* Hafif gölge */
+  min-width: 120px;              /* Minimum genişlik */
+}
+
+.reset-btn {
+  background: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
 .start-btn:hover {
   transform: translateY(-1px);
-  box-shadow: 0 12px 32px rgba(77, 163, 255, 0.45);
+  box-shadow: 0 6px 16px rgba(77, 163, 255, 0.4);
+}
+
+.reset-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
+  background: rgba(255, 255, 255, 0.15);
 }
 
 
@@ -926,6 +939,31 @@ body { background-image: radial-gradient(1200px 800px at 20% -10%, rgba(77,163,2
 }
 
 .task-box:hover { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.22); color: #e0e0e0; }
+
+/* Task footer (Arşivle butonu) */
+.task-footer {
+  margin-top: 20px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.task-footer button {
+  width: 100%;
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  border-radius: 8px;
+  color: var(--text);
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.task-footer button:hover {
+  background: rgba(255, 255, 255, 0.15);
+  transform: translateY(-1px);
+}
 
 /* Dinamik görev öğeleri için modern stil */
 .task-item {

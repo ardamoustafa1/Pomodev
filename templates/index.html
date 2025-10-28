@@ -3,8 +3,18 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Pomodev</title>
+  <title>Pomodev – Pomodoro Zamanlayıcı</title>
   <meta name="theme-color" content="#0f141a" />
+  <meta name="description" content="Odaklan, üret, tekrar et. Basit ve hızlı Pomodoro zamanlayıcı." />
+  <meta property="og:title" content="Pomodev – Pomodoro Zamanlayıcı" />
+  <meta property="og:description" content="Odaklan, üret, tekrar et. Basit ve hızlı Pomodoro." />
+  <meta property="og:type" content="website" />
+  <meta property="og:image" content="/static/favicon.svg" />
+  <meta property="og:url" content="/" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <link rel="icon" href="/favicon.ico" sizes="any" />
+  <link rel="icon" type="image/svg+xml" href="/static/favicon.svg" />
+  <link rel="manifest" href="/static/manifest.webmanifest" />
   <meta name="google-adsense-account" content="ca-pub-9221145906123169">
   
   <!-- Google tag (gtag.js) -->
@@ -15,20 +25,60 @@
     gtag('js', new Date());
     gtag('config', 'G-1LKTPZV07N', {
       'send_page_view': true,
-      'anonymize_ip': true
+      'anonymize_ip': true,
+      'user_properties': {
+        'session_count': 0,
+        'first_visit': Date.now()
+      }
     });
     
+    // Özel etkinlikler için yardımcı fonksiyon
+    window.trackEvent = function(eventName, params) {
+      gtag('event', eventName, params);
+      console.log('📊 Event:', eventName, params);
+    };
+    
+    // İlk ziyaret takibi
+    if (!localStorage.getItem('hasVisited')) {
+      localStorage.setItem('hasVisited', Date.now());
+      trackEvent('first_visit', { session: 1 });
+    } else {
+      const firstVisit = parseInt(localStorage.getItem('hasVisited'));
+      const daysSince = Math.floor((Date.now() - firstVisit) / (1000 * 60 * 60 * 24));
+      trackEvent('return_visit', { days_since_first: daysSince });
+    }
+    
     // Debug için console'a log yazdır
-    console.log('Google Analytics loaded: G-1LKTPZV07N');
+    console.log('✅ Google Analytics loaded: G-1LKTPZV07N');
   </script>
   
   <!-- Google AdSense -->
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9221145906123169"
        crossorigin="anonymous"></script>
   
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/modern-normalize/2.0.0/modern-normalize.min.css" />
   <link rel="stylesheet" href="/static/style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet" />
+  
+  <!-- PWA Install Prompt -->
+  <style>
+    #installPrompt {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: var(--bg-primary);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 16px;
+      max-width: 320px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+      z-index: 1000;
+      display: none;
+      gap: 12px;
+    }
+    #installPrompt.show { display: flex; flex-direction: column; }
+    #installPrompt button { margin: 4px 0; }
+  </style>
   <style>
     /* Slaytlar için basit stil */
     .info-slider {
@@ -71,6 +121,43 @@
       max-width: 400px;
       width: 90%;
     }
+
+    /* 🎯 Goal modal modern tasarım */
+    #goalModal .modal-content {
+      background: linear-gradient(180deg, rgba(255,255,255,0.95), rgba(255,255,255,0.9));
+      backdrop-filter: blur(8px);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+      border: 1px solid rgba(0,0,0,0.05);
+    }
+    #goalModal .modal-input {
+      width: 100%;
+      height: 44px;
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1px solid #e6e6e6;
+      outline: none;
+      font-size: 16px;
+    }
+    #goalModal .modal-input:focus {
+      border-color: var(--accent, #ff4d4f);
+      box-shadow: 0 0 0 3px rgba(255,77,79,0.15);
+    }
+    #goalModal .btn.save {
+      background: var(--accent-color, #ff4d4f);
+      color: #fff;
+      border: none;
+      padding: 10px 14px;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+    #goalModal .btn.cancel {
+      background: transparent;
+      color: #333;
+      border: 1px solid #e6e6e6;
+      padding: 10px 14px;
+      border-radius: 10px;
+      cursor: pointer;
+    }
   </style>
 </head>
 <body>
@@ -89,6 +176,8 @@
         <button id="themeToggle" title="Tema">🌙</button>
         <button id="fullscreenBtn" title="Tam Ekran">⛶</button>
         <button id="notificationsBtn" title="Bildirimler">🔔</button>
+        <button id="shareStatsBtn" title="Paylaş">📊</button>
+        <a href="/blog" style="text-decoration:none;"><button id="blogBtn" title="Blog">📚</button></a>
         <button id="settingsBtn">⚙️ Settings</button>
       </div>
     </div>
@@ -103,6 +192,7 @@
         <div class="hero-cta">
           <a href="#workspace" class="btn-cta">Odaklanmaya Başla</a>
           <button id="howItWorksBtn" class="btn-ghost" type="button">Nasıl Çalışır?</button>
+          <button id="shareSettingsBtn" class="btn-ghost" type="button" title="Ayarları Paylaş">🔗 Paylaş</button>
         </div>
       </div>
     </div>
@@ -181,10 +271,12 @@
             <div class="timer-display">
               <div class="timer-time" id="timer">25:00</div>
               <div class="timer-mode" id="focusMsg">#1<br />Time to focus!</div>
+              <div class="timer-goal" id="currentGoalDisplay" style="margin-top:16px;font-size:14px;opacity:0.8;font-style:italic;"></div>
             </div>
             <div class="timer-controls">
               <button class="start-btn" onclick="startTimer()">START</button>
               <button class="reset-btn" onclick="resetTimer()">RESET</button>
+              <button id="quickAddCalendar" title="Takvime Ekle" type="button">📅</button>
             </div>
           </div>
         </main>
@@ -228,6 +320,9 @@
           </div>
           <div class="task-box" onclick="addTask()">➕ Görev Ekle</div>
           <div id="taskList" class="task-list"></div>
+          <div class="task-footer">
+            <button id="archiveCompletedBtn" type="button">Arşivle</button>
+          </div>
         </div>
       </section>
     </div>
@@ -363,6 +458,50 @@
     </div>
   </div>
 
+  <!-- 🎯 Goal Modal -->
+  <div id="goalModal" class="modal hidden" aria-hidden="true">
+    <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="goalTitle">
+      <h2 id="goalTitle">🎯 Bu pomodoro için hedef</h2>
+      <p style="margin:8px 0 16px;color:#666">Tek cümle yaz; oturum sonunda tamamlandı mı diye soracağız.</p>
+      <input id="goalInput" type="text" class="modal-input" placeholder="Örn: Makale girişini yaz" maxlength="120" />
+      <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px">
+        <button class="btn cancel" id="goalCancelBtn" type="button">İptal</button>
+        <button class="btn save" id="goalSaveBtn" type="button">Başlat</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 📊 Session Summary Modal -->
+  <div id="sessionSummaryModal" class="modal hidden" aria-hidden="true">
+    <div class="modal-content" role="dialog" aria-modal="true">
+      <h2>🎉 Oturum Tamamlandı!</h2>
+      <div style="margin:20px 0;padding:16px;background:#f0f0f0;border-radius:8px;">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <div>
+            <div style="font-size:32px;font-weight:bold;color:#ff4d4f;" id="summaryPomodoros">0</div>
+            <div style="color:#666;">Pomodoro</div>
+          </div>
+          <div>
+            <div style="font-size:32px;font-weight:bold;color:#4caf50;" id="summaryStreak">0</div>
+            <div style="color:#666;">Gün Streak</div>
+          </div>
+        </div>
+      </div>
+      <div style="margin:16px 0;">
+        <p style="color:#666;margin-bottom:12px;">Paylaş:</p>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button id="shareTwitter" class="btn" style="background:#1DA1F2;color:white;flex:1;min-width:120px;">Twitter</button>
+          <button id="shareFacebook" class="btn" style="background:#4267B2;color:white;flex:1;min-width:120px;">Facebook</button>
+          <button id="shareWhatsapp" class="btn" style="background:#25D366;color:white;flex:1;min-width:120px;">WhatsApp</button>
+          <button id="copyLinkBtn" class="btn" style="background:#666;color:white;flex:1;min-width:120px;">Link Kopyala</button>
+        </div>
+      </div>
+      <div style="margin-top:16px;">
+        <button class="btn save" id="closeSummaryBtn" type="button">Kapat</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Görev Modalı -->
   <div id="taskModal" class="modal hidden">
     <div class="modal-content">
@@ -450,6 +589,62 @@
     });
   </script>
 
+  <!-- PWA Install Prompt -->
+  <div id="installPrompt" class="hidden">
+    <div style="font-weight:600;margin-bottom:8px;">📱 Uygulamayı Yükle</div>
+    <div style="font-size:14px;color:var(--text-secondary);margin-bottom:12px;">Ana ekrana ekle ve daha hızlı eriş.</div>
+    <button class="btn save" id="installBtn" style="width:100%;">Yükle</button>
+    <button class="btn cancel" id="installCancelBtn" style="width:100%;">Daha Sonra</button>
+  </div>
+
   <script src="/static/script.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', function() {
+        navigator.serviceWorker.register('/static/sw.js');
+      });
+    }
+    
+    // PWA Install Prompt
+    let deferredPrompt;
+    const installPrompt = document.getElementById('installPrompt');
+    const installBtn = document.getElementById('installBtn');
+    const installCancelBtn = document.getElementById('installCancelBtn');
+    
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      // 10 saniye sonra göster
+      setTimeout(() => {
+        if (deferredPrompt && !localStorage.getItem('installPromptDismissed')) {
+          installPrompt.classList.add('show');
+        }
+      }, 10000);
+    });
+    
+    installBtn?.addEventListener('click', async () => {
+      if (!deferredPrompt) return;
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      if (outcome === 'accepted') {
+        console.log('✅ PWA installed');
+        localStorage.setItem('installPromptDismissed', 'true');
+      }
+      installPrompt.classList.remove('show');
+      deferredPrompt = null;
+    });
+    
+    installCancelBtn?.addEventListener('click', () => {
+      installPrompt.classList.remove('show');
+      localStorage.setItem('installPromptDismissed', 'true');
+    });
+    
+    window.addEventListener('appinstalled', () => {
+      console.log('✅ PWA installed successfully');
+      installPrompt.classList.remove('show');
+      localStorage.setItem('installPromptDismissed', 'true');
+      deferredPrompt = null;
+    });
+  </script>
 </body>
 </html>
