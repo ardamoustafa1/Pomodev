@@ -16,6 +16,7 @@ const durations = {
 };
 
 let remainingTime = durations.pomodoro;
+let endTimestamp = 0; // Wall-clock based timer için bitiş zamanı
 
 // Ayar değişkenleri
 let autoStartBreaks = false;
@@ -134,6 +135,12 @@ function startTimer() {
         startBtn.textContent = 'START';
         tickAudio.pause();
         
+        // Kalan süreyi wall-clock'tan güncelle
+        if (endTimestamp > 0) {
+            remainingTime = Math.max(0, Math.floor((endTimestamp - Date.now()) / 1000));
+            displayTime();
+        }
+        
         // Analytics: Timer paused
         if (window.trackEvent) {
             trackEvent('timer_paused', {
@@ -155,6 +162,9 @@ function startTimer() {
     isRunning = true;
     startBtn.textContent = 'PAUSE';
     updateTickSound();
+    
+    // Wall-clock based timer: bitiş zamanını hesapla
+    endTimestamp = Date.now() + remainingTime * 1000;
     timer = setInterval(timerTick, 1000);
     
     // Analytics: Timer started
@@ -170,6 +180,7 @@ function resetTimer() {
     clearInterval(timer);
     isRunning = false;
     remainingTime = durations[currentMode];
+    endTimestamp = 0; // endTimestamp'i sıfırla
     displayTime();
     document.querySelector('.start-btn').textContent = 'START';
     tickAudio.pause();
@@ -1419,9 +1430,18 @@ function handleVisibilityChange() {
 }
 
 function timerTick() {
+    // Wall-clock based timer: gerçek zamandan kalan süreyi hesapla
+    if (endTimestamp > 0) {
+        remainingTime = Math.max(0, Math.floor((endTimestamp - Date.now()) / 1000));
+    } else {
+        // Fallback: eski yöntem
+        remainingTime--;
+    }
+    
     if (remainingTime <= 0) {
         clearInterval(timer);
         isRunning = false;
+        endTimestamp = 0; // Timer bitti, endTimestamp'i sıfırla
         document.querySelector('.start-btn').textContent = 'START';
         tickAudio.pause();
         playAlarm();
