@@ -42,13 +42,16 @@ Bu rehber, Pomodev uygulamanızı internette yayınlamak için en iyi seçenekle
 - ✅ Çok hızlı deployment
 - ✅ Global CDN
 - ✅ Otomatik scaling
+- ✅ Serverless functions
 
 **Adımlar:**
 1. [vercel.com](https://vercel.com) adresine git
 2. "Sign up" → GitHub ile giriş
 3. "Import Project" → Repo seçin
-4. Framework: "Other"
-5. "Deploy"
+4. Vercel otomatik olarak `vercel.json` dosyasını algılayacak
+5. "Deploy" butonuna tıklayın
+
+**Not:** `vercel.json` dosyası projede hazır! Ekstra ayar gerekmez.
 
 **URL:** `https://your-project-name.vercel.app`
 
