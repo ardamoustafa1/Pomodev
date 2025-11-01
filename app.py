@@ -60,7 +60,7 @@ def favicon():
     except:
         return send_from_directory('static', 'favicon.svg')
 
-# Vercel için handler
+# Vercel için handler - WSGI uygulaması
 handler = app
 
 if __name__ == '__main__':
