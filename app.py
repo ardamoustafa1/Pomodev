@@ -1,7 +1,14 @@
 from flask import Flask, render_template, request, redirect, url_for, send_from_directory
 import os
 
-app = Flask(__name__)
+# Vercel için path ayarları
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+TEMPLATE_DIR = os.path.join(BASE_DIR, 'templates')
+STATIC_DIR = os.path.join(BASE_DIR, 'static')
+
+app = Flask(__name__, 
+            template_folder=TEMPLATE_DIR,
+            static_folder=STATIC_DIR)
 
 @app.route('/')
 def index():
@@ -41,24 +48,24 @@ def terms():
 
 @app.route('/static/<path:filename>')
 def static_files(filename):
-    return send_from_directory('static', filename)
+    return send_from_directory(STATIC_DIR, filename)
 
 @app.route('/ads.txt')
 def ads_txt():
     try:
         # Önce root dizinden dene
-        return send_from_directory('.', 'ads.txt', mimetype='text/plain')
+        return send_from_directory(BASE_DIR, 'ads.txt', mimetype='text/plain')
     except:
         # Sonra static dizinden dene
-        return send_from_directory('static', 'ads.txt', mimetype='text/plain')
+        return send_from_directory(STATIC_DIR, 'ads.txt', mimetype='text/plain')
 
 @app.route('/favicon.ico')
 def favicon():
     # Önce .ico varsa onu ver, yoksa svg ver
     try:
-        return send_from_directory('static', 'favicon.ico')
+        return send_from_directory(STATIC_DIR, 'favicon.ico')
     except:
-        return send_from_directory('static', 'favicon.svg')
+        return send_from_directory(STATIC_DIR, 'favicon.svg')
 
 # Vercel için handler - WSGI uygulaması
 handler = app
