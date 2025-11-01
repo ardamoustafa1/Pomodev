@@ -67,9 +67,6 @@ def favicon():
     except:
         return send_from_directory(STATIC_DIR, 'favicon.svg')
 
-# Vercel için handler - WSGI uygulaması
-handler = app
-
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port, debug=False)
