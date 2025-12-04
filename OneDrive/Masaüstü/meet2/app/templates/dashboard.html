@@ -1,0 +1,203 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<!-- Header Kısımı -->
+<div style="display:flex; justify-content:space-between; align-items:end; margin-bottom:40px;">
+    <div>
+        <h1 style="font-size:1.8rem; font-weight:700; color:#111827; letter-spacing:-1px; margin:0 0 8px 0;">Hoşgeldiniz, Admin 👋</h1>
+        <p style="color:#6b7280; margin:0;">Toplantılarınızı yönetin ve davet linklerini paylaşın.</p>
+    </div>
+    <div>
+        <div style="background:white; border:1px solid #e5e7eb; padding:10px 16px; border-radius:8px; font-weight:600; color:#374151; display:flex; align-items:center; gap:8px;">
+            <div style="width:8px; height:8px; background:#10b981; border-radius:50%;"></div>
+            Sistem Online
+        </div>
+    </div>
+</div>
+
+<!-- İstatistik Kartları -->
+<div class="row" style="margin-bottom:32px;">
+    <div class="col-md-4">
+        <div class="card-premium" style="display:flex; align-items:center; gap:16px;">
+            <div style="width:48px; height:48px; background:#eef2ff; border-radius:12px; display:flex; align-items:center; justify-content:center; color:var(--primary);">
+                <i class="fas fa-video fa-lg"></i>
+            </div>
+            <div>
+                <div style="color:#6b7280; font-size:0.85rem; font-weight:500;">Toplam Toplantı</div>
+                <div style="color:#111827; font-size:1.5rem; font-weight:700;">{{ meetings|length }}</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card-premium" style="display:flex; align-items:center; gap:16px;">
+            <div style="width:48px; height:48px; background:#ecfdf5; border-radius:12px; display:flex; align-items:center; justify-content:center; color:#059669;">
+                <i class="fas fa-users fa-lg"></i>
+            </div>
+            <div>
+                <div style="color:#6b7280; font-size:0.85rem; font-weight:500;">Aktif Oturumlar</div>
+                <div style="color:#111827; font-size:1.5rem; font-weight:700;">
+                    {% set active_count = namespace(value=0) %}
+                    {% for m in meetings if m.db_obj.is_active %}{% set active_count.value = active_count.value + 1 %}{% endfor %}
+                    {{ active_count.value }}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- SOL: Yeni Toplantı Oluşturma Formu -->
+    <div class="col-lg-4 mb-4">
+        <div class="card-premium h-100">
+            <h3 class="card-title">Hızlı Toplantı Oluştur</h3>
+            <p style="color:#6b7280; font-size:0.9rem; margin-bottom:24px; line-height:1.5;">
+                Ekibinizle veya müşterilerinizle hemen görüşmek için güvenli bir oda oluşturun.
+            </p>
+
+            <form action="{{ url_for('main.create') }}" method="post">
+                <div style="margin-bottom:20px;">
+                    <label class="form-label">TOPLANTI BAŞLIĞI</label>
+                    <input type="text" name="name" class="form-control" placeholder="Örn: Haftalık Pazarlama Toplantısı" autocomplete="off" required>
+                </div>
+
+                <div style="margin-bottom:24px;">
+                    <label class="form-label">GÜVENLİK</label>
+                    <div style="display:flex; gap:8px;">
+                        <span style="background:#f3f4f6; padding:6px 12px; border-radius:6px; font-size:0.8rem; color:#4b5563; font-weight:500;">
+                            <i class="fas fa-lock text-success me-1"></i> Şifreli
+                        </span>
+                        <span style="background:#f3f4f6; padding:6px 12px; border-radius:6px; font-size:0.8rem; color:#4b5563; font-weight:500;">
+                            <i class="fas fa-video text-primary me-1"></i> HD
+                        </span>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-primary-pro">
+                    Odayı Oluştur <i class="fas fa-plus-circle" style="margin-left:8px;"></i>
+                </button>
+            </form>
+
+            <div style="margin-top: 20px; border-top: 1px solid #f3f4f6; padding-top: 15px;">
+                <small style="color: #9ca3af; font-size: 0.75rem;">
+                    * Misafirler şifre girmeden sadece link ile katılır.
+                </small>
+            </div>
+        </div>
+    </div>
+
+    <!-- SAĞ: Toplantı Listesi Tablosu -->
+    <div class="col-lg-8 mb-4">
+        <div class="card-premium" style="padding:0; overflow:hidden; min-height: 100%;">
+            <div style="padding:24px; border-bottom:1px solid #e5e7eb; display:flex; justify-content:space-between; align-items:center;">
+                <h3 class="card-title" style="margin:0;">Aktif Oturumlar</h3>
+                <span style="font-size:0.85rem; color:#6b7280;">
+                    <i class="fas fa-sync-alt me-1"></i> Canlı
+                </span>
+            </div>
+
+            <div style="overflow-x:auto;">
+                <table class="table-custom">
+                    <thead>
+                        <tr>
+                            <th style="padding-left:24px;">Toplantı Detayı</th>
+                            <th>Saat</th>
+                            <th>Durum</th>
+                            <th style="text-align:right; padding-right:24px;">İşlemler</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in meetings %}
+                        <tr>
+                            <td style="padding-left:24px;">
+                                <div style="display:flex; align-items:center; gap:12px;">
+                                    <div style="width:40px; height:40px; background:linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%); color:var(--primary); font-weight:700; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size: 1.1rem;">
+                                        {{ item.db_obj.name[:1] | upper }}
+                                    </div>
+                                    <div>
+                                        <div style="font-weight:600; color:#111827;">{{ item.db_obj.name }}</div>
+                                        <div style="font-size:0.75rem; color:#6b7280; font-family:monospace; background: #f3f4f6; padding: 2px 6px; border-radius: 4px; display: inline-block; margin-top: 4px;">
+                                            ID: {{ item.db_obj.meeting_id }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <span style="font-weight: 500; color: #374151;">{{ item.db_obj.created_at.strftime('%H:%M') }}</span>
+                                <div style="font-size:0.75rem; color:#9ca3af;">{{ item.db_obj.created_at.strftime('%d.%m.%Y') }}</div>
+                            </td>
+                            <td>
+                                {% if item.db_obj.is_active %}
+                                    <span class="badge-dot badge-active">Yayında</span>
+                                {% else %}
+                                    <span class="badge-dot badge-passive">Kapalı</span>
+                                {% endif %}
+                            </td>
+                            <td style="text-align:right; padding-right:24px;">
+                                {% if item.db_obj.is_active %}
+                                    <!-- 1. Yönetici Girişi (PLAY) -->
+                                    <a href="{{ item.mod_link }}" target="_blank" class="btn-action" title="Yönetici Olarak Gir" style="color: var(--primary); border-color: var(--primary); background-color: #eef2ff;">
+                                        <i class="fas fa-play"></i>
+                                    </a>
+
+                                    <!-- 2. Misafir Linki Kopyala (LINK) -->
+                                    <button onclick="copyLink('{{ item.guest_invite_link }}')" class="btn-action" title="Misafir Linkini Kopyala">
+                                        <i class="fas fa-link"></i>
+                                    </button>
+
+                                    <!-- 3. Toplantıyı Kapat (X) -->
+                                    <a href="{{ url_for('main.end_meeting', db_id=item.db_obj.id) }}" class="btn-action danger" onclick="return confirm('Bu toplantıyı sonlandırmak istediğinize emin misiniz? Tüm katılımcılar atılacak.')" title="Toplantıyı Bitir">
+                                        <i class="fas fa-times"></i>
+                                    </a>
+                                {% else %}
+                                    <span style="font-size:0.8rem; color:#d1d5db; font-style: italic;">Arşivlendi</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="4" style="text-align:center; padding:50px;">
+                                <div style="color:#e5e7eb; margin-bottom:12px;"><i class="fas fa-inbox fa-3x"></i></div>
+                                <div style="color:#6b7280; font-weight:500;">Henüz aktif veya geçmiş toplantı yok.</div>
+                                <div style="color:#9ca3af; font-size: 0.9rem;">Soldaki panelden yeni bir oda oluşturun.</div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Kopyalama Scripti -->
+<script>
+function copyLink(text) {
+    if (!navigator.clipboard) {
+        // Eski tarayıcılar için fallback
+        var textArea = document.createElement("textarea");
+        textArea.value = text;
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        try {
+            document.execCommand('copy');
+            alert('Link kopyalandı: ' + text);
+        } catch (err) {
+            console.error('Kopyalanamadı', err);
+        }
+        document.body.removeChild(textArea);
+        return;
+    }
+
+    // Modern tarayıcılar
+    navigator.clipboard.writeText(text).then(function() {
+        // Basit bir uyarı yerine daha şık bir yöntem eklenebilir ama şimdilik alert yeterli
+        alert('✅ Davet Linki Kopyalandı!\n\nBu linki katılımcıya gönderin:\n' + text);
+    }, function(err) {
+        console.error('Hata:', err);
+    });
+}
+</script>
+
+{% endblock %}
