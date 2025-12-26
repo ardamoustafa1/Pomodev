@@ -1,0 +1,729 @@
+﻿@page
+@model Sayhi.ApiService.Pages.ChatWidgetModel
+@{
+    Layout = null;
+    //ViewData["Title"] = "Chat Widget";
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Chat Widget</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            overflow: hidden;
+        }
+
+        .chat-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 9999;
+        }
+
+        .chat-button {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background-color: #2563eb;
+            color: white;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+            .chat-button:hover {
+                transform: scale(1.1);
+            }
+
+        .online-indicator {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            width: 12px;
+            height: 12px;
+            background-color: #10b981;
+            border-radius: 50%;
+            border: 2px solid white;
+            animation: pulse 2s infinite;
+        }
+
+        @@keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.5;
+            }
+        }
+
+        .chat-window {
+            width: 380px;
+            height: 550px;
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+            animation: slideIn 0.3s ease-out;
+        }
+
+            .chat-window.open {
+                display: flex;
+            }
+
+        @@keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .chat-header {
+            background-color: #2563eb;
+            color: white;
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+            .chat-header h3 {
+                margin: 0;
+                font-size: 18px;
+                font-weight: 600;
+            }
+
+            .chat-header p {
+                margin: 4px 0 0 0;
+                font-size: 13px;
+                opacity: 0.9;
+            }
+
+        .connection-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            margin-top: 2px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: #10b981;
+        }
+
+            .status-dot.connecting {
+                background-color: #f59e0b;
+            }
+
+            .status-dot.disconnected {
+                background-color: #ef4444;
+            }
+
+        .close-button {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            cursor: pointer;
+            border-radius: 6px;
+            width: 32px;
+            height: 32px;
+            transition: background 0.2s;
+        }
+
+            .close-button:hover {
+                background: rgba(255,255,255,0.3);
+            }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            background-color: #f9fafb;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .message {
+            display: flex;
+            margin-bottom: 8px;
+        }
+
+            .message.user {
+                justify-content: flex-end;
+            }
+
+        .message-bubble {
+            max-width: 75%;
+            padding: 10px 14px;
+            border-radius: 12px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.08);
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .message.user .message-bubble {
+            background-color: #2563eb;
+            color: white;
+        }
+
+        .message.bot .message-bubble {
+            background-color: white;
+            color: #1f2937;
+        }
+
+        .message.agent .message-bubble {
+            background-color: #10b981;
+            color: white;
+        }
+
+        .message-time {
+            font-size: 11px;
+            margin-top: 4px;
+            opacity: 0.7;
+        }
+
+        .typing-indicator {
+            display: none;
+            align-items: center;
+            gap: 4px;
+            padding: 10px 14px;
+            background-color: white;
+            border-radius: 12px;
+            width: fit-content;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.08);
+        }
+
+            .typing-indicator.show {
+                display: flex;
+            }
+
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            background-color: #9ca3af;
+            border-radius: 50%;
+            animation: typing 1.4s infinite;
+        }
+
+            .typing-dot:nth-child(2) {
+                animation-delay: 0.2s;
+            }
+
+            .typing-dot:nth-child(3) {
+                animation-delay: 0.4s;
+            }
+
+        @@keyframes typing {
+            0%, 60%, 100% {
+                transform: translateY(0);
+            }
+
+            30% {
+                transform: translateY(-10px);
+            }
+        }
+
+        .chat-input-area {
+            padding: 16px;
+            background-color: white;
+            border-top: 1px solid #e5e7eb;
+            display: flex;
+            gap: 8px;
+        }
+
+        .chat-input {
+            flex: 1;
+            padding: 10px 14px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 14px;
+            outline: none;
+        }
+
+            .chat-input:focus {
+                border-color: #2563eb;
+            }
+
+        .send-button {
+            background-color: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            width: 44px;
+            height: 44px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+            .send-button:hover {
+                background-color: #1d4ed8;
+            }
+
+            .send-button:disabled {
+                background-color: #9ca3af;
+                cursor: not-allowed;
+            }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <button class="chat-button" id="chatButton">
+            <div class="online-indicator"></div>
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+            </svg>
+        </button>
+
+        <div class="chat-window" id="chatWindow">
+            <div class="chat-header">
+                <div>
+                    <h3>Canlı Destek</h3>
+                    <div class="connection-status">
+                        <span class="status-dot connecting" id="statusDot"></span>
+                        <span id="statusText">Bağlanıyor...</span>
+                    </div>
+                </div>
+
+@if (Model.IsDevelopment)
+{
+                <button id="add_ai">+ ai</button>
+                <button id="add_agent">+ agent</button>
+                <button id="remove_ai">- ai</button>
+                <button id="remove_agent">- agent</button>
+}
+
+                <button class="close-button" id="closeButton">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+
+            <div class="chat-messages" id="chatMessages">
+                <div class="typing-indicator" id="typingIndicator">
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                </div>
+            </div>
+
+            <div class="chat-input-area">
+                <input type="text" class="chat-input" id="chatInput" placeholder="Mesajınızı yazın..." />
+                <button class="send-button" id="sendButton" disabled>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="22" y1="2" x2="11" y2="13"></line>
+                        <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/9.0.6/signalr.min.js" integrity="sha512-kkMt8UThSmWcdXLYFaGZ/U6vyWSNLZMUWQ5SMeF80pGqrEkH5ei9D/3MbVQpB8p7D5C3A4vlX7BpsWTT2BfB6A==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script>
+        let connection;
+        let typingSendTimeout = undefined;
+        let typingReceiveTimeout = undefined;
+        let reconnectionTimeout = undefined;
+        let current = {
+            chatId: null,
+            userId: null
+        };
+        //let messages = [];
+        const elements = {
+            chatButton: document.getElementById("chatButton"),
+            chatWindow: document.getElementById("chatWindow"),
+            closeButton: document.getElementById("closeButton"),
+            chatMessages: document.getElementById("chatMessages"),
+            chatInput: document.getElementById("chatInput"),
+            sendButton: document.getElementById("sendButton"),
+            statusDot: document.getElementById("statusDot"),
+            statusText: document.getElementById("statusText"),
+            typingIndicator: document.getElementById("typingIndicator")
+        };
+
+        const dateTimeUtils = {
+            userLocale: (navigator.languages && navigator.languages[navigator.languages.length - 1]) || navigator.language || "en-US",
+            getTime: (timestamp) =>
+            {
+                const time = timestamp ? new Date(timestamp) : new Date();
+                return time.toLocaleTimeString(this.userLocale, { hour: "2-digit", minute: "2-digit" });
+            }
+        };
+
+        const session = {
+            get username()
+            {
+                let username = sessionStorage.getItem("username");
+                if (!username)
+                {
+                    username = `user_${Math.random().toString(36).substr(2)}${Date.now().toString().slice(-4)}`;
+                    sessionStorage.setItem("username", username);
+                }
+                return username;
+            },
+            set username(value)
+            {
+                sessionStorage.setItem("username", value);
+            }
+        };
+
+        function initSignalR(username)
+        {
+            connection = new signalR.HubConnectionBuilder()
+                .withUrl(`/chatHub?username=${username}&apiKey=@Model.ApiKey`)
+                .withAutomaticReconnect()
+                .build();
+
+            connection.on("ReceiveMessage", (message) =>
+            {
+                console.log("ReceiveMessage");
+                console.log(current);
+                console.log(message);
+
+                /*
+                id?: string;
+                chatId: string;
+                senderId: string;
+                text: string;
+                createdAt: Date;
+                */
+
+                if (current.chatId === message.chatId &&
+                    current.userId !== message.senderId)
+                {
+                    addMessage(message.text, "agent", message.createdAt);
+                    elements.typingIndicator.classList.remove("show");
+                }
+            });
+            connection.on("UserLoggedIn", (peer) =>
+            {
+                console.log("UserLoggedIn", peer, current.userId);
+            });
+            connection.on("UserLoggedOut", (peer) =>
+            {
+                console.log("UserLoggedOut", peer);
+            });
+            connection.on("ActiveUsers", (peers) =>
+            {
+                console.log("ActiveUsers", peers);
+            });
+            connection.on("ActiveAgents", (peers) =>
+            {
+                console.log("ActiveAgents", peers);
+            });
+            connection.on("Typing", (chatId, senderId, isTyping) =>
+            {
+                console.log("Typing", chatId, senderId, isTyping);
+                if (current.chatId === chatId &&
+                    current.userId !== senderId)
+                {
+                    if (isTyping)
+                    {
+                        elements.typingIndicator.classList.add("show");
+                        scrollToBottom();
+
+                        clearTimeout(typingReceiveTimeout);
+                        typingReceiveTimeout = setTimeout(() =>
+                        {
+                            elements.typingIndicator.classList.remove("show");
+                        }, 3000);
+                    }
+                    else
+                    {
+                        elements.typingIndicator.classList.remove("show");
+                    }
+                }
+            });
+            connection.on("ReceiveRinging", (data) =>
+            {
+                console.log("ReceiveRinging", data);
+            });
+            connection.on("ReceiveHangup", (data) =>
+            {
+                console.log("ReceiveHangup", data);
+            });
+            connection.on("UserJoined", (chatId, peer) =>
+            {
+                if (!current.chatId)
+                {
+                    current.chatId = chatId;
+                }
+                if (peer.name === username)
+                {
+                    current.userId = peer.id;
+                }
+                console.log("UserJoined", chatId, peer);
+                console.log(current);
+            });
+            connection.on("UserLeft", (chatId, peer) =>
+            {
+                console.log("UserLeft", chatId, peer);
+            });
+
+            connection.onreconnecting(() =>
+            {
+                updateConnectionStatus("connecting");
+            });
+
+            connection.onreconnected(() =>
+            {
+                updateConnectionStatus("connected");
+            });
+
+            connection.onclose(() =>
+            {
+                updateConnectionStatus("disconnected");
+                //await connect();
+            });
+        }
+
+        async function connect()
+        {
+            try
+            {
+                await connection.start();
+                updateConnectionStatus("connected");
+                elements.sendButton.disabled = false;
+                return true;
+            }
+            catch (err)
+            {
+                console.error("SignalR bağlantı hatası:", err);
+                updateConnectionStatus("disconnected");
+                clearTimeout(reconnectionTimeout);
+                reconnectionTimeout = setTimeout(connect, 5000);
+                return false;
+            }
+        }
+
+        async function disconnect()
+        {
+            try
+            {
+                clearTimeout(reconnectionTimeout);
+                await connection.stop();
+                updateConnectionStatus("disconnected");
+                elements.sendButton.disabled = true;
+                return true;
+            }
+            catch (err)
+            {
+                console.error("SignalR bağlantı hatası:", err);
+                updateConnectionStatus("disconnected");
+                return false;
+            }
+        }
+
+        function updateConnectionStatus(status)
+        {
+            elements.statusDot.className = `status-dot ${status}`;
+
+            const statusTexts = {
+                connected: "Çevrimiçi",
+                connecting: "Bağlanıyor...",
+                disconnected: "Bağlantı Kesildi"
+            };
+
+            elements.statusText.textContent = statusTexts[status] || statusTexts.connecting;
+        }
+
+@if (Model.IsDevelopment)
+{
+    <text>
+        document.getElementById("add_ai").addEventListener("click", async () =>
+        {
+            console.log("add_ai", current.chatId);
+            return await remoteProcedureCall("AddAIToChat", current.chatId);
+        });
+        document.getElementById("add_agent").addEventListener("click", async () =>
+        {
+            console.log("add_agent", current.chatId);
+            return await remoteProcedureCall("AddAgentToChat", current.chatId);
+        });
+        document.getElementById("remove_ai").addEventListener("click", async () =>
+        {
+            console.log("remove_ai", current.chatId);
+            return await remoteProcedureCall("RemoveAIFromChat", current.chatId);
+        });
+        document.getElementById("remove_agent").addEventListener("click", async () =>
+        {
+            console.log("remove_agent", current.chatId);
+            return await remoteProcedureCall("RemoveAgentFromChat", current.chatId);
+        });
+    </text>
+}
+        elements.chatButton.addEventListener("click", async () =>
+        {
+            elements.chatWindow.classList.add("open");
+            elements.chatButton.style.display = "none";
+
+            if (!connection)
+            {
+                initSignalR(session.username);
+            }
+
+            // Connected
+            // Connecting
+            // Reconnecting
+            // Disconnected
+            // Disconnecting
+
+            if (connection.state !== signalR.HubConnectionState.Connected)
+            {
+                //if (await connect())
+                //{
+                //    addMessage("Merhaba! Canlı destek ekibimize bağlandınız. Size nasıl yardımcı olabiliriz?", "bot");
+                //}
+                await connect();
+            }
+        });
+
+        elements.closeButton.addEventListener("click", async () =>
+        {
+            if (connection.state !== signalR.HubConnectionState.Disconnected)
+            {
+                await disconnect();
+            }
+
+            elements.chatWindow.classList.remove("open");
+            elements.chatButton.style.display = "flex";
+        });
+
+        elements.sendButton.addEventListener("click", onSendMessage);
+        elements.chatInput.addEventListener("keypress", (e) =>
+        {
+            if (e.key === "Enter")
+                onSendMessage();
+        });
+
+        elements.chatInput.addEventListener("input", async () =>
+        {
+            clearTimeout(typingSendTimeout);
+
+            if (await sendTyping(current.chatId, true))
+            {
+                typingSendTimeout = setTimeout(async () =>
+                {
+                    await sendTyping(current.chatId, false);
+                }, 1000);
+            }
+        });
+
+        async function onSendMessage()
+        {
+            const text = elements.chatInput.value.trim();
+            if (!text || !connection || connection.state !== signalR.HubConnectionState.Connected)
+                return;
+
+            addMessage(text, "user");
+            elements.chatInput.value = "";
+
+            if (! (await sendMessage(current.chatId, text) ||
+                await sendTyping(current.chatId, false)))
+            {
+                addMessage("Üzgünüz, mesaj gönderilemedi. Lütfen tekrar deneyin.", "bot");
+            }
+        }
+
+        async function remoteProcedureCall(functionName, ...args)
+        {
+            if (!connection || connection.state !== signalR.HubConnectionState.Connected)
+                return false;
+
+            try
+            {
+                await connection.invoke(functionName, ...args);
+                return true;
+            }
+            catch (ex)
+            {
+                console.error(ex);
+                return false;
+            }
+        }
+
+        async function sendMessage(chatId, text)
+        {
+            return await remoteProcedureCall("SendMessage", chatId, text);
+        }
+        async function sendTyping(chatId, isTyping)
+        {
+            return await remoteProcedureCall("SendTyping", chatId, isTyping);
+        }
+        async function ring(chatId, calleeId)
+        {
+            return await remoteProcedureCall("Ring", chatId, calleeId);
+        }
+        async function hangup(chatId, calleeId)
+        {
+            return await remoteProcedureCall("Hangup", chatId, calleeId);
+        }
+        async function join(chatId)
+        {
+            return await remoteProcedureCall("Join", chatId);
+        }
+        async function leave(chatId)
+        {
+            return await remoteProcedureCall("Leave", chatId);
+        }
+
+        function addMessage(text, sender, timestamp = null)
+        {
+            const time = dateTimeUtils.getTime(timestamp)
+            const messageDiv = document.createElement("div");
+            messageDiv.className = `message ${sender}`;
+            messageDiv.innerHTML = `
+                <div class="message-bubble">
+                    ${escapeHtml(text)}
+                    <div class="message-time">
+                        ${time}
+                    </div>
+                </div>
+            `;
+
+            elements.chatMessages.insertBefore(messageDiv, elements.typingIndicator);
+            scrollToBottom();
+        }
+
+        function scrollToBottom()
+        {
+            elements.chatMessages.scrollTop = elements.chatMessages.scrollHeight;
+        }
+
+        function escapeHtml(text)
+        {
+            const div = document.createElement("div");
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+    </script>
+</body>
+</html>

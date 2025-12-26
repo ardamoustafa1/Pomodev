@@ -1,0 +1,89 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 18
+VisualStudioVersion = 18.3.11222.16
+MinimumVisualStudioVersion = 17.8.0.0
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sayhi.AppHost", "Sayhi.AppHost\Sayhi.AppHost.csproj", "{97CB792F-1292-4704-A146-1A93292BEF11}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sayhi.ServiceDefaults", "Sayhi.ServiceDefaults\Sayhi.ServiceDefaults.csproj", "{C27B0755-083D-42B0-8690-C01190782B53}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sayhi.ApiService", "Sayhi.ApiService\Sayhi.ApiService.csproj", "{D32E7237-8EF2-4B0F-90B5-657AACEDFA04}"
+EndProject
+Project("{54A90642-561A-4BB1-A94E-469ADEE60C69}") = "sayhi.web", "Sayhi.Web\sayhi.web.esproj", "{5309F36F-2644-5104-107A-7A5D020CE8DA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sayhi.Model", "Sayhi.Model\Sayhi.Model.csproj", "{4D8597CF-8D42-4212-AAF8-1C1799147802}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{8EC462FD-D22E-90A8-E5CE-7E832BA40C5D}"
+	ProjectSection(SolutionItems) = preProject
+		cloud-config.yaml = cloud-config.yaml
+		docker-compose.yaml = docker-compose.yaml
+		publish.bat = publish.bat
+		README.md = README.md
+		ServerSetup.md = ServerSetup.md
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sayhi.Providers.WhatsApp", "Sayhi.Providers.WhatsApp\Sayhi.Providers.WhatsApp.csproj", "{0D593D84-0151-4F12-A932-A53485A81262}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sayhi.AIGateway", "Sayhi.AIGateway\Sayhi.AIGateway.csproj", "{5B0EF4B0-7852-1D4F-8770-A9FB37C86006}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{24716394-9BF2-4CF7-ADCF-2F5131411FF4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sayhi.ApiService.Tests", "Sayhi.ApiService.Tests\Sayhi.ApiService.Tests.csproj", "{36F6F037-6B32-4C17-8F92-0E5EBE92EC5B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sayhi.ApiService.IntegrationTests", "Sayhi.ApiService.IntegrationTests\Sayhi.ApiService.IntegrationTests.csproj", "{3723EC18-7EDB-4430-9D46-BBC4A104EBC3}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{97CB792F-1292-4704-A146-1A93292BEF11}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{97CB792F-1292-4704-A146-1A93292BEF11}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{97CB792F-1292-4704-A146-1A93292BEF11}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{97CB792F-1292-4704-A146-1A93292BEF11}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C27B0755-083D-42B0-8690-C01190782B53}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C27B0755-083D-42B0-8690-C01190782B53}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C27B0755-083D-42B0-8690-C01190782B53}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C27B0755-083D-42B0-8690-C01190782B53}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D32E7237-8EF2-4B0F-90B5-657AACEDFA04}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D32E7237-8EF2-4B0F-90B5-657AACEDFA04}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D32E7237-8EF2-4B0F-90B5-657AACEDFA04}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D32E7237-8EF2-4B0F-90B5-657AACEDFA04}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5309F36F-2644-5104-107A-7A5D020CE8DA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5309F36F-2644-5104-107A-7A5D020CE8DA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5309F36F-2644-5104-107A-7A5D020CE8DA}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{5309F36F-2644-5104-107A-7A5D020CE8DA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5309F36F-2644-5104-107A-7A5D020CE8DA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5309F36F-2644-5104-107A-7A5D020CE8DA}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{4D8597CF-8D42-4212-AAF8-1C1799147802}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4D8597CF-8D42-4212-AAF8-1C1799147802}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4D8597CF-8D42-4212-AAF8-1C1799147802}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4D8597CF-8D42-4212-AAF8-1C1799147802}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0D593D84-0151-4F12-A932-A53485A81262}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0D593D84-0151-4F12-A932-A53485A81262}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0D593D84-0151-4F12-A932-A53485A81262}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0D593D84-0151-4F12-A932-A53485A81262}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5B0EF4B0-7852-1D4F-8770-A9FB37C86006}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5B0EF4B0-7852-1D4F-8770-A9FB37C86006}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5B0EF4B0-7852-1D4F-8770-A9FB37C86006}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5B0EF4B0-7852-1D4F-8770-A9FB37C86006}.Release|Any CPU.Build.0 = Release|Any CPU
+		{36F6F037-6B32-4C17-8F92-0E5EBE92EC5B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{36F6F037-6B32-4C17-8F92-0E5EBE92EC5B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{36F6F037-6B32-4C17-8F92-0E5EBE92EC5B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{36F6F037-6B32-4C17-8F92-0E5EBE92EC5B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3723EC18-7EDB-4430-9D46-BBC4A104EBC3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3723EC18-7EDB-4430-9D46-BBC4A104EBC3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3723EC18-7EDB-4430-9D46-BBC4A104EBC3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3723EC18-7EDB-4430-9D46-BBC4A104EBC3}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{36F6F037-6B32-4C17-8F92-0E5EBE92EC5B} = {24716394-9BF2-4CF7-ADCF-2F5131411FF4}
+		{3723EC18-7EDB-4430-9D46-BBC4A104EBC3} = {24716394-9BF2-4CF7-ADCF-2F5131411FF4}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {FC95AC97-8AF6-4B3C-B7DC-B46DD7FF1AB5}
+	EndGlobalSection
+EndGlobal

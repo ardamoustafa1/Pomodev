@@ -1,0 +1,72 @@
+.chatArea {
+	background-color: #F5F1EB;
+}
+
+.chatAreaWithSuggestions {
+	background: linear-gradient(90deg, transparent calc(100% - 314px), #fff 314px);
+}
+
+.message {
+	text-align: left;
+	box-shadow: 0 1px .5px rgba(11, 20, 26, .13);
+	font-family: "Roboto Variable", "Segoe UI", "Helvetica Neue", Helvetica, "Lucida Grande", Arial, Ubuntu, Cantarell, "Fira Sans", sans-serif;
+	font-size: 14.2px;
+	line-height: 20px;
+}
+
+.message.own {
+	color: #000;
+	background-color: #bbf7d0;
+}
+
+.message.own .time {
+	color: #71717a;
+}
+
+.message.own .status {
+	color: #71717a;
+}
+
+.message.other {
+	color: #000;
+	background-color: #fff;
+	/*border: 1px solid silver !important;*/
+}
+
+.message.other .time {
+	color: #71717a;
+}
+
+.message.other .status {
+	color: #71717a;
+}
+
+.chat {
+	margin: 8px;
+	padding: 6px;
+	border-radius: 12px;
+	height: 72px;
+}
+
+.chat.selected {
+	background-color: #F6F5F4;
+}
+
+.chat.not-selected {
+	/*background-color: #f4f4f5;*/
+	background-color: #fff;
+}
+
+.chat.not-selected:hover {
+	background-color: #F7F5F3;
+}
+
+/*.chat span[data-slot="badge"]*/
+.chat .unread {
+	background-color: green;
+}
+
+.chat .typing {
+	color: green;
+	font-size: 14px;
+}

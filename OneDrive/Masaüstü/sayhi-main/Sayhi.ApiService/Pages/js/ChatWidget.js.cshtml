@@ -1,0 +1,14 @@
+﻿@page "/js/chat-widget.js"
+@model Sayhi.ApiService.Pages.js.ChatWidgetJsModel
+@{
+    Layout = null;
+    Response.ContentType = "application/javascript";
+}
+
+(function ()
+{
+    var script = document.createElement("script");
+    script.src = "@(Model.BaseUrl)/js/chat-widget-loader.js";
+    script.setAttribute("data-api-key", "DEMO-KEY-12345");
+    document.body.appendChild(script);
+})();

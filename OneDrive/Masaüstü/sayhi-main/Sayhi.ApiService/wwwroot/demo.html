@@ -1,0 +1,22 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Chat Demo</title>
+</head>
+<body>
+    <h1>Customer Web Page</h1>
+    <p>Customer Web Page</p>
+    <script>
+        (function ()
+        {
+            var script = document.createElement("script");
+            script.src = "http://localhost:5406/js/chat-widget-loader.js";
+            script.setAttribute("data-api-key", "DEMO-KEY-12345");
+            document.body.appendChild(script);
+        })();
+    </script>
+</body>
+</html>
+
