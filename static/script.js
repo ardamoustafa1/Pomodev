@@ -2159,3 +2159,241 @@ function setupOnboarding() {
 
 // Call onboarding on page load
 document.addEventListener('DOMContentLoaded', setupOnboarding);
+
+// ===== HEATMAP SYSTEM =====
+function renderHeatmap() {
+    const container = document.getElementById('heatmapContainer');
+    if (!container) return;
+
+    container.innerHTML = '';
+    const today = new Date();
+    const days = 28; // 4 weeks
+
+    // Get pomodoro data from history
+    const pomodoroData = {};
+    pomodoroHistory.forEach(entry => {
+        const date = new Date(entry.timestamp).toDateString();
+        pomodoroData[date] = (pomodoroData[date] || 0) + 1;
+    });
+
+    for (let i = days - 1; i >= 0; i--) {
+        const date = new Date(today);
+        date.setDate(today.getDate() - i);
+        const dateStr = date.toDateString();
+        const count = pomodoroData[dateStr] || 0;
+
+        const cell = document.createElement('div');
+        cell.className = 'heatmap-cell';
+        cell.title = `${date.toLocaleDateString('tr-TR')}: ${count} pomodoro`;
+
+        // Color intensity based on count
+        if (count === 0) {
+            cell.style.background = 'rgba(255, 255, 255, 0.05)';
+        } else if (count <= 2) {
+            cell.style.background = 'rgba(77, 163, 255, 0.2)';
+        } else if (count <= 4) {
+            cell.style.background = 'rgba(77, 163, 255, 0.4)';
+        } else if (count <= 6) {
+            cell.style.background = 'rgba(77, 163, 255, 0.7)';
+        } else {
+            cell.style.background = 'rgba(77, 163, 255, 1)';
+        }
+
+        container.appendChild(cell);
+    }
+}
+
+// ===== WEEKLY SUMMARY =====
+function updateWeeklySummary() {
+    const weeklyHoursEl = document.getElementById('weeklyHours');
+    const weeklyPomodorosEl = document.getElementById('weeklyPomodoros');
+    const comparisonEl = document.getElementById('weeklyComparison');
+
+    if (!weeklyHoursEl || !weeklyPomodorosEl) return;
+
+    // Calculate weekly stats
+    const now = new Date();
+    const weekStart = new Date(now);
+    weekStart.setDate(now.getDate() - 7);
+
+    let weeklyCount = 0;
+    pomodoroHistory.forEach(entry => {
+        const entryDate = new Date(entry.timestamp);
+        if (entryDate >= weekStart) {
+            weeklyCount++;
+        }
+    });
+
+    const weeklyHours = (weeklyCount * 25 / 60).toFixed(1);
+    weeklyHoursEl.textContent = weeklyHours;
+    weeklyPomodorosEl.textContent = weeklyCount;
+
+    // Comparison with last week
+    const lastWeekStart = new Date(weekStart);
+    lastWeekStart.setDate(lastWeekStart.getDate() - 7);
+
+    let lastWeekCount = 0;
+    pomodoroHistory.forEach(entry => {
+        const entryDate = new Date(entry.timestamp);
+        if (entryDate >= lastWeekStart && entryDate < weekStart) {
+            lastWeekCount++;
+        }
+    });
+
+    if (comparisonEl) {
+        if (lastWeekCount === 0) {
+            comparisonEl.textContent = '🌱 İlk haftanı başarıyla tamamlıyorsun!';
+        } else if (weeklyCount > lastWeekCount) {
+            const percent = Math.round(((weeklyCount - lastWeekCount) / lastWeekCount) * 100);
+            comparisonEl.textContent = `📈 Geçen haftadan %${percent} daha iyi!`;
+        } else if (weeklyCount < lastWeekCount) {
+            comparisonEl.textContent = `💪 Geçen hafta ${lastWeekCount} yapmıştın, yakala!`;
+        } else {
+            comparisonEl.textContent = '🎯 Geçen haftayla aynı tempoda!';
+        }
+    }
+}
+
+// ===== AMBIENT SOUNDS SYSTEM =====
+let ambientAudio = null;
+let currentAmbientSound = null;
+
+// Free ambient sound URLs (using freesound.org creative commons)
+const AMBIENT_SOUNDS = {
+    rain: 'https://cdn.freesound.org/previews/531/531947_5765869-lq.mp3',
+    cafe: 'https://cdn.freesound.org/previews/346/346170_4502737-lq.mp3',
+    fire: 'https://cdn.freesound.org/previews/499/499829_1648170-lq.mp3',
+    ocean: 'https://cdn.freesound.org/previews/467/467952_5121236-lq.mp3',
+    forest: 'https://cdn.freesound.org/previews/367/367850_6572353-lq.mp3'
+};
+
+function setupAmbientSounds() {
+    const buttons = document.querySelectorAll('.ambient-btn');
+    const volumeSlider = document.getElementById('ambientVolume');
+    const stopBtn = document.getElementById('stopAmbient');
+
+    buttons.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const sound = btn.dataset.sound;
+            playAmbientSound(sound, btn);
+        });
+    });
+
+    volumeSlider?.addEventListener('input', () => {
+        if (ambientAudio) {
+            ambientAudio.volume = volumeSlider.value / 100;
+        }
+    });
+
+    stopBtn?.addEventListener('click', stopAmbientSound);
+}
+
+function playAmbientSound(sound, btn) {
+    // Stop current if same button clicked
+    if (currentAmbientSound === sound && ambientAudio) {
+        stopAmbientSound();
+        return;
+    }
+
+    stopAmbientSound();
+
+    ambientAudio = new Audio(AMBIENT_SOUNDS[sound]);
+    ambientAudio.loop = true;
+    ambientAudio.volume = (document.getElementById('ambientVolume')?.value || 30) / 100;
+    ambientAudio.play().catch(e => console.warn('Ambient ses çalınamadı:', e));
+
+    currentAmbientSound = sound;
+
+    // Update active state
+    document.querySelectorAll('.ambient-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+}
+
+function stopAmbientSound() {
+    if (ambientAudio) {
+        ambientAudio.pause();
+        ambientAudio = null;
+    }
+    currentAmbientSound = null;
+    document.querySelectorAll('.ambient-btn').forEach(b => b.classList.remove('active'));
+}
+
+// ===== STRICT MODE =====
+let strictModeEnabled = false;
+
+function enableStrictMode() {
+    strictModeEnabled = true;
+    window.addEventListener('beforeunload', strictModeWarning);
+
+    // Add visual indicator
+    const indicator = document.createElement('div');
+    indicator.id = 'strictModeIndicator';
+    indicator.className = 'strict-mode-indicator';
+    indicator.innerHTML = '🔒 Strict Mode Aktif - Pomodoro tamamlanana kadar ayrılamazsın!';
+    document.body.prepend(indicator);
+}
+
+function disableStrictMode() {
+    strictModeEnabled = false;
+    window.removeEventListener('beforeunload', strictModeWarning);
+    document.getElementById('strictModeIndicator')?.remove();
+}
+
+function strictModeWarning(e) {
+    if (isRunning && currentMode === 'pomodoro') {
+        e.preventDefault();
+        e.returnValue = 'Pomodoro devam ediyor! Ayrılmak istediğinize emin misiniz?';
+        return e.returnValue;
+    }
+}
+
+// ===== WATER REMINDER =====
+let waterReminderInterval = null;
+
+function setupWaterReminder() {
+    // Remind every 30 minutes
+    waterReminderInterval = setInterval(() => {
+        if (isRunning) {
+            showWaterReminder();
+        }
+    }, 30 * 60 * 1000); // 30 minutes
+}
+
+function showWaterReminder() {
+    const reminder = document.createElement('div');
+    reminder.className = 'water-reminder';
+    reminder.innerHTML = `
+        <div style="display: flex; align-items: center; gap: 12px;">
+            <span style="font-size: 2rem;">💧</span>
+            <div>
+                <div style="font-weight: 700;">Su İçme Vakti!</div>
+                <div style="font-size: 0.85rem; opacity: 0.9;">Sağlıklı kalmak için su içmeyi unutma</div>
+            </div>
+            <button onclick="this.parentElement.parentElement.remove()" style="background: rgba(255,255,255,0.2); border: none; color: white; padding: 8px; border-radius: 8px; cursor: pointer;">✕</button>
+        </div>
+    `;
+    document.body.appendChild(reminder);
+
+    // Auto remove after 10 seconds
+    setTimeout(() => reminder.remove(), 10000);
+}
+
+// ===== INITIALIZE NEW FEATURES =====
+document.addEventListener('DOMContentLoaded', () => {
+    setupAmbientSounds();
+    setupWaterReminder();
+    renderHeatmap();
+    updateWeeklySummary();
+
+    // Enable strict mode when timer starts (optional - can be toggled)
+    // Comment out if you don't want strict mode by default
+    // enableStrictMode();
+});
+
+// Update heatmap and weekly summary when pomodoro completes
+const originalUpdateStatistics = typeof updateStatistics === 'function' ? updateStatistics : null;
+function updateStatistics() {
+    if (originalUpdateStatistics) originalUpdateStatistics();
+    renderHeatmap();
+    updateWeeklySummary();
+}

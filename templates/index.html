@@ -674,6 +674,56 @@
               </div>
             </div>
           </div>
+
+          <!-- 📊 Haftalık Özet -->
+          <div class="panel-section glass">
+            <h3>📊 Bu Hafta</h3>
+            <div class="weekly-summary">
+              <div class="weekly-stat">
+                <span class="weekly-value" id="weeklyHours">0</span>
+                <span class="weekly-label">saat odak</span>
+              </div>
+              <div class="weekly-stat">
+                <span class="weekly-value" id="weeklyPomodoros">0</span>
+                <span class="weekly-label">pomodoro</span>
+              </div>
+              <div class="comparison-message" id="weeklyComparison">
+                📈 Geçen haftadan daha iyi gidiyorsun!
+              </div>
+            </div>
+          </div>
+
+          <!-- 📅 Heatmap -->
+          <div class="panel-section glass">
+            <h3>🔥 Aktivite Haritası</h3>
+            <div class="heatmap-container" id="heatmapContainer">
+              <!-- JS ile doldurulacak -->
+            </div>
+            <div class="heatmap-legend">
+              <span>Az</span>
+              <div class="heatmap-cell" style="background: rgba(77, 163, 255, 0.1);"></div>
+              <div class="heatmap-cell" style="background: rgba(77, 163, 255, 0.3);"></div>
+              <div class="heatmap-cell" style="background: rgba(77, 163, 255, 0.6);"></div>
+              <div class="heatmap-cell" style="background: rgba(77, 163, 255, 1);"></div>
+              <span>Çok</span>
+            </div>
+          </div>
+
+          <!-- 🎵 Ambient Sounds -->
+          <div class="panel-section glass">
+            <h3>🎵 Atmosfer Sesleri</h3>
+            <div class="ambient-sounds">
+              <button class="ambient-btn" data-sound="rain" title="Yağmur">🌧️</button>
+              <button class="ambient-btn" data-sound="cafe" title="Kahvehane">☕</button>
+              <button class="ambient-btn" data-sound="fire" title="Şömine">🔥</button>
+              <button class="ambient-btn" data-sound="ocean" title="Dalga">🌊</button>
+              <button class="ambient-btn" data-sound="forest" title="Orman">🌲</button>
+            </div>
+            <div class="ambient-controls">
+              <label>Ses: <input type="range" id="ambientVolume" min="0" max="100" value="30" /></label>
+              <button id="stopAmbient" class="btn-small">⏹ Durdur</button>
+            </div>
+          </div>
         </aside>
 
         <!-- Orta Panel: Timer -->
