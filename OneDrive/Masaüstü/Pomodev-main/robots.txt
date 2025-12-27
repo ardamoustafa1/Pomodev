@@ -1,0 +1,18 @@
+User-agent: *
+Allow: /
+
+# Google
+User-agent: Googlebot
+Allow: /
+
+# Yandex
+User-agent: Yandex
+Allow: /
+
+# Sitemap
+Sitemap: https://pomodev-omega.vercel.app/sitemap.xml
+
+# Disallow admin or private areas if any
+Disallow: /api/
+Disallow: /admin/
+
