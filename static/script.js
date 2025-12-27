@@ -2258,13 +2258,13 @@ function updateWeeklySummary() {
 let ambientAudio = null;
 let currentAmbientSound = null;
 
-// Free ambient sound URLs (using freesound.org creative commons)
+// Free ambient sound URLs (reliable sources)
 const AMBIENT_SOUNDS = {
-    rain: 'https://cdn.freesound.org/previews/531/531947_5765869-lq.mp3',
-    cafe: 'https://cdn.freesound.org/previews/346/346170_4502737-lq.mp3',
-    fire: 'https://cdn.freesound.org/previews/499/499829_1648170-lq.mp3',
-    ocean: 'https://cdn.freesound.org/previews/467/467952_5121236-lq.mp3',
-    forest: 'https://cdn.freesound.org/previews/367/367850_6572353-lq.mp3'
+    rain: 'https://assets.mixkit.co/active_storage/sfx/212/212-preview.mp3',
+    cafe: 'https://assets.mixkit.co/active_storage/sfx/145/145-preview.mp3',
+    fire: 'https://assets.mixkit.co/active_storage/sfx/189/189-preview.mp3',
+    ocean: 'https://assets.mixkit.co/active_storage/sfx/184/184-preview.mp3',
+    forest: 'https://assets.mixkit.co/active_storage/sfx/176/176-preview.mp3'
 };
 
 function setupAmbientSounds() {

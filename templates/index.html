@@ -1035,6 +1035,42 @@
         <a href="/hakkimizda" style="color: var(--primary);">Hakkımızda</a>
       </div>
 
+      <hr style="border:0; border-top:1px solid rgba(255,255,255,0.1); margin: 20px 0;">
+
+      <!-- 🔒 Deep Work Section -->
+      <div class="section">
+        <h3>🔒 Deep Work</h3>
+        <label><input type="checkbox" id="strictModeCheckbox" /> Strict Mode (Sekme kapatma uyarısı)</label><br />
+        <label><input type="checkbox" id="waterReminderCheckbox" checked /> Su İçme Hatırlatıcısı</label><br />
+      </div>
+
+      <!-- 🔗 Entegrasyonlar -->
+      <div class="section">
+        <h3>🔗 Entegrasyonlar</h3>
+        <div class="integration-item">
+          <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+            <span style="font-size: 1.5rem;">📝</span>
+            <div>
+              <strong>Notion</strong>
+              <div style="font-size: 0.8rem; color: var(--muted);">Görevleri Notion'dan senkronize et</div>
+            </div>
+            <button id="notionConnectBtn" class="btn-icon-text" style="margin-left: auto;">Bağla</button>
+          </div>
+        </div>
+        <div class="integration-item">
+          <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+            <span style="font-size: 1.5rem;">✅</span>
+            <div>
+              <strong>Todoist</strong>
+              <div style="font-size: 0.8rem; color: var(--muted);">Todoist görevlerini getir</div>
+            </div>
+            <button id="todoistConnectBtn" class="btn-icon-text" style="margin-left: auto;">Bağla</button>
+          </div>
+        </div>
+        <p style="font-size: 0.75rem; color: var(--muted); text-align: center; margin-top: 8px;">
+          🚧 Entegrasyonlar yakında aktif olacak
+        </p>
+      </div>
 
       <button id="closeSettings">Kapat</button>
     </div>
