@@ -1,0 +1,2321 @@
+body {
+  font-family: 'Inter', 'Poppins', sans-serif;
+  /* Modern yazı tipi */
+  background-color: var(--bg);
+  /* Arka plan rengi */
+  color: var(--text);
+  /* Genel yazı rengi */
+  margin: 0;
+  /* Sayfa kenar boşluklarını kaldır */
+  padding: 0;
+  /* Sayfa iç boşluklarını kaldır */
+  text-align: center;
+  /* Sayfadaki tüm metni yatayda ortala */
+}
+
+/* ===== Theme Tokens ===== */
+:root {
+  --bg: #0f141a;
+  --panel: rgba(24, 31, 40, 0.7);
+  --panel-strong: rgba(24, 31, 40, 0.9);
+  --text: #d6dde6;
+  --muted: #9aa6b2;
+  --primary: #4da3ff;
+  --primary-strong: #2a7be7;
+  --radius: 16px;
+}
+
+/* Arka plana yumuşak gradient dokunuşu */
+body {
+  background-image: radial-gradient(1200px 800px at 20% -10%, rgba(77, 163, 255, 0.08), transparent), radial-gradient(1000px 700px at 110% 20%, rgba(244, 63, 94, 0.08), transparent);
+}
+
+/* Light theme */
+[data-theme="light"] {
+  --bg: #f6f8fb;
+  --panel: #ffffff;
+  --panel-strong: #ffffff;
+  --text: #0b1220;
+  --muted: #5b6573;
+}
+
+/* Light theme component overrides for better contrast */
+[data-theme="light"] .timer-container,
+[data-theme="light"] .tasks,
+[data-theme="light"] .feature-card,
+[data-theme="light"] .info-slider,
+[data-theme="light"] .modal-content {
+  border: 1px solid rgba(15, 23, 42, 0.12);
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.12);
+}
+
+[data-theme="light"] .top-buttons button,
+[data-theme="light"] .top-buttons select {
+  background: #f3f4f6;
+  color: #0b1220;
+  border: 1px solid rgba(15, 23, 42, 0.12);
+}
+
+[data-theme="light"] .top-buttons button:hover,
+[data-theme="light"] .top-buttons select:hover {
+  background: #e5e7eb;
+  color: #0b1220;
+}
+
+[data-theme="light"] .mode {
+  background-color: #e5e7eb;
+  color: #0b1220;
+  border: 1px solid rgba(15, 23, 42, 0.12);
+}
+
+[data-theme="light"] .mode:hover {
+  box-shadow: 0 6px 16px rgba(15, 23, 42, 0.12);
+}
+
+[data-theme="light"] .task-item {
+  background: rgba(15, 23, 42, 0.03);
+  border: 1px solid rgba(15, 23, 42, 0.12);
+}
+
+[data-theme="light"] .task-box {
+  background: rgba(15, 23, 42, 0.03);
+  border: 1px dashed rgba(15, 23, 42, 0.18);
+}
+
+[data-theme="light"] .task-box:hover {
+  background: rgba(15, 23, 42, 0.06);
+  border-color: rgba(15, 23, 42, 0.24);
+  color: #0b1220;
+}
+
+[data-theme="light"] .chip {
+  background: rgba(15, 23, 42, 0.04);
+  border: 1px solid rgba(15, 23, 42, 0.12);
+  color: #0b1220;
+}
+
+[data-theme="light"] #settingsBtn {
+  background: #f3f4f6;
+  color: #0b1220;
+  border: 1px solid rgba(15, 23, 42, 0.12);
+}
+
+[data-theme="light"] #settingsBtn:hover {
+  background: #e5e7eb;
+  color: #0b1220;
+}
+
+/* Light theme: ensure timer and logo are clearly visible */
+[data-theme="light"] #timer {
+  color: #0b1220;
+  text-shadow: 0 4px 16px rgba(42, 123, 231, 0.25);
+}
+
+[data-theme="light"] .logo {
+  color: #0b1220;
+}
+
+/* Accent palettes */
+[data-accent="blue"] {
+  --primary: #4da3ff;
+  --primary-strong: #2a7be7;
+}
+
+[data-accent="purple"] {
+  --primary: #a78bfa;
+  --primary-strong: #7c3aed;
+}
+
+[data-accent="coral"] {
+  --primary: #fb7185;
+  --primary-strong: #e11d48;
+}
+
+/* ===== Container & Layout ===== */
+.container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  gap: 24px;
+  align-items: start;
+}
+
+/* ===== Premium Layout ===== */
+.premium-layout {
+  display: grid;
+  grid-template-columns: 300px 1fr 300px;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+  min-height: 600px;
+}
+
+.left-panel,
+.right-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.main-panel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.panel-section {
+  padding: 1.5rem;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+}
+
+.panel-section h3 {
+  margin: 0 0 1rem 0;
+  color: var(--text);
+  font-size: 1.1rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* ===== Timer Container ===== */
+.timer-container {
+  padding: 2rem;
+  text-align: center;
+  max-width: 400px;
+  width: 100%;
+}
+
+.timer-display {
+  margin: 1.5rem 0;
+}
+
+.timer-time {
+  font-size: 4rem;
+  font-weight: 900;
+  color: var(--text);
+  line-height: 1;
+  margin-bottom: 0.5rem;
+}
+
+.timer-mode {
+  font-size: 1.2rem;
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.timer-controls {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  margin-top: 1.5rem;
+}
+
+.start-btn,
+.reset-btn {
+  padding: 0.8rem 2rem;
+  border: none;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.start-btn {
+  background: var(--primary);
+  color: white;
+}
+
+.start-btn:hover {
+  background: var(--primary-strong);
+  transform: translateY(-2px);
+}
+
+.reset-btn {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.reset-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px);
+}
+
+/* ===== Hedef Bölümü ===== */
+.goal-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.goal-input-group {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.goal-input-group input {
+  flex: 1;
+  padding: 0.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text);
+  font-size: 1rem;
+}
+
+.goal-btn {
+  padding: 0.5rem 1rem;
+  background: var(--primary);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.goal-btn:hover {
+  background: var(--primary-strong);
+  transform: translateY(-1px);
+}
+
+.progress-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.progress-text {
+  text-align: center;
+  font-weight: 600;
+  color: var(--text);
+  font-size: 0.9rem;
+}
+
+/* ===== Görevler Bölümü ===== */
+.tasks-section {
+  margin-top: 2rem;
+}
+
+.tasks {
+  padding: 1.5rem;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+}
+
+/* Yeni grid */
+.app-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  /* İki sütun: Timer | Görevler */
+  gap: 36px;
+  align-items: start;
+}
+
+/* ===== Responsive Tasarım ===== */
+@media (max-width: 1200px) {
+  .premium-layout {
+    grid-template-columns: 250px 1fr 250px;
+    gap: 1rem;
+  }
+}
+
+@media (max-width: 1024px) {
+  .premium-layout {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .left-panel,
+  .right-panel {
+    flex-direction: row;
+    overflow-x: auto;
+  }
+
+  .panel-section {
+    min-width: 250px;
+    flex-shrink: 0;
+  }
+
+  .app-grid {
+    grid-template-columns: 1fr;
+    justify-items: center;
+    gap: 28px;
+  }
+
+  .timer-section .sticky {
+    position: static;
+  }
+
+  .timer-container,
+  .tasks {
+    max-width: 720px;
+    margin: 0 auto;
+  }
+}
+
+@media (max-width: 768px) {
+  .premium-layout {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .left-panel,
+  .right-panel {
+    flex-direction: column;
+  }
+
+  .panel-section {
+    min-width: auto;
+  }
+
+  .timer-time {
+    font-size: 3rem;
+  }
+
+  .timer-controls {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .start-btn,
+  .reset-btn {
+    width: 100%;
+  }
+}
+
+.timer-section .sticky {
+  position: sticky;
+  top: 24px;
+}
+
+.tasks-section {
+  min-height: 300px;
+}
+
+.timer-section,
+.tasks-section {
+  padding-top: 16px;
+}
+
+@media (max-width: 920px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ===== Header (Floating & Glass) ===== */
+.app-header {
+  position: sticky;
+  top: 24px;
+  z-index: 1000;
+  width: 90%;
+  max-width: 1200px;
+  margin: 0 auto 40px auto;
+  padding: 12px 24px;
+  background: rgba(20, 25, 33, 0.75);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 20px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
+}
+
+[data-theme="light"] .app-header {
+  background: rgba(255, 255, 255, 0.8);
+  border-color: rgba(0, 0, 0, 0.05);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.05);
+}
+
+.header-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 0 !important;
+  /* Override container padding */
+}
+
+/* Brand */
+.brand-section {
+  display: flex;
+  align-items: center;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: -0.5px;
+}
+
+[data-theme="light"] .logo {
+  color: #111;
+}
+
+.logo-text {
+  background: linear-gradient(135deg, #fff, #a5b4fc);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+[data-theme="light"] .logo-text {
+  background: linear-gradient(135deg, #111, #4f46e5);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Right Section Groups */
+.actions-section {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.header-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.nav-divider {
+  width: 1px;
+  height: 24px;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+[data-theme="light"] .nav-divider {
+  background: rgba(0, 0, 0, 0.1);
+}
+
+/* ===== Dropdown Menu ===== */
+.dropdown-container {
+  position: relative;
+  display: inline-block;
+  z-index: 2000;
+}
+
+.dropdown-menu {
+  position: absolute;
+  top: calc(100% + 12px);
+  right: 0;
+  width: 240px;
+  background: rgba(20, 25, 33, 0.98);
+  /* Increased opacity for visibility */
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 16px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+  padding: 8px;
+  z-index: 2001;
+  /* Higher index */
+
+  /* Transition setup */
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-8px);
+  transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s;
+  pointer-events: none;
+  /* Prevent clicks when hidden */
+}
+
+.dropdown-menu.show {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+  pointer-events: auto;
+  /* Enable clicks when shown */
+}
+
+[data-theme="light"] .dropdown-menu {
+  background: rgba(255, 255, 255, 0.98);
+  border-color: rgba(0, 0, 0, 0.1);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+}
+
+.dropdown-group {
+  padding: 4px;
+}
+
+.dropdown-label {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--muted);
+  font-weight: 700;
+  padding: 8px 12px 4px;
+  margin-bottom: 4px;
+}
+
+.dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 10px 12px;
+  font-size: 0.95rem;
+  color: var(--text);
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.15s;
+  text-align: left;
+}
+
+.dropdown-item:hover {
+  background: rgba(255, 255, 255, 0.08);
+  /* Stronger hover */
+  transform: translateX(4px);
+}
+
+[data-theme="light"] .dropdown-item:hover {
+  background: rgba(0, 0, 0, 0.06);
+}
+
+.dropdown-item span {
+  font-size: 1.1rem;
+  min-width: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dropdown-item.non-clickable {
+  cursor: default;
+  background: transparent !important;
+  transform: none !important;
+}
+
+.dropdown-divider {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.1);
+  margin: 4px 0;
+}
+
+[data-theme="light"] .dropdown-divider {
+  background: rgba(0, 0, 0, 0.1);
+}
+
+/* Minimalist Button Tweaks */
+.app-header .icon-btn {
+  opacity: 1;
+  /* Reset opacity for visibility */
+  position: relative;
+  z-index: 100;
+}
+
+.app-header .icon-btn:hover,
+.app-header .icon-btn.active {
+  background: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.05);
+  /* Highlight ring */
+}
+
+/* Hide accent select in minimal mode or redesign it? 
+   We removed it from HTML, so no CSS needed unless we want it back.
+*/
+.logo {
+  gap: 12px;
+  /* bit more space */
+}
+
+
+/* Gamification Badge in Header */
+.gamification-group {
+  background: rgba(255, 255, 255, 0.05);
+  padding: 6px 12px;
+  border-radius: 99px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  cursor: default;
+  transition: all 0.2s;
+}
+
+[data-theme="light"] .gamification-group {
+  background: rgba(0, 0, 0, 0.03);
+  border-color: rgba(0, 0, 0, 0.05);
+}
+
+#levelText {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--primary);
+  margin-right: 8px;
+}
+
+.xp-bar-container {
+  width: 60px;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+[data-theme="light"] .xp-bar-container {
+  background: rgba(0, 0, 0, 0.1);
+}
+
+.xp-bar-fill {
+  height: 100%;
+  background: var(--primary);
+  width: 0%;
+  transition: width 0.5s ease;
+}
+
+/* Header Buttons */
+.app-header .icon-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  color: var(--muted);
+  font-size: 1.1rem;
+  transition: all 0.2s;
+}
+
+.app-header .icon-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  transform: translateY(-1px);
+}
+
+[data-theme="light"] .app-header .icon-btn:hover {
+  background: rgba(0, 0, 0, 0.05);
+  color: #000;
+}
+
+/* Compact Select */
+.compact-select {
+  background: transparent !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  color: var(--muted) !important;
+  padding: 6px 10px !important;
+  font-size: 0.85rem !important;
+  border-radius: 8px !important;
+}
+
+[data-theme="light"] .compact-select {
+  border-color: rgba(0, 0, 0, 0.1) !important;
+}
+
+.compact-select:hover {
+  border-color: var(--primary) !important;
+  color: var(--text) !important;
+}
+
+/* Primary Small Button (Login) */
+.btn-primary-sm {
+  background: var(--primary);
+  color: white;
+  font-size: 0.9rem;
+  font-weight: 600;
+  padding: 8px 16px;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 4px 12px rgba(var(--primary-rgb), 0.2);
+}
+
+.btn-primary-sm:hover {
+  filter: brightness(1.1);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(var(--primary-rgb), 0.3);
+}
+
+/* ===== Hero ===== */
+.hero {
+  position: relative;
+  padding: 64px 0 24px;
+}
+
+.hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(600px 300px at 20% 10%, rgba(77, 163, 255, 0.12), transparent 60%), radial-gradient(500px 260px at 80% 0%, rgba(244, 63, 94, 0.10), transparent 60%);
+  filter: blur(0.5px);
+}
+
+.hero-inner {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+  align-items: center;
+  justify-items: center;
+}
+
+.hero-copy {
+  text-align: center;
+}
+
+.hero-copy h1 {
+  margin: 0 0 10px;
+  font-size: 2.6rem;
+  font-weight: 900;
+  letter-spacing: 0.2px;
+}
+
+.hero-copy p {
+  margin: 0 0 22px;
+  color: var(--muted);
+  font-size: 1.05rem;
+}
+
+.hero-cta {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+.btn-cta {
+  background: linear-gradient(135deg, var(--primary), var(--primary-strong));
+  color: #fff;
+  padding: 12px 18px;
+  border-radius: 12px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.btn-ghost {
+  background: var(--panel-strong);
+  color: var(--text);
+  padding: 12px 18px;
+  border-radius: 12px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+
+.app-header .container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.app-header .brand {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+}
+
+.app-header .tagline {
+  color: var(--muted);
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.logo {
+  font-size: 22px;
+  /* Logo yazısının büyüklüğü */
+  font-weight: 900;
+  /* Logo yazısı kalın */
+  color: #e2e8f0;
+  /* Logo yazısı açık gri renk */
+}
+
+/* ===== Üstteki Butonlar ===== */
+.top-buttons {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.top-buttons button,
+.top-buttons select {
+  background: var(--panel-strong);
+  /* Buton arka plan rengi koyu gri */
+  border: none;
+  /* Buton kenarlığı yok */
+  border-radius: 10px;
+  /* Buton köşeleri yuvarlatılmış */
+  padding: 8px 12px;
+  /* Buton iç boşluğu (üst-alt 8px, sağ-sol 12px) */
+  color: var(--text);
+  /* Buton yazı rengi */
+  cursor: pointer;
+  /* Üzerine gelince fare işaretçisi el simgesi olur */
+  transition: background-color 0.3s ease, color 0.3s ease;
+  /* Arka plan ve yazı renginde yumuşak geçiş */
+  font-weight: 700;
+  /* Buton yazısı kalın */
+  font-size: 15px;
+  /* Buton yazısı boyutu */
+}
+
+.top-buttons button:hover,
+.top-buttons select:hover {
+  background: #1f2937;
+  /* Fare ile üzerine gelince arka plan daha açık gri olur */
+  color: #e0e0e0;
+  /* Yazı rengi biraz daha açık gri olur */
+}
+
+/* ===== Mod Butonları ===== */
+.mode-switcher {
+  display: flex;
+  /* Mod butonlarını yatay sırala */
+  justify-content: center;
+  /* Mod butonlarını yatayda ortala */
+  gap: 12px;
+  /* Butonlar arasında 12px boşluk bırak */
+  margin: 30px 0 10px;
+  /* Üst boşluk 30px, alt boşluk 10px */
+}
+
+.mode {
+  background-color: #3a3a3a;
+  /* Mod butonlarının arka plan rengi */
+  color: #cfd8e3;
+  /* Yazı rengi */
+  padding: 12px 24px;
+  /* Buton iç boşluk (üst-alt 12px, sağ-sol 24px) */
+  border-radius: 12px;
+  /* Köşeleri yuvarlat */
+  font-size: 15px;
+  /* Yazı boyutu */
+  font-weight: 700;
+  /* Yazı kalınlığı */
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  cursor: pointer;
+  /* Fare el simgesi */
+  transition: background-color 0.25s ease, color 0.25s ease, box-shadow 0.25s ease, transform 0.06s ease;
+  /* Geçiş efekti */
+}
+
+.mode:hover {
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35);
+  transform: translateY(-1px);
+}
+
+.mode.active {
+  background: linear-gradient(135deg, var(--primary), var(--primary-strong));
+  color: white;
+  /* Yazı beyaz */
+}
+
+/* ===== Sayaç (Timer) ===== */
+#timer {
+  font-size: 6rem;
+  /* Çok büyük yazı */
+  font-weight: 900;
+  /* Kalın yazı */
+  margin: 20px 0;
+  /* Üst ve alt boşluk */
+  color: #eef2f7;
+  /* Yazı rengi açık gri */
+  text-shadow: 0 6px 26px rgba(77, 163, 255, 0.45);
+  /* Hafif mavi parıltı efekti */
+}
+
+/* ===== Başlat Butonu ===== */
+.start-btn,
+.reset-btn {
+  background: linear-gradient(135deg, var(--primary), var(--primary-strong));
+  color: #fff;
+  /* Beyaz yazı */
+  font-size: 1.1rem;
+  /* Daha küçük yazı */
+  padding: 10px 24px;
+  /* Daha az iç boşluk */
+  border: none;
+  /* Kenarlık yok */
+  border-radius: 10px;
+  /* Köşeleri yuvarlat */
+  cursor: pointer;
+  /* Fare el simgesi */
+  font-weight: 600;
+  /* Normal kalınlık */
+  transition: transform 0.08s ease, box-shadow 0.3s ease;
+  /* Renk değişimi animasyonu */
+  margin-bottom: 8px;
+  /* Alt boşluk */
+  box-shadow: 0 4px 12px rgba(77, 163, 255, 0.25);
+  /* Hafif gölge */
+  min-width: 120px;
+  /* Minimum genişlik */
+}
+
+.reset-btn {
+  background: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.start-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(77, 163, 255, 0.4);
+}
+
+/* Start button tema renklerine göre shadow */
+[data-accent="purple"] .start-btn {
+  box-shadow: 0 4px 12px rgba(167, 139, 250, 0.3);
+}
+
+[data-accent="purple"] .start-btn:hover {
+  box-shadow: 0 6px 20px rgba(124, 58, 237, 0.5);
+}
+
+[data-accent="coral"] .start-btn {
+  box-shadow: 0 4px 12px rgba(251, 113, 133, 0.3);
+}
+
+[data-accent="coral"] .start-btn:hover {
+  box-shadow: 0 6px 20px rgba(225, 29, 72, 0.5);
+}
+
+.reset-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
+  background: rgba(255, 255, 255, 0.15);
+}
+
+/* Google Calendar Button */
+#quickAddCalendar {
+  background: linear-gradient(135deg, var(--primary), var(--primary-strong));
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  padding: 10px 16px;
+  font-size: 1.2rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(77, 163, 255, 0.25);
+}
+
+#quickAddCalendar:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(77, 163, 255, 0.4);
+}
+
+/* Tema renklerine göre shadow değişimi */
+[data-accent="purple"] #quickAddCalendar {
+  box-shadow: 0 4px 12px rgba(167, 139, 250, 0.3);
+}
+
+[data-accent="purple"] #quickAddCalendar:hover {
+  box-shadow: 0 6px 20px rgba(124, 58, 237, 0.5);
+}
+
+[data-accent="coral"] #quickAddCalendar {
+  box-shadow: 0 4px 12px rgba(251, 113, 133, 0.3);
+}
+
+[data-accent="coral"] #quickAddCalendar:hover {
+  box-shadow: 0 6px 20px rgba(225, 29, 72, 0.5);
+}
+
+
+/* ===== Odak Mesajı ===== */
+.focus-message {
+  font-size: 1rem;
+  /* Normal yazı boyutu */
+  margin-bottom: 40px;
+  /* Alt boşluk */
+  color: var(--muted);
+  /* Açık gri yazı */
+  font-weight: 600;
+  /* Orta kalınlık */
+}
+
+/* ===== İstatistikler Paneli ===== */
+.stats-section {
+  margin-bottom: 2rem;
+}
+
+.stats-container {
+  background: var(--panel);
+  border-radius: var(--radius);
+  padding: 1.5rem;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.stats-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.stats-toggle {
+  background: var(--primary);
+  color: white;
+  border: none;
+  padding: 0.5rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1.2rem;
+}
+
+.stats-content {
+  display: block;
+}
+
+.stats-content.hidden {
+  display: none;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.stat-card {
+  text-align: center;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.stat-value {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--primary);
+  margin-bottom: 0.5rem;
+}
+
+.stat-label {
+  font-size: 0.9rem;
+  color: var(--muted);
+  font-weight: 500;
+}
+
+.goal-section {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+
+.goal-section label {
+  font-weight: 600;
+  color: var(--text);
+}
+
+.goal-section input {
+  width: 80px;
+  padding: 0.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  background: var(--panel);
+  color: var(--text);
+}
+
+.goal-section button {
+  background: var(--primary);
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--primary), var(--primary-strong));
+  border-radius: 4px;
+  transition: width 0.3s ease;
+  width: 0%;
+}
+
+/* ===== Üretkenlik Raporu ===== */
+.productivity-section {
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.productivity-section h3 {
+  margin: 0 0 1rem 0;
+  color: var(--text);
+  font-size: 1.1rem;
+}
+
+.productivity-content {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
+
+.most-productive h4,
+.hourly-chart h4 {
+  margin: 0 0 0.8rem 0;
+  color: var(--muted);
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.hours-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.hour-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.hour-time {
+  font-weight: 600;
+  color: var(--text);
+}
+
+.hour-count {
+  color: var(--primary);
+  font-weight: 700;
+}
+
+.chart-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.chart-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.chart-hour {
+  width: 30px;
+  font-size: 0.8rem;
+  color: var(--muted);
+  text-align: right;
+}
+
+.chart-fill {
+  flex: 1;
+  height: 20px;
+  background: linear-gradient(90deg, var(--primary), var(--primary-strong));
+  border-radius: 4px;
+  position: relative;
+  min-width: 4px;
+}
+
+.chart-count {
+  font-size: 0.8rem;
+  color: var(--text);
+  font-weight: 600;
+  min-width: 20px;
+  text-align: right;
+}
+
+/* ===== Görev Kontrolleri ===== */
+.task-controls {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.task-controls select {
+  padding: 0.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  background: var(--panel);
+  color: var(--text);
+  font-size: 0.9rem;
+}
+
+/* ===== Tam Ekran ve Bildirim Butonları ===== */
+#fullscreenBtn,
+#notificationsBtn {
+  background: var(--panel);
+  color: var(--text);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 0.5rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1.2rem;
+  transition: all 0.2s ease;
+}
+
+#fullscreenBtn:hover,
+#notificationsBtn:hover {
+  background: var(--primary);
+  color: white;
+  transform: translateY(-1px);
+}
+
+#notificationsBtn.enabled {
+  background: var(--primary);
+  color: white;
+}
+
+/* ===== Görev Stilleri ===== */
+.task-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  margin-bottom: 0.5rem;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: all 0.2s ease;
+}
+
+.task-item:hover {
+  background: rgba(255, 255, 255, 0.08);
+  transform: translateY(-1px);
+}
+
+.task-item.completed {
+  opacity: 0.6;
+  text-decoration: line-through;
+}
+
+.task-item h4 {
+  margin: 0 0 0.5rem 0;
+  color: var(--text);
+  font-size: 1.1rem;
+}
+
+.task-item .meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
+.badge {
+  padding: 0.2rem 0.5rem;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.badge-low {
+  background: rgba(34, 197, 94, 0.2);
+  color: #22c55e;
+}
+
+.badge-normal {
+  background: rgba(59, 130, 246, 0.2);
+  color: #3b82f6;
+}
+
+.badge-important {
+  background: rgba(245, 158, 11, 0.2);
+  color: #f59e0b;
+}
+
+.badge-urgent {
+  background: rgba(239, 68, 68, 0.2);
+  color: #ef4444;
+}
+
+.badge-category {
+  background: rgba(139, 92, 246, 0.2);
+  color: #8b5cf6;
+}
+
+.task-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.complete-btn,
+.delete-btn {
+  background: none;
+  border: none;
+  padding: 0.5rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: all 0.2s ease;
+}
+
+.complete-btn {
+  color: #22c55e;
+}
+
+.complete-btn:hover {
+  background: rgba(34, 197, 94, 0.2);
+}
+
+.complete-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.delete-btn {
+  color: #ef4444;
+}
+
+.delete-btn:hover {
+  background: rgba(239, 68, 68, 0.2);
+}
+
+.chip {
+  display: inline-block;
+  padding: 0.2rem 0.5rem;
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--muted);
+  border-radius: 4px;
+  font-size: 0.8rem;
+  margin-right: 0.3rem;
+}
+
+/* ===== Responsive Tasarım ===== */
+@media (max-width: 768px) {
+  .app-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .goal-section {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .task-controls {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .top-buttons {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .timer-container {
+    margin-bottom: 1rem;
+  }
+
+  .task-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .task-actions {
+    align-self: flex-end;
+  }
+}
+
+@media (max-width: 480px) {
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .stat-card {
+    padding: 0.8rem;
+  }
+
+  .stat-value {
+    font-size: 1.5rem;
+  }
+
+  .task-item .meta {
+    flex-direction: column;
+    gap: 0.3rem;
+  }
+
+  .productivity-content {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .chart-container {
+    max-height: 300px;
+    overflow-y: auto;
+  }
+}
+
+/* ===== Görevler Bölümü ===== */
+.tasks {
+  width: 100%;
+  /* Sütunu tamamen doldur */
+  margin: 0;
+  /* Grid yönetir */
+  text-align: left;
+  background: var(--panel);
+  padding: 36px 28px;
+  border-radius: var(--radius);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: var(--text);
+}
+
+.task-header {
+  display: flex;
+  /* Başlık ve diğer içerik yan yana */
+  justify-content: space-between;
+  /* Aralarında maksimum boşluk */
+  align-items: center;
+  /* Dikey ortala */
+}
+
+.task-header h2 {
+  margin: 0;
+  /* Başlık etrafında boşluk yok */
+  font-size: 22px;
+  /* Başlık boyutu */
+}
+
+/* Görev içi başlık/metin tipografisi */
+.task-item h4 {
+  margin: 0 0 4px 0;
+  font-size: 15px;
+  color: var(--text);
+  font-weight: 700;
+}
+
+.task-item p {
+  margin: 2px 0;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+/* Meta rozetleri ve etiket çipleri */
+.badge {
+  display: inline-block;
+  padding: 2px 8px;
+  font-size: 11px;
+  border-radius: 999px;
+  font-weight: 700;
+}
+
+.badge-low {
+  background: rgba(34, 197, 94, 0.2);
+  color: #86efac;
+}
+
+.badge-medium {
+  background: rgba(59, 130, 246, 0.2);
+  color: #bfdbfe;
+}
+
+.badge-high {
+  background: rgba(234, 179, 8, 0.25);
+  color: #fde68a;
+}
+
+.badge-urgent {
+  background: rgba(244, 63, 94, 0.25);
+  color: #fecdd3;
+}
+
+.chip {
+  display: inline-block;
+  padding: 4px 8px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 999px;
+  font-size: 11px;
+  margin-right: 6px;
+}
+
+.task-box {
+  margin-top: 12px;
+  padding: 14px 16px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px dashed rgba(255, 255, 255, 0.14);
+  text-align: left;
+  border-radius: 12px;
+  cursor: pointer;
+  font-weight: 700;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: background 0.25s ease, color 0.25s ease, border-color 0.25s ease;
+}
+
+.task-box:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.22);
+  color: #e0e0e0;
+}
+
+/* Task footer (Arşivle butonu) */
+.task-footer {
+  margin-top: 20px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.task-footer button {
+  width: 100%;
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  border-radius: 8px;
+  color: var(--text);
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.task-footer button:hover {
+  background: rgba(255, 255, 255, 0.15);
+  transform: translateY(-1px);
+}
+
+/* Dinamik görev öğeleri için modern stil */
+.task-item {
+  margin-top: 12px;
+  padding: 12px 14px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px;
+  align-items: center;
+}
+
+.task-item h4 {
+  margin: 0 0 6px 0;
+  font-size: 16px;
+  color: var(--text);
+}
+
+.task-item p {
+  margin: 2px 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+/* ===== Timer Container ===== */
+.timer-container {
+  background: var(--panel);
+  padding: 36px 28px;
+  /* İç boşluk */
+  border-radius: var(--radius);
+  width: 100%;
+  /* Sütunu doldur */
+  margin: 0;
+  /* Grid yönetir */
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.info-section {
+  margin: 28px auto 56px;
+}
+
+/* ===== Features ===== */
+.features {
+  padding: 8px 0 40px;
+}
+
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+}
+
+@media (max-width: 980px) {
+  .features-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.feature-card {
+  background: var(--panel);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius);
+  padding: 20px;
+  text-align: left;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.45);
+}
+
+.feature-icon {
+  font-size: 22px;
+  margin-bottom: 8px;
+}
+
+.feature-card h3 {
+  margin: 0 0 6px;
+  font-size: 1.1rem;
+}
+
+.feature-card p {
+  margin: 0;
+  color: var(--muted);
+}
+
+/* ===== Footer ===== */
+.site-footer {
+  padding: 24px 0;
+  margin-top: 24px;
+  border-top: none;
+}
+
+.footer-inner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.footer-brand {
+  font-weight: 900;
+}
+
+.footer-meta {
+  color: var(--muted);
+}
+
+/* ===== Bilgilendirme Slaytları ===== */
+.info-slider {
+  max-width: 950px;
+  /* Maksimum genişlik */
+  margin: 8px auto 50px;
+  /* Ortalanmış, üst-alt boşluk */
+  background: var(--panel);
+  /* Kartlarla aynı panel arka planı */
+  padding: 16px 24px;
+  /* İç boşluk */
+  border-radius: var(--radius);
+  /* Köşeleri yuvarlat */
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+  /* Kart gölgesi */
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  /* İnce border */
+  color: var(--text);
+  /* Yazı rengi */
+  font-family: 'Segoe UI', sans-serif;
+  /* Yazı tipi */
+  min-height: 300px;
+  /* Minimum yükseklik */
+  position: relative;
+  /* Konumlandırma (slayt animasyonları için) */
+  overflow: hidden;
+  /* Taşan içerikler gizlenir */
+}
+
+.info-slider .slide {
+  position: absolute;
+  /* Slaytları üst üste yerleştir */
+  width: 100%;
+  /* Slayt genişliği %100 */
+  top: 0;
+  /* Yukarı hizalama */
+  left: 0;
+  /* Sol hizalama */
+  opacity: 0;
+  /* Başlangıçta görünmez */
+  pointer-events: none;
+  /* Tıklanamaz */
+  transition: opacity 0.6s ease, transform 0.6s ease;
+  /* Opaklık ve konum değişim animasyonu */
+  transform: translateY(20px);
+  /* Hafif aşağı kaydırılmış */
+}
+
+.info-slider .slide.active {
+  opacity: 1;
+  /* Aktif slayt görünür */
+  pointer-events: auto;
+  /* Tıklanabilir */
+  position: relative;
+  /* Normal akışa döner */
+  transform: translateY(0);
+  /* Normal pozisyon */
+}
+
+/* Dahili script'in kullandığı .slide-active sınıfını da destekle */
+.info-slider .slide.slide-active {
+  opacity: 1;
+  pointer-events: auto;
+  position: relative;
+  transform: translateY(0);
+}
+
+.info-slider ul {
+  padding-left: 1.2em;
+  /* Liste madde iç boşluğu */
+  list-style: disc;
+  /* Madde işareti disk (nokta) */
+}
+
+/* ===== Animasyon Keyframes ===== */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    /* Başlangıçta saydam */
+    transform: translateY(15px);
+    /* Hafif aşağı kaydırılmış */
+  }
+
+  to {
+    opacity: 1;
+    /* Tam görünür */
+    transform: translateY(0);
+    /* Normal pozisyon */
+  }
+}
+
+/* Görev ekleme kutusu */
+.add-task {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 20px auto;
+  max-width: 500px;
+  background-color: #1f1f1f;
+  padding: 15px 20px;
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
+}
+
+/* Metin girişi */
+.add-task input[type="text"] {
+  flex-grow: 1;
+  padding: 10px 15px;
+  border: none;
+  border-radius: 10px;
+  background-color: #2e2e2e;
+  color: #d1d1d1;
+  font-size: 16px;
+  margin-right: 12px;
+}
+
+/* Ekle butonu */
+.add-task-btn {
+  padding: 10px 18px;
+  background-color: #0078d4;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 15px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.add-task-btn:hover {
+  background-color: #005a9e;
+}
+
+
+/* ===== Ayarlar Butonu (Sağ üst sabit) ===== */
+#settingsBtn {
+  font-weight: 900;
+  /* Kalın yazı */
+  position: static;
+  /* Header içinde akışta */
+  background: var(--panel-strong);
+  /* Diğerleriyle aynı arka plan */
+  border-radius: 10px;
+  /* Diğerleriyle aynı radius */
+  padding: 8px 12px;
+  /* Diğerleriyle aynı padding */
+  font-size: 15px;
+  /* Yazı boyutu */
+  color: var(--text);
+  /* Yazı rengi */
+  box-shadow: none;
+  /* Gölge yok */
+  border: none;
+  /* Kenarlık yok */
+  cursor: pointer;
+  /* Fare el simgesi */
+  z-index: 1;
+  /* Üst katmanda */
+  transition: background-color 0.3s ease, color 0.3s ease;
+  /* Yumuşak renk geçişleri */
+}
+
+#settingsBtn:hover {
+  background-color: #2f2f2f;
+  /* Üzerine gelince daha koyu arka plan */
+  color: #e0e0e0;
+  /* Yazı rengi açılır */
+}
+
+/* ===== Modal (Ayarlar penceresi) ===== */
+.modal {
+  position: fixed;
+  /* Sayfada sabit */
+  top: 0;
+  /* En üst */
+  left: 0;
+  /* En sol */
+  width: 100%;
+  /* Tam genişlik */
+  height: 100%;
+  /* Tam yükseklik */
+  background-color: rgba(0, 0, 0, 0.75);
+  /* Yarı saydam siyah arka plan */
+  z-index: 1000;
+  /* En üst katmanda */
+  display: flex;
+  /* İçeriği flex ile ortala */
+  justify-content: center;
+  /* Yatayda ortala */
+  align-items: center;
+  /* Dikeyde ortala */
+  transition: opacity 0.3s ease;
+  /* Opaklık değişim animasyonu */
+}
+
+.modal.hidden {
+  display: none;
+  /* Gizleme için */
+}
+
+/* Modal içeriği kutusu */
+.modal-content {
+  background: linear-gradient(180deg, rgba(24, 31, 40, 0.98), rgba(24, 31, 40, 0.92)) !important;
+  color: var(--text);
+  padding: 28px 28px;
+  border-radius: 20px;
+  width: 520px;
+  max-height: 90vh;
+  overflow-y: auto;
+  text-align: left;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+/* Modal içi bölümler arasındaki boşluk */
+.section {
+  margin-bottom: 20px;
+}
+
+/* Modal etiketleri */
+.modal-content label {
+  display: block;
+  margin-bottom: 10px;
+  font-weight: 700;
+  color: var(--muted);
+}
+
+/* Modal form elemanları */
+.modal-content input[type=number],
+.modal-content select,
+.modal-content input[type=range] {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  margin-bottom: 20px;
+  font-size: 16px;
+  background-color: rgba(255, 255, 255, 0.07);
+  color: var(--text);
+}
+
+/* Checkbox yanında yazı boşluğu */
+.modal-content input[type=checkbox] {
+  margin-right: 10px;
+  /* Sağda boşluk */
+  vertical-align: middle;
+  /* Orta hizalama */
+}
+
+.modal-label {
+  display: block;
+  font-size: 0.95rem;
+  margin-top: 14px;
+  margin-bottom: 6px;
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.modal-input {
+  width: 100%;
+  padding: 12px 14px;
+  font-size: 1rem;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background-color: rgba(255, 255, 255, 0.07);
+  color: var(--text);
+  outline: none;
+  transition: all 0.2s;
+}
+
+.modal-input:focus {
+  background-color: rgba(255, 255, 255, 0.12);
+  box-shadow: 0 0 0 2px var(--primary);
+}
+
+.pomodoro-control {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.pomodoro-input {
+  width: 60px;
+  text-align: center;
+  background-color: #2a2a2a;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  padding: 8px;
+  font-size: 1rem;
+}
+
+.pomodoro-btn {
+  background: linear-gradient(135deg, var(--primary), var(--primary-strong));
+  color: white;
+  border: none;
+  font-size: 1.1rem;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: transform 0.1s ease, box-shadow 0.3s ease;
+  box-shadow: 0 8px 18px rgba(77, 163, 255, 0.3);
+}
+
+.pomodoro-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 12px 24px rgba(77, 163, 255, 0.4);
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 24px;
+}
+
+.btn {
+  padding: 12px 16px;
+  font-size: 1rem;
+  border-radius: 12px;
+  border: none;
+  cursor: pointer;
+}
+
+.btn.cancel {
+  background-color: rgba(255, 255, 255, 0.12);
+  color: var(--text);
+}
+
+.btn.cancel:hover {
+  background-color: rgba(255, 255, 255, 0.18);
+}
+
+.btn.save {
+  background: linear-gradient(135deg, var(--primary), var(--primary-strong));
+  color: white;
+}
+
+.btn.save:hover {
+  filter: brightness(1.05);
+}
+
+/* ===== Genel Buton Stili ===== */
+button {
+  cursor: pointer;
+  /* Fare el simgesi */
+  background-color: #0078d4;
+  /* Mavi arka plan */
+  border: none;
+  /* Kenarlık yok */
+  color: white;
+  /* Beyaz yazı */
+  font-weight: 700;
+  /* Kalın yazı */
+  padding: 10px 20px;
+  /* İç boşluk */
+  border-radius: 12px;
+  /* Yuvarlak köşeler */
+  transition: background-color 0.3s ease;
+  /* Renk geçiş animasyonu */
+}
+
+/* Butonların hover efekti */
+#settingsBtn:hover,
+.start-btn:hover,
+button:hover {
+  background-color: #005a9e;
+  /* Daha koyu mavi arka plan */
+}
+
+/* Aktif mod butonu stili */
+.mode.active {
+  background-color: #0078d4;
+  /* Mavi arka plan */
+  color: white;
+  /* Beyaz yazı */
+}
+
+
+/* Kapat Butonu */
+#closeSettings {
+  background: #3a3a3a;
+  /* Koyu gri arka plan */
+  margin-top: 10px;
+  /* Üst boşluk */
+  width: 100%;
+  /* Tam genişlik */
+  padding: 12px;
+  /* İç boşluk */
+  border: none;
+  /* Kenarlık yok */
+  border-radius: 12px;
+  /* Köşeleri yuvarlat */
+  color: #d1d1d1;
+  /* Açık gri yazı */
+  cursor: pointer;
+  /* Fare el simgesi */
+  font-weight: 700;
+  /* Kalın yazı */
+  box-shadow: none;
+  /* Gölge yok */
+  transition: background-color 0.3s ease;
+  /* Geçiş animasyonu */
+}
+
+#closeSettings:hover {
+  background-color: #545454;
+  /* Hoverda koyu gri arka plan */
+}
+
+/* ===== Yardımcı Gizleme Sınıfı ===== */
+.hidden {
+  display: none !important;
+}
+
+/* Küçük ekranlarda zamanlayıcı boyutu */
+@media (max-width: 480px) {
+  #timer {
+    font-size: 4rem;
+  }
+}
+
+/* Sağ kolon kısa bilgi kartı */
+.right-column .info-card {
+  background: rgba(44, 44, 44, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  padding: 18px 20px;
+  margin: 24px 0 12px;
+  text-align: left;
+}
+
+/* ===== Floating Mini Player ===== */
+#floatingMini {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  width: 280px;
+  background: linear-gradient(145deg, rgba(15, 20, 30, 0.95), rgba(10, 15, 25, 0.98));
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 24px;
+  padding: 20px;
+  box-shadow:
+    0 25px 50px rgba(0, 0, 0, 0.5),
+    0 0 100px rgba(var(--primary-rgb), 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  z-index: 9999;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  cursor: move;
+  overflow: hidden;
+}
+
+/* Animated glow ring */
+#floatingMini::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  background: linear-gradient(45deg, var(--primary), transparent, var(--primary));
+  border-radius: 26px;
+  z-index: -1;
+  opacity: 0.3;
+  animation: glowPulse 3s ease-in-out infinite;
+}
+
+@keyframes glowPulse {
+
+  0%,
+  100% {
+    opacity: 0.2;
+  }
+
+  50% {
+    opacity: 0.4;
+  }
+}
+
+.floating-mini-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.floating-mini-header #floatingTitle {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--muted);
+}
+
+.floating-mini-header button {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 0.85rem;
+  padding: 6px 10px;
+  border-radius: 8px;
+  transition: all 0.2s;
+}
+
+.floating-mini-header button:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.floating-mini-content {
+  text-align: center;
+  margin-bottom: 20px;
+  padding: 16px 0;
+}
+
+.floating-time {
+  font-size: 3.5rem;
+  font-weight: 800;
+  color: #ffffff;
+  font-family: 'Inter', -apple-system, sans-serif;
+  letter-spacing: -2px;
+  line-height: 1;
+  text-shadow: 0 0 40px rgba(var(--primary-rgb), 0.5);
+}
+
+.floating-mode {
+  font-size: 0.8rem;
+  color: var(--primary);
+  margin-top: 8px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+.floating-mini-buttons {
+  display: flex;
+  gap: 10px;
+}
+
+.floating-mini-buttons button {
+  flex: 1;
+  padding: 14px 16px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  color: var(--text);
+  cursor: pointer;
+  font-size: 1.1rem;
+  font-weight: 600;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.floating-mini-buttons button:hover {
+  background: rgba(255, 255, 255, 0.1);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+}
+
+.floating-mini-buttons button:active {
+  transform: translateY(0);
+}
+
+#floatingPlayPause {
+  background: linear-gradient(135deg, var(--primary), var(--primary-strong));
+  border: none;
+  color: white;
+  box-shadow: 0 4px 20px rgba(var(--primary-rgb), 0.4);
+}
+
+#floatingPlayPause:hover {
+  background: linear-gradient(135deg, var(--primary-strong), var(--primary));
+  box-shadow: 0 8px 30px rgba(var(--primary-rgb), 0.5);
+  transform: translateY(-2px) scale(1.02);
+}
+
+#floatingClose {
+  background: rgba(255, 70, 90, 0.1);
+  border-color: rgba(255, 70, 90, 0.2);
+  color: #ff4d6d;
+  flex: 0.4;
+}
+
+#floatingClose:hover {
+  background: rgba(255, 70, 90, 0.2);
+  border-color: rgba(255, 70, 90, 0.3);
+}
+
+/* ===== Zen Mode ===== */
+body.zen-mode .left-panel,
+body.zen-mode .right-panel,
+body.zen-mode .top-buttons,
+body.zen-mode .tasks-section,
+body.zen-mode .site-footer {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.5s ease;
+}
+
+body.zen-mode .timer-container {
+  transform: scale(1.1);
+  transition: transform 0.5s ease;
+}

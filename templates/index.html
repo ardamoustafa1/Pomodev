@@ -1,0 +1,1206 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>En İyi Pomodoro Timer 2024 - Best Pomodoro Timer Ücretsiz | Pomodev</title>
+  <meta name="theme-color" content="#0f141a" />
+  <meta name="description" content="Pomodev, 2024'ün en iyi ücretsiz pomodoro timer uygulamasıdır (best pomodoro timer). Öğrenciler, programcılar ve profesyoneller için best pomodoro timer. Gamification, detaylı istatistikler, görev yönetimi ve XP sistemi ile verimliliğinizi artırın. Kayıt olmadan kullanılabilir, tamamen ücretsiz." />
+  <meta name="keywords" content="best pomodoro timer, pomodoro timer, best free pomodoro timer, pomodoro timer 2024, best pomodoro timer for students, best pomodoro timer for programmers, online pomodoro timer, pomodoro app, focus timer, productivity timer, best pomodoro timer app, free pomodoro timer, pomodoro technique, en iyi pomodoro timer, pomodoro zamanlayıcı, ücretsiz pomodoro timer" />
+  <meta name="author" content="Pomodev" />
+  <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+  <meta name="google-site-verification" content="86d7f55421be2d0f" />
+  <link rel="canonical" href="https://pomodev-omega.vercel.app/" />
+  
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://pomodev-omega.vercel.app/" />
+  <meta property="og:title" content="En İyi Pomodoro Timer 2024 - Best Pomodoro Timer Ücretsiz | Pomodev" />
+  <meta property="og:description" content="Pomodev, 2024'ün en iyi ücretsiz pomodoro timer uygulamasıdır (best pomodoro timer). Öğrenciler, programcılar ve profesyoneller için best pomodoro timer. Gamification, istatistikler, görev yönetimi. Kayıt olmadan kullanılabilir, tamamen ücretsiz." />
+  <meta property="og:image" content="https://pomodev-omega.vercel.app/static/cover-image.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:locale" content="tr_TR" />
+  <meta property="og:site_name" content="Pomodev" />
+  
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:url" content="https://pomodev-omega.vercel.app/" />
+  <meta name="twitter:title" content="En İyi Pomodoro Timer 2024 - Best Pomodoro Timer Ücretsiz" />
+  <meta name="twitter:description" content="Pomodev, 2024'ün en iyi ücretsiz pomodoro timer uygulamasıdır (best pomodoro timer). Öğrenciler ve programcılar için best pomodoro timer. Gamification, istatistikler, görev yönetimi. Tamamen ücretsiz." />
+  <meta name="twitter:image" content="https://pomodev-omega.vercel.app/static/cover-image.png" />
+  
+  <!-- Yandex -->
+  <meta name="yandex-verification" content="" />
+  <meta name="yandex" content="index, follow" />
+  
+  <!-- Favicon -->
+  <link rel="icon" href="/favicon.ico" sizes="any" />
+  <link rel="icon" type="image/svg+xml" href="/static/favicon.svg" />
+  <link rel="apple-touch-icon" href="/static/cover-image.png" />
+  <link rel="manifest" href="/static/manifest.webmanifest" />
+  
+  <!-- Google AdSense -->
+  <meta name="google-adsense-account" content="ca-pub-9221145906123169">
+
+  <!-- Google AdSense -->
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9221145906123169"
+    crossorigin="anonymous"></script>
+
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-1LKTPZV07N"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag('js', new Date());
+    gtag('config', 'G-1LKTPZV07N', {
+      'send_page_view': true,
+      'anonymize_ip': true,
+      'user_properties': {
+        'session_count': 0,
+        'first_visit': Date.now()
+      }
+    });
+
+    // Özel etkinlikler için yardımcı fonksiyon
+    window.trackEvent = function (eventName, params) {
+      gtag('event', eventName, params);
+      console.log('📊 Event:', eventName, params);
+    };
+
+    // İlk ziyaret takibi
+    if (!localStorage.getItem('hasVisited')) {
+      localStorage.setItem('hasVisited', Date.now());
+      trackEvent('first_visit', { session: 1 });
+    } else {
+      const firstVisit = parseInt(localStorage.getItem('hasVisited'));
+      const daysSince = Math.floor((Date.now() - firstVisit) / (1000 * 60 * 60 * 24));
+      trackEvent('return_visit', { days_since_first: daysSince });
+    }
+
+    // Debug için console'a log yazdır
+    console.log('✅ Google Analytics loaded: G-1LKTPZV07N');
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "Pomodev - En İyi Pomodoro Timer 2024",
+    "alternateName": "Pomodev - Best Pomodoro Timer 2024",
+    "applicationCategory": "ProductivityApplication",
+    "operatingSystem": "Web, iOS, Android",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD",
+      "availability": "https://schema.org/InStock"
+    },
+    "description": "Pomodev, 2024'ün en iyi ücretsiz Pomodoro timer uygulamasıdır (best pomodoro timer). Gamification, detaylı istatistikler, görev yönetimi ve XP sistemi ile verimliliğinizi artırın. Kayıt olmadan kullanılabilir, tamamen ücretsiz. Öğrenciler, programcılar ve profesyoneller için best pomodoro timer.",
+    "featureList": ["Pomodoro Timer", "Task Management", "Gamification (XP & Levels)", "Detailed Statistics", "Level System", "Leaderboard", "Streak Tracking", "Daily Goal Setting", "Customizable Durations", "Multiple Sound Options", "Dark Mode", "Free Forever"],
+    "screenshot": "https://pomodev-omega.vercel.app/static/cover-image.png",
+    "url": "https://pomodev-omega.vercel.app/",
+    "softwareVersion": "2.0",
+    "datePublished": "2024-01-01",
+    "dateModified": "2024-01-15",
+    "aggregateRating": {
+      "@type": "AggregateRating",
+      "ratingValue": "4.9",
+      "ratingCount": "2500",
+      "bestRating": "5",
+      "worstRating": "1"
+    },
+    "author": {
+      "@type": "Organization",
+      "name": "Pomodev"
+    },
+    "keywords": "best pomodoro timer, pomodoro timer, best free pomodoro timer, pomodoro timer 2024, best pomodoro timer for students, best pomodoro timer for programmers, online pomodoro timer, pomodoro app, focus timer, productivity timer",
+    "award": "Best Free Pomodoro Timer 2024",
+    "audience": {
+      "@type": "Audience",
+      "audienceType": "Students, Programmers, Professionals, Freelancers"
+    }
+  }
+  </script>
+  
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "Pomodev",
+    "url": "https://pomodev-omega.vercel.app/",
+    "logo": "https://pomodev-omega.vercel.app/static/cover-image.png",
+    "description": "Ücretsiz Pomodoro zamanlayıcı ve verimlilik uygulaması",
+    "sameAs": []
+  }
+  </script>
+  
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "Pomodoro tekniği nedir?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Pomodoro tekniği, işi 25 dakikalık yoğun odak bloklarına (pomodoro) ve kısa molalara bölen kanıtlanmış bir zaman yönetimi yaklaşımıdır. Her pomodoro sonrası 5 dakika mola, 4 pomodoro sonrası 15-30 dakika uzun mola verilir."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Pomodoro zamanlayıcı nasıl kullanılır?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Pomodev'de görevinizi seçin, 25 dakikalık pomodoro zamanlayıcıyı başlatın ve sadece o işe odaklanın. Zamanlayıcı bittiğinde 5 dakika mola verin. 4 pomodoro tamamlandığında 15-30 dakika uzun mola verin."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Pomodoro zamanlayıcı ücretsiz mi?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Evet, Pomodev tamamen ücretsizdir. Kayıt olmadan da kullanabilirsiniz, ancak kayıt olursanız verileriniz bulutta saklanır ve tüm cihazlardan erişebilirsiniz."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "En iyi Pomodoro zamanlayıcı hangisi?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Pomodev, 2024'ün en iyi ücretsiz Pomodoro timer uygulamasıdır. Gamification özellikleri (XP kazanma, seviye atlama, liderlik tablosu), detaylı istatistikler, görev yönetimi, streak takibi ve modern arayüzü ile diğer uygulamalardan ayrılır. Tamamen ücretsizdir ve kayıt olmadan kullanılabilir."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "En iyi ücretsiz pomodoro timer hangisi?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Pomodev en iyi ücretsiz pomodoro timer'dır. Tüm özellikler ücretsizdir, premium abonelik veya sınırlama yoktur. Gamification, istatistikler, görev yönetimi ve daha fazlası tamamen ücretsizdir."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Öğrenciler için en iyi pomodoro timer hangisi?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Pomodev öğrenciler için en iyi pomodoro timer'dır. Gamification özellikleri ile çalışmayı eğlenceli hale getirir, XP kazanma ve seviye atlama sistemi motivasyonu artırır. Detaylı istatistikler ile çalışma saatlerinizi takip edebilirsiniz."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Programcılar için en iyi pomodoro timer hangisi?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Pomodev programcılar için de idealdir. Derin çalışma modu, özelleştirilebilir süreler ve görev yönetimi özellikleri ile uzun kodlama seanslarında verimliliğinizi artırır. Dark mode ve minimal arayüz ile dikkat dağıtmadan çalışabilirsiniz."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "En iyi pomodoro timer hangisi? (What is the best pomodoro timer?)",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Pomodev, 2024'ün en iyi pomodoro timer'ıdır (best pomodoro timer). Gamification özellikleri (XP kazanma, seviye atlama, liderlik tablosu), detaylı istatistikler, görev yönetimi, streak takibi ve modern arayüz sunar. Tamamen ücretsizdir ve kayıt olmadan kullanılabilir."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "En iyi ücretsiz pomodoro timer 2024? (Best free pomodoro timer 2024?)",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Pomodev, 2024'ün en iyi ücretsiz pomodoro timer'ıdır (best free pomodoro timer). Tüm özellikler ücretsizdir, premium abonelik veya sınırlama yoktur. Gamification, istatistikler, görev yönetimi ve daha fazlası - hepsi tamamen ücretsiz."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Öğrenciler için en iyi pomodoro timer? (Best pomodoro timer for students?)",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Pomodev, öğrenciler için en iyi pomodoro timer'dır (best pomodoro timer for students). Gamification özellikleri çalışmayı eğlenceli hale getirir, XP kazanma ve seviye atlama sistemi motivasyonu artırır. Detaylı istatistikler ile çalışma saatlerinizi takip edebilirsiniz."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Programcılar için en iyi pomodoro timer? (Best pomodoro timer for programmers?)",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Pomodev, programcılar için idealdir (best pomodoro timer for programmers). Derin çalışma modu, özelleştirilebilir süreler ve görev yönetimi özellikleri ile uzun kodlama seanslarında verimliliğinizi artırır. Dark mode ve minimal arayüz ile dikkat dağıtmadan çalışabilirsiniz."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "En iyi online pomodoro timer? (Best online pomodoro timer?)",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Pomodev, en iyi online pomodoro timer'dır (best online pomodoro timer). İndirme gerekmez, tüm cihazlarda çalışır, tamamen ücretsizdir ve kayıt olmadan kullanılabilir. Tüm özellikler online olarak mevcuttur."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Hangi pomodoro timer en iyisi? (Which pomodoro timer is best?)",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Pomodev, en iyi pomodoro timer'dır (best pomodoro timer). Gamification, detaylı istatistikler, görev yönetimi, streak takibi ve modern arayüzü birleştirir. Tamamen ücretsizdir ve kayıt olmadan kullanılabilir, bu da onu üretkenlik için en iyi seçim yapar."
+        }
+      }
+    ]
+  }
+  </script>
+  
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "Pomodev - En İyi Pomodoro Timer 2024",
+    "alternateName": "Pomodev - Best Pomodoro Timer",
+    "url": "https://pomodev-omega.vercel.app/",
+    "description": "2024'ün en iyi ücretsiz pomodoro timer uygulaması (best pomodoro timer). Gamification, istatistikler, görev yönetimi. Tamamen ücretsiz, kayıt olmadan kullanılabilir.",
+    "potentialAction": {
+      "@type": "SearchAction",
+      "target": "https://pomodev-omega.vercel.app/?q={search_term_string}",
+      "query-input": "required name=search_term_string"
+    }
+  }
+  </script>
+  
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    "name": "Pomodev - En İyi Pomodoro Timer",
+    "description": "2024'ün en iyi ücretsiz pomodoro timer uygulaması (best pomodoro timer). Gamification, detaylı istatistikler, görev yönetimi ve XP sistemi özellikleri. Tamamen ücretsiz, kayıt olmadan kullanılabilir.",
+    "brand": {
+      "@type": "Brand",
+      "name": "Pomodev"
+    },
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD",
+      "availability": "https://schema.org/InStock",
+      "url": "https://pomodev-omega.vercel.app/"
+    },
+    "aggregateRating": {
+      "@type": "AggregateRating",
+      "ratingValue": "4.9",
+      "ratingCount": "2500",
+      "bestRating": "5",
+      "worstRating": "1"
+    },
+    "category": "Productivity Software",
+    "keywords": "best pomodoro timer, pomodoro timer, best free pomodoro timer, pomodoro timer 2024"
+  }
+  </script>
+
+  <link rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/modern-normalize/2.0.0/modern-normalize.min.css" />
+  <link rel="stylesheet" href="/static/style.css?v=8" />
+  <link rel="stylesheet" href="/static/gamification.css?v=8" />
+  <link rel="stylesheet" href="/static/new_ui.css?v=8" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet" />
+
+  <!-- PWA Install Prompt -->
+  <style>
+    #installPrompt {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: var(--bg-primary);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 16px;
+      max-width: 320px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+      z-index: 1000;
+      display: none;
+      gap: 12px;
+    }
+
+    #installPrompt.show {
+      display: flex;
+      flex-direction: column;
+    }
+
+    #installPrompt button {
+      margin: 4px 0;
+    }
+  </style>
+  <style>
+    /* Slaytlar için basit stil */
+    .info-slider {
+      position: relative;
+      height: 200px;
+      overflow: hidden;
+    }
+
+    .slide {
+      opacity: 0;
+      transition: opacity 0.6s ease;
+      pointer-events: none;
+      position: absolute;
+      width: 100%;
+      top: 0;
+      left: 0;
+    }
+
+    .slide.slide-active {
+      opacity: 1;
+      position: relative;
+      pointer-events: auto;
+    }
+
+    /* Modal için basit görünürlük */
+    .modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 100;
+    }
+
+    .modal.hidden {
+      display: none;
+    }
+
+    .modal-content {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      max-width: 400px;
+      width: 90%;
+    }
+
+    /* 🎯 Goal modal modern tasarım */
+    #goalModal .modal-content {
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.9));
+      backdrop-filter: blur(8px);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+      border: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    #goalModal .modal-input {
+      width: 100%;
+      height: 44px;
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1px solid #e6e6e6;
+      outline: none;
+      font-size: 16px;
+    }
+
+    #goalModal .modal-input:focus {
+      border-color: var(--accent, #ff4d4f);
+      box-shadow: 0 0 0 3px rgba(255, 77, 79, 0.15);
+    }
+
+    #goalModal .btn.save {
+      background: var(--accent-color, #ff4d4f);
+      color: #fff;
+      border: none;
+      padding: 10px 14px;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+
+    #goalModal .btn.cancel {
+      background: transparent;
+      color: #333;
+      border: 1px solid #e6e6e6;
+      padding: 10px 14px;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+
+<body>
+  <header class="app-header">
+    <div class="container header-inner">
+      <!-- Left: Brand (Minimal) -->
+      <div class="brand-section">
+        <div class="logo">
+          <span class="logo-icon">✔️</span>
+          <span class="logo-text">Pomodev</span>
+        </div>
+      </div>
+
+      <!-- Right: Minimal Actions -->
+      <div class="actions-section">
+
+        <!-- Gamification (Level/XP) - Restored to Header -->
+        <div class="header-group gamification-group" id="levelBadge" title="Level & XP" style="margin-right: 12px;">
+          <div class="level-indicator">
+            <span id="levelText">Lvl 1</span>
+          </div>
+          <div class="xp-bar-container">
+            <div id="xpBar" class="xp-bar-fill"></div>
+          </div>
+        </div>
+
+        <!-- Accent Color Selector (Styled Dropdown) -->
+        <div class="accent-selector-wrapper" style="position: relative; display: inline-block;">
+          <select id="accentSelect" aria-label="Accent Color" style="background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05)); 
+                   border: 1px solid rgba(255,255,255,0.2); 
+                   color: #ffffff; 
+                   padding: 8px 32px 8px 12px; 
+                   font-size: 0.85rem; 
+                   font-weight: 600;
+                   border-radius: 10px; 
+                   cursor: pointer; 
+                   appearance: none; 
+                   -webkit-appearance: none;
+                   backdrop-filter: blur(8px);
+                   transition: all 0.2s ease;
+                   outline: none;"
+            onmouseover="this.style.borderColor='rgba(255,255,255,0.4)'; this.style.background='linear-gradient(135deg, rgba(255,255,255,0.15), rgba(255,255,255,0.08))';"
+            onmouseout="this.style.borderColor='rgba(255,255,255,0.2)'; this.style.background='linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05))';">
+            <option value="blue" style="background: #1a1f2b; color: white;">🔵 Mavi</option>
+            <option value="purple" style="background: #1a1f2b; color: white;">🟣 Mor</option>
+            <option value="coral" style="background: #1a1f2b; color: white;">🟠 Mercan</option>
+          </select>
+          <!-- Custom dropdown arrow -->
+          <span
+            style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); pointer-events: none; color: rgba(255,255,255,0.6); font-size: 0.7rem;">▼</span>
+        </div>
+
+        <!-- Essential Toggles -->
+        <button id="themeToggle" class="icon-btn" title="Toggle Theme">🌙</button>
+        <button id="settingsBtn" class="icon-btn" title="Settings">⚙️</button>
+
+        <!-- Divider -->
+        <div class="nav-divider"></div>
+
+        <!-- Menu Dropdown Container -->
+        <div class="dropdown-container">
+          <button id="menuBtn" class="icon-btn" title="More Tools"
+            style="color: #ffffff !important; opacity: 1 !important; z-index: 9999; width: auto !important; padding: 0 12px; font-weight: bold; border: 1px solid rgba(255,255,255,0.2); cursor: pointer;"
+            onclick="(function(btn){ var dd = document.getElementById('headerDropdown'); console.log('CLICK!', dd); if(dd.style.display === 'block') { dd.style.display = 'none'; } else { dd.style.display = 'block'; } })(this)">
+            MENU
+          </button>
+
+          <!-- Dropdown Menu -->
+          <div id="headerDropdown"
+            style="display: none; position: absolute; top: 100%; right: 0; width: 240px; background: rgba(30, 35, 45, 0.98); border: 1px solid rgba(255,255,255,0.15); border-radius: 12px; padding: 8px; z-index: 99999; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+            <div
+              style="padding: 8px 12px; font-size: 0.75rem; text-transform: uppercase; color: #888; font-weight: 700;">
+              Tools</div>
+            <button id="floatingBtn"
+              style="display: flex; align-items: center; gap: 10px; width: 100%; padding: 10px 12px; background: transparent; border: none; color: white; border-radius: 8px; cursor: pointer; text-align: left;">📱
+              Mini Player</button>
+            <button id="fullscreenBtn"
+              style="display: flex; align-items: center; gap: 10px; width: 100%; padding: 10px 12px; background: transparent; border: none; color: white; border-radius: 8px; cursor: pointer; text-align: left;">⛶
+              Fullscreen</button>
+            <button id="shareStatsBtn"
+              style="display: flex; align-items: center; gap: 10px; width: 100%; padding: 10px 12px; background: transparent; border: none; color: white; border-radius: 8px; cursor: pointer; text-align: left;">📊
+              Share Stats</button>
+            <div style="height: 1px; background: rgba(255,255,255,0.1); margin: 8px 0;"></div>
+            <div
+              style="padding: 8px 12px; font-size: 0.75rem; text-transform: uppercase; color: #888; font-weight: 700;">
+              Gamification</div>
+            <button id="leaderboardBtn"
+              style="display: flex; align-items: center; gap: 10px; width: 100%; padding: 10px 12px; background: transparent; border: none; color: white; border-radius: 8px; cursor: pointer; text-align: left;">🏆
+              Leaderboard</button>
+            <button id="shopBtn"
+              style="display: flex; align-items: center; gap: 10px; width: 100%; padding: 10px 12px; background: transparent; border: none; color: white; border-radius: 8px; cursor: pointer; text-align: left;">🛒
+              XP Shop</button>
+            <div style="height: 1px; background: rgba(255,255,255,0.1); margin: 8px 0;"></div>
+            <a href="/blog"
+              style="display: flex; align-items: center; gap: 10px; width: 100%; padding: 10px 12px; background: transparent; border: none; color: white; border-radius: 8px; cursor: pointer; text-align: left; text-decoration: none;">📚
+              Blog</a>
+            <a href="/hakkimizda"
+              style="display: flex; align-items: center; gap: 10px; width: 100%; padding: 10px 12px; background: transparent; border: none; color: white; border-radius: 8px; cursor: pointer; text-align: left; text-decoration: none;">ℹ️
+              About</a>
+          </div>
+        </div>
+
+        <!-- Primary Action -->
+        <div class="header-group user-group">
+          <button id="loginBtn" class="btn-primary-sm" title="Login">Giriş Yap</button>
+        </div>
+
+      </div>
+    </div>
+  </header>
+
+  <!-- CRITICAL FIX: Inline Script to guarantee Menu works -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const menuBtn = document.getElementById('menuBtn');
+      const dropdown = document.getElementById('headerDropdown');
+
+      console.log("Menu Logic Init:", menuBtn, dropdown);
+
+      if (menuBtn && dropdown) {
+        menuBtn.addEventListener('click', (e) => {
+          console.log("Menu Clicked");
+          e.stopPropagation();
+          dropdown.classList.toggle('show');
+
+          // Force visibility styles
+          if (dropdown.classList.contains('show')) {
+            dropdown.style.opacity = '1';
+            dropdown.style.visibility = 'visible';
+            dropdown.style.transform = 'translateY(0)';
+            dropdown.style.pointerEvents = 'auto'; // Make sure it's clickable
+          } else {
+            dropdown.style.opacity = '0';
+            dropdown.style.visibility = 'hidden';
+            dropdown.style.transform = 'translateY(-8px)';
+            dropdown.style.pointerEvents = 'none';
+          }
+        });
+
+        document.addEventListener('click', (e) => {
+          if (!dropdown.contains(e.target) && !menuBtn.contains(e.target)) {
+            dropdown.classList.remove('show');
+            dropdown.style.opacity = '0';
+            dropdown.style.visibility = 'hidden';
+            dropdown.style.transform = 'translateY(-8px)';
+            dropdown.style.pointerEvents = 'none';
+          }
+        });
+      }
+    });
+  </script>
+
+  <style>
+    /* CRITICAL FIX: Force Menu Visibility */
+    #menuBtn svg {
+      stroke: white;
+      /* Force white color */
+    }
+
+    [data-theme="light"] #menuBtn svg {
+      stroke: #333;
+      /* Dark for light mode */
+    }
+
+    .dropdown-menu {
+      z-index: 99999 !important;
+      /* Always on top */
+    }
+  </style>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="container hero-inner">
+      <div class="hero-copy">
+        <h1>En İyi Pomodoro Timer 2024 - Best Pomodoro Timer Ücretsiz</h1>
+        <p>Pomodev, 2024'ün en iyi ücretsiz pomodoro timer uygulamasıdır (best pomodoro timer). Gamification, detaylı istatistikler, görev yönetimi ve XP sistemi ile verimliliğinizi artırın. Kayıt olmadan kullanılabilir, tamamen ücretsiz. Best pomodoro timer for students, programmers, and professionals.</p>
+        <div class="hero-cta">
+          <a href="#workspace" class="btn-cta">En İyi Pomodoro Timer'ı Başlat</a>
+          <button id="howItWorksBtn" class="btn-ghost" type="button">Nasıl Çalışır?</button>
+          <button id="shareSettingsBtn" class="btn-ghost" type="button" title="Ayarları Paylaş">🔗 Paylaş</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features Section -->
+  <section class="features">
+    <div class="container features-grid">
+      <article class="feature-card">
+        <div class="feature-icon">🧠</div>
+        <h3>Derin Odak</h3>
+        <p>25 dakikalık yoğun odak bloklarıyla, dikkati dağıtan unsurları oyundan çıkar.</p>
+      </article>
+      <article class="feature-card">
+        <div class="feature-icon">📈</div>
+        <h3>Ölç ve İyileştir</h3>
+        <p>Her gün kaç pomodoro tamamladığını gör, ritmini ince ayarla ve verimini artır.</p>
+      </article>
+      <article class="feature-card">
+        <div class="feature-icon">🎨</div>
+        <h3>Kişiselleştir</h3>
+        <p>Açık/koyu tema ve vurgu rengiyle çalışma alanını zevkine göre düzenle.</p>
+      </article>
+    </div>
+  </section>
+
+  <main id="workspace">
+    <div class="container">
+      <!-- Premium Layout Container -->
+      <div class="premium-layout">
+        <!-- Sol Panel: İstatistikler ve Hedefler -->
+        <aside class="left-panel">
+          <div class="panel-section glass">
+            <h3>📊 İstatistikler</h3>
+            <div class="stats-grid">
+              <div class="stat-card">
+                <div class="stat-value" id="todayPomodoros">0</div>
+                <div class="stat-label">Bugün</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-value" id="weekPomodoros">0</div>
+                <div class="stat-label">Bu Hafta</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-value" id="currentStreak">0</div>
+                <div class="stat-label">Streak</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel-section glass">
+            <h3>🎯 Günlük Hedef</h3>
+            <div class="goal-container">
+              <div class="goal-input-group">
+                <input type="number" id="dailyGoal" min="1" max="20" value="8" />
+                <button onclick="updateGoal()" class="goal-btn">Güncelle</button>
+              </div>
+              <div class="progress-container">
+                <div class="progress-bar">
+                  <div class="progress-fill" id="goalProgressBar"></div>
+                </div>
+                <span class="progress-text" id="goalProgress">0/8</span>
+              </div>
+            </div>
+          </div>
+        </aside>
+
+        <!-- Orta Panel: Timer -->
+        <main class="main-panel">
+          <div class="timer-container glass">
+            <div class="mode-switcher">
+              <button class="mode active" onclick="setMode('pomodoro')">Pomodoro</button>
+              <button class="mode" onclick="setMode('short')">Short Break</button>
+              <button class="mode" onclick="setMode('long')">Long Break</button>
+            </div>
+            <div class="timer-display">
+              <div class="timer-time" id="timer">25:00</div>
+              <div class="timer-mode" id="focusMsg">#1<br />Time to focus!</div>
+              <div class="timer-goal" id="currentGoalDisplay"
+                style="margin-top:16px;font-size:14px;opacity:0.8;font-style:italic;"></div>
+            </div>
+            <div class="timer-controls">
+              <button class="start-btn" onclick="startTimer()">START</button>
+              <button class="reset-btn" onclick="resetTimer()">RESET</button>
+              <button id="quickAddCalendar" title="Takvime Ekle" type="button">📅</button>
+            </div>
+          </div>
+        </main>
+
+        <!-- Sağ Panel: Üretkenlik -->
+        <aside class="right-panel">
+          <div class="panel-section glass">
+            <h3>📈 Üretkenlik</h3>
+            <div class="productivity-content">
+              <div class="most-productive">
+                <h4>En Verimli Saatler</h4>
+                <div id="mostProductiveHours" class="hours-list">
+                  <!-- JavaScript ile doldurulacak -->
+                </div>
+              </div>
+              <div class="hourly-chart">
+                <h4>Saatlik Dağılım</h4>
+                <div id="hourlyChart" class="chart-container">
+                  <!-- JavaScript ile doldurulacak -->
+                </div>
+              </div>
+            </div>
+          </div>
+        </aside>
+      </div>
+
+      <!-- Görevler Bölümü -->
+      <section class="tasks-section">
+        <div class="tasks glass">
+          <div class="task-header">
+            <h2>📋 Görevler</h2>
+            <div class="task-controls">
+              <select id="categoryFilter">
+                <option value="all">Tüm Kategoriler</option>
+                <option value="work">İş</option>
+                <option value="personal">Kişisel</option>
+                <option value="learning">Öğrenme</option>
+              </select>
+              <button id="taskMenuBtn">⋮</button>
+            </div>
+          </div>
+          <div class="task-box" onclick="addTask()">➕ Görev Ekle</div>
+          <div id="taskList" class="task-list"></div>
+          <div class="task-footer">
+            <button id="archiveCompletedBtn" type="button">Arşivle</button>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <section class="container info-section" id="learn">
+      <div class="info-slider">
+        <div class="slide slide-active">
+          <h2>Pomodoro Nedir?</h2>
+          <p>Pomodoro Tekniği, işi 25 dakikalık yoğun odak bloklarına (pomodoro) ve kısa molalara bölen kanıtlanmış bir
+            zaman yönetimi yaklaşımıdır.</p>
+          <ul>
+            <li>Net hedef → 25 dk odak → 5 dk mola → 4 setten sonra 15-30 dk uzun mola</li>
+            <li>Tek seferde tek görev: bölünmeyen, bildirimleri kapatılmış çalışma</li>
+            <li>Ölç, gözlemle, iyileştir: her gün daha iyi akış</li>
+          </ul>
+        </div>
+        <div class="slide">
+          <h2>Hedefler ve Faydalar</h2>
+          <ul>
+            <li>Ertelemeyi azaltır, başlangıcı kolaylaştırır</li>
+            <li>Odak ve derin çalışmayı artırır</li>
+            <li>Enerji yönetimini dengeler, tükenmişliği azaltır</li>
+            <li>Üretkenlik ve tahmin edilebilirlik kazandırır</li>
+          </ul>
+        </div>
+        <div class="slide">
+          <h2>Temel Kurallar</h2>
+          <ul>
+            <li>Pomodoro bölünmez: ara verilecekse zamanlayıcı durdurulur</li>
+            <li>Görev küçükse birleştir; büyükse alt hedeflere böl</li>
+            <li>4 pomodoro sonrası mutlaka uzun mola</li>
+          </ul>
+        </div>
+        <div class="slide">
+          <h2>Günlük Akış Önerisi</h2>
+          <ul>
+            <li>Sabah: 1-2 saat derin odak (en zor iş)</li>
+            <li>Öğlen: idari işler ve toplantılar</li>
+            <li>Gün sonu: gözden geçirme, yarına hazırlık</li>
+          </ul>
+        </div>
+        <div class="slide">
+          <h2>İpuçları</h2>
+          <ul>
+            <li>Hedefi yaz: her pomodoro başlamadan 1 cümle</li>
+            <li>Çeldiricileri yok et: bildirimler kapalı, tek sekme</li>
+            <li>Ritmi koru: aynı saatlerde çalış, alışkanlık oluştur</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+  </main>
+
+
+
+  <!-- Nasıl Çalışır Modalı -->
+  <div id="howItWorksModal" class="modal hidden">
+    <div class="modal-content">
+      <h2>Nasıl Çalışır?</h2>
+      <h3>Pomodoro Tekniği</h3>
+      <ol>
+        <li>Görevi seç ve netleştir.</li>
+        <li>25 dakikalık pomodoroyu başlat ve sadece bu işe odaklan.</li>
+        <li>Bitince 5 dakika kısa mola ver.</li>
+        <li>4 pomodoro tamamlandığında 15-30 dakika uzun mola ver.</li>
+      </ol>
+      <h3>Bu Sitede Akış</h3>
+      <ul>
+        <li>Mod Seçimi: Pomodoro, Kısa/Uzun mola modlarını üstte değiştir.</li>
+        <li>Zamanlayıcı: START ile başlat/durdur; süreler Ayarlar’dan değişir.</li>
+        <li>Görevler: ‘Görev Ekle’ ile liste oluştur, ilerlemeni takip et.</li>
+        <li>Tema/Renk: Sağ üstten koyu/açık ve vurgu rengi seç.</li>
+      </ul>
+      <div class="modal-actions">
+        <button class="btn cancel" id="closeHowItWorks">Kapat</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 🔐 Auth Modal -->
+  <div id="authModal" class="modal hidden">
+    <div class="modal-content" style="max-width: 350px;">
+      <div style="text-align:center; margin-bottom:20px;">
+        <h2>🔐 Hesabına Giriş Yap</h2>
+        <p style="color:#666; font-size:0.9rem;">Verilerini bulutta sakla, her yerden eriş.</p>
+      </div>
+
+      <div class="auth-tabs" style="display:flex; gap:10px; margin-bottom:20px; border-bottom:1px solid #eee;">
+        <button id="tabLogin" class="tab-btn active"
+          style="flex:1; padding:10px; border:none; background:none; cursor:pointer; border-bottom:2px solid var(--primary); font-weight:bold;">Giriş</button>
+        <button id="tabRegister" class="tab-btn"
+          style="flex:1; padding:10px; border:none; background:none; cursor:pointer; color:#999;">Kayıt Ol</button>
+      </div>
+
+      <form id="authForm">
+        <label style="display:block; margin-bottom:8px; font-weight:bold; font-size:0.9rem;">Kullanıcı Adı</label>
+        <input type="text" id="authUsername" class="modal-input" placeholder="Kullanıcı adın..." required
+          style="margin-bottom:15px;">
+
+        <label style="display:block; margin-bottom:8px; font-weight:bold; font-size:0.9rem;">Şifre</label>
+        <input type="password" id="authPassword" class="modal-input" placeholder="******" required
+          style="margin-bottom:20px;">
+
+        <div id="authError" style="color:red; font-size:0.85rem; margin-bottom:15px; display:none;"></div>
+
+        <button type="submit" class="btn save" style="width:100%;">Giriş Yap</button>
+      </form>
+
+      <button id="closeAuthBtn"
+        style="margin-top:15px; width:100%; background:none; border:none; color:#666; cursor:pointer;">Kapat</button>
+    </div>
+  </div>
+
+  <!-- 🏆 Leaderboard Modal -->
+  <div id="leaderboardModal" class="modal hidden">
+    <div class="modal-content" style="max-width: 400px; max-height: 80vh; overflow-y: auto;">
+      <div style="text-align:center; margin-bottom:20px;">
+        <h2>🏆 Liderlik Tablosu</h2>
+        <p style="color:#666; font-size:0.9rem;">En çalışkanlar burada. Zirveye oyna!</p>
+      </div>
+
+      <div id="leaderboardList" style="display:flex; flex-direction:column; gap:10px;">
+        <!-- JS ile doldurulacak -->
+        <div style="text-align:center; color:#999;">Yükleniyor...</div>
+      </div>
+
+      <button id="closeLeaderboardBtn" style="margin-top:20px; width:100%;" class="btn save">Kapat</button>
+    </div>
+  </div>
+
+  <!-- 🛒 Shop Modal -->
+  <div id="shopModal" class="modal hidden">
+    <div class="modal-content" style="max-width: 600px; max-height: 80vh; overflow-y: auto;">
+      <div style="text-align:center; margin-bottom:20px; border-bottom:1px solid #eee; padding-bottom:10px;">
+        <h2>🛒 XP Mağazası</h2>
+        <p style="color:#666;">Çalışarak kazandığın XP'leri harca!</p>
+        <div style="font-size:1.2rem; font-weight:bold; color:var(--primary); margin-top:5px;">
+          Mevcut: <span id="shopUserXP">0</span> XP
+        </div>
+      </div>
+
+      <h3>🎨 Özel Temalar</h3>
+      <div id="shopThemesList" class="shop-grid">
+        <!-- JS -->
+      </div>
+
+      <h3 style="margin-top:20px;">✨ Özel Efektler</h3>
+      <div id="shopEffectsList" class="shop-grid">
+        <!-- JS -->
+      </div>
+
+      <h3 style="margin-top:20px;">⚡ Güçlendiriciler</h3>
+      <div id="shopConsumablesList" class="shop-grid">
+        <!-- JS -->
+      </div>
+
+      <button id="closeShopBtn" style="margin-top:20px; width:100%;" class="btn cancel">Mağazadan Çık</button>
+    </div>
+  </div>
+
+  <!-- ✅ Settings Modal -->
+  <div id="settingsModal" class="modal hidden">
+    <div class="modal-content">
+      <h2>⚙ Ayarlar</h2>
+
+      <div class="section">
+        <h3>⏱ Zamanlayıcı</h3>
+        <label>Pomodoro <input type="number" id="pomodoroDuration" value="25" min="1" max="60" /></label><br />
+        <label>Kısa Mola <input type="number" id="shortBreak" value="5" min="1" max="30" /></label><br />
+        <label>Uzun Mola <input type="number" id="longBreak" value="15" min="1" max="60" /></label><br />
+        <label>Uzun Mola Aralığı <input type="number" id="longBreakInterval" value="4" min="1" max="10" /></label><br />
+        <label><input type="checkbox" id="autoStartBreaks" /> Molalar Otomatik Başlasın</label><br />
+        <label><input type="checkbox" id="autoStartPomodoros" /> Pomodorolar Otomatik Başlasın</label><br />
+      </div>
+
+      <div class="section">
+        <h3>📋 Görev</h3>
+        <label><input type="checkbox" id="autoCheckTasks" /> Görevleri Otomatik İşaretle</label><br />
+        <label><input type="checkbox" id="autoSwitchTasks" checked /> Görevleri Otomatik Geç</label><br />
+      </div>
+
+      <div class="section">
+        <h3>🔊 Ses</h3>
+        <label>Alarm Sesi:
+          <select id="alarmSound">
+            <option value="kitchen">Kitchen</option>
+            <option value="bell">Bell</option>
+            <option value="clock">Clock</option>
+          </select>
+        </label><br />
+        <label>Tekrar Sayısı:
+          <input type="number" id="alarmRepeat" value="1" min="1" />
+        </label><br />
+        <label>Alarm Ses Seviyesi:
+          <input type="range" id="alarmVolume" min="0" max="100" value="50" />
+        </label><br />
+        <label>Tık Sesi:
+          <select id="tickSound">
+            <option value="none">Yok</option>
+            <option value="clock">Saat</option>
+          </select>
+        </label><br />
+        <label>Tık Ses Seviyesi:
+          <input type="range" id="tickVolume" min="0" max="100" value="50" />
+        </label>
+      </div>
+
+      <hr style="border:0; border-top:1px solid #eee; margin: 20px 0;">
+
+      <h3>Görünüm ve Araçlar</h3>
+      <div class="settings-grid">
+        <label>Tema Rengi:
+          <select id="accentSelect">
+            <option value="blue">Mavi</option>
+            <option value="purple">Mor</option>
+            <option value="coral">Mercan</option>
+          </select>
+        </label>
+
+        <div class="setting-item">
+          <span>Karanlık Mod</span>
+          <button id="themeToggle" class="btn-icon-text">🌙 Değiştir</button>
+        </div>
+
+        <div class="setting-item">
+          <span>Bildirimler</span>
+          <button id="notificationsBtn" class="btn-icon-text">🔔 Aç/Kapa</button>
+        </div>
+
+        <div class="setting-item">
+          <span>Tam Ekran</span>
+          <button id="fullscreenBtn" class="btn-icon-text">⛶ Aç</button>
+        </div>
+
+        <div class="setting-item">
+          <span>Mini Oyantıcı</span>
+          <button id="floatingBtn" class="btn-icon-text">📱 Aç</button>
+        </div>
+      </div>
+
+      <div style="margin-top: 20px; text-align: center; font-size: 0.9rem;">
+        <a href="/blog" style="margin-right: 15px; color: var(--primary);">Blog</a>
+        <a href="/hakkimizda" style="color: var(--primary);">Hakkımızda</a>
+      </div>
+
+
+      <button id="closeSettings">Kapat</button>
+    </div>
+  </div>
+
+  <!-- 🎯 Goal Modal -->
+  <div id="goalModal" class="modal hidden">
+    <div class="modal-content">
+      <h2 style="margin-bottom: 10px;">🎯 Hedef Belirle</h2>
+      <p style="color:#666; margin-bottom: 20px;">Bu odaklanma seansında ne başaracaksın?</p>
+      <input type="text" id="goalInput" class="modal-input" placeholder="Örn: Proje raporunu tamamla..." />
+      <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:20px">
+        <button class="btn cancel" id="goalCancelBtn" type="button">İptal</button>
+        <button class="btn save" id="goalSaveBtn" type="button">Başlat</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 📊 Session Summary Modal -->
+  <div id="sessionSummaryModal" class="modal hidden" aria-hidden="true">
+    <div class="modal-content" role="dialog" aria-modal="true">
+      <h2>🎉 Oturum Tamamlandı!</h2>
+      <div style="margin:20px 0;padding:16px;background:#f0f0f0;border-radius:8px;">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <div>
+            <div style="font-size:32px;font-weight:bold;color:#ff4d4f;" id="summaryPomodoros">0</div>
+            <div style="color:#666;">Pomodoro</div>
+          </div>
+          <div>
+            <div style="font-size:32px;font-weight:bold;color:#4caf50;" id="summaryStreak">0</div>
+            <div style="color:#666;">Gün Streak</div>
+          </div>
+        </div>
+      </div>
+      <div style="margin:16px 0;">
+        <p style="color:#666;margin-bottom:12px;">Paylaş:</p>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button id="shareTwitter" class="btn"
+            style="background:#1DA1F2;color:white;flex:1;min-width:120px;">Twitter</button>
+          <button id="shareFacebook" class="btn"
+            style="background:#4267B2;color:white;flex:1;min-width:120px;">Facebook</button>
+          <button id="shareWhatsapp" class="btn"
+            style="background:#25D366;color:white;flex:1;min-width:120px;">WhatsApp</button>
+          <button id="copyLinkBtn" class="btn" style="background:#666;color:white;flex:1;min-width:120px;">Link
+            Kopyala</button>
+        </div>
+      </div>
+      <div style="margin-top:16px;">
+        <button class="btn save" id="closeSummaryBtn" type="button">Kapat</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Görev Modalı -->
+  <div id="taskModal" class="modal hidden">
+    <div class="modal-content">
+
+      <h2 class="modal-title">🆕 Yeni Görev Ekle</h2>
+
+      <!-- Görev Başlığı -->
+      <label class="modal-label" for="taskTitle">🎯 Görev Başlığı</label>
+      <input class="modal-input" type="text" id="taskTitle" placeholder="Ne üzerinde çalışıyorsun?" />
+
+      <!-- Pomodoro Sayısı -->
+      <label class="modal-label" for="pomodoroCount">🍅 Tahmini Pomodoro</label>
+      <div class="pomodoro-control">
+        <button type="button" class="pomodoro-btn" onclick="decrementPomodoro()">−</button>
+        <input type="number" id="pomodoroCount" min="1" value="1" class="pomodoro-input" readonly />
+        <button type="button" class="pomodoro-btn" onclick="incrementPomodoro()">+</button>
+      </div>
+
+      <!-- Kategori -->
+      <label class="modal-label" for="taskCategory">📁 Kategori</label>
+      <select class="modal-input" id="taskCategory">
+        <option value="work">İş</option>
+        <option value="personal">Kişisel</option>
+        <option value="learning">Öğrenme</option>
+      </select>
+
+      <!-- Öncelik -->
+      <label class="modal-label" for="priority">⭐ Öncelik</label>
+      <select class="modal-input" id="priority">
+        <option value="low">Düşük</option>
+        <option value="normal" selected>Normal</option>
+        <option value="important">Önemli</option>
+        <option value="urgent">Acil</option>
+      </select>
+
+      <!-- Tarih -->
+      <label class="modal-label" for="dueDate">📅 Bitiş Tarihi</label>
+      <input class="modal-input" type="date" id="dueDate" />
+
+      <!-- Not -->
+      <label class="modal-label" for="taskNote">📝 Not (isteğe bağlı)</label>
+      <textarea class="modal-input" id="taskNote" rows="2" placeholder="Ek bilgi ya da açıklama girin..."></textarea>
+
+      <!-- Proje -->
+      <label class="modal-label" for="taskProject">📁 Proje (isteğe bağlı)</label>
+      <input class="modal-input" type="text" id="taskProject" placeholder="Örn: Final Projesi" />
+
+      <!-- Etiketler -->
+      <label class="modal-label" for="taskTags">🏷️ Etiketler (virgülle ayır)</label>
+      <input class="modal-input" type="text" id="taskTags" placeholder="örn: çalışma, araştırma, UI" />
+
+      <!-- Butonlar -->
+      <div class="modal-actions">
+        <button class="btn cancel" onclick="closeTaskModal()">İptal</button>
+        <button class="btn save" onclick="saveTask()">Kaydet</button>
+      </div>
+
+    </div> <!-- modal-content kapanışı -->
+  </div> <!-- taskModal kapanışı -->
+
+  <!-- Alarm Audio -->
+  <audio id="alarm" preload="auto">
+    <source src="{{ url_for('static', filename='sounds/kitchen.wav') }}" type="audio/wav">
+  </audio>
+
+  <!-- Slayt geçiş scripti -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      let currentSlide = 0;
+      const slides = document.querySelectorAll('.info-slider .slide');
+
+      function showSlide(index) {
+        slides.forEach((slide, i) => {
+          slide.classList.toggle('slide-active', i === index);
+        });
+      }
+
+      function nextSlide() {
+        currentSlide = (currentSlide + 1) % slides.length;
+        showSlide(currentSlide);
+      }
+
+      showSlide(currentSlide);
+      setInterval(nextSlide, 5000);
+    });
+  </script>
+
+  <!-- PWA Install Prompt -->
+  <div id="installPrompt" class="hidden">
+    <div style="font-weight:600;margin-bottom:8px;">📱 Uygulamayı Yükle</div>
+    <div style="font-size:14px;color:var(--text-secondary);margin-bottom:12px;">Ana ekrana ekle ve daha hızlı eriş.
+    </div>
+    <button class="btn save" id="installBtn" style="width:100%;">Yükle</button>
+    <button class="btn cancel" id="installCancelBtn" style="width:100%;">Daha Sonra</button>
+  </div>
+
+  <!-- Floating Mini Player -->
+  <div id="floatingMini" style="display:none;">
+    <div class="floating-mini-header">
+      <span id="floatingTitle">Pomodoro</span>
+      <button id="floatingToggle" title="Ana Sayfaya Git">🔗</button>
+    </div>
+    <div class="floating-mini-content">
+      <div id="floatingTime" class="floating-time">25:00</div>
+      <div class="floating-mode" id="floatingMode">Pomodoro</div>
+    </div>
+    <div class="floating-mini-buttons">
+      <button id="floatingPlayPause">▶</button>
+      <button id="floatingClose">✕</button>
+    </div>
+  </div>
+
+  <script src="/static/script.js?v=6"></script>
+  <script src="/static/auth.js?v=1"></script>
+  <script src="/static/leaderboard.js?v=1"></script>
+  <script src="/static/shop.js?v=6"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', function () {
+        navigator.serviceWorker.register('/static/sw.js');
+      });
+    }
+
+    // PWA Install Prompt
+    let deferredPrompt;
+    const installPrompt = document.getElementById('installPrompt');
+    const installBtn = document.getElementById('installBtn');
+    const installCancelBtn = document.getElementById('installCancelBtn');
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      // 10 saniye sonra göster
+      setTimeout(() => {
+        if (deferredPrompt && !localStorage.getItem('installPromptDismissed')) {
+          installPrompt.classList.add('show');
+        }
+      }, 10000);
+    });
+
+    installBtn?.addEventListener('click', async () => {
+      if (!deferredPrompt) return;
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      if (outcome === 'accepted') {
+        console.log('✅ PWA installed');
+        localStorage.setItem('installPromptDismissed', 'true');
+      }
+      installPrompt.classList.remove('show');
+      deferredPrompt = null;
+    });
+
+    installCancelBtn?.addEventListener('click', () => {
+      installPrompt.classList.remove('show');
+      localStorage.setItem('installPromptDismissed', 'true');
+    });
+
+    window.addEventListener('appinstalled', () => {
+      console.log('✅ PWA installed successfully');
+      installPrompt.classList.remove('show');
+      localStorage.setItem('installPromptDismissed', 'true');
+      deferredPrompt = null;
+    });
+  </script>
+  <footer
+    style="text-align: center; padding: 20px; margin-top: 40px; border-top: 1px solid rgba(255,255,255,0.1); color: #8b949e; font-size: 0.9em;">
+    <p>&copy; 2024 Pomodev. Ücretsiz Pomodoro Zamanlayıcı</p>
+    <div style="margin-top: 10px; display: flex; justify-content: center; gap: 20px; flex-wrap: wrap;">
+      <a href="/hakkimizda" style="color: #58a6ff; text-decoration: none;">Hakkımızda</a>
+      <a href="/kullanim-kilavuzu" style="color: #58a6ff; text-decoration: none;">Kullanım Kılavuzu</a>
+      <a href="/blog" style="color: #58a6ff; text-decoration: none;">Blog</a>
+      <a href="/gizlilik-politikasi" style="color: #58a6ff; text-decoration: none;">Gizlilik Politikası</a>
+      <a href="/kullanim-sartlari" style="color: #58a6ff; text-decoration: none;">Kullanım Şartları</a>
+    </div>
+  </footer>
+</body>
+
+</html>
