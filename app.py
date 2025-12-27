@@ -36,6 +36,22 @@ def blog_deepwork():
 def blog_best_timers():
     return render_template('blog_best_pomodoro_timers.html')
 
+@app.route('/blog/ogrenciler-icin-pomodoro-rehberi')
+def blog_students():
+    return render_template('blog_students_guide.html')
+
+@app.route('/blog/programcilar-icin-deep-work')
+def blog_programmers():
+    return render_template('blog_programmers_deepwork.html')
+
+@app.route('/blog/adhd-icin-pomodoro')
+def blog_adhd():
+    return render_template('blog_adhd_pomodoro.html')
+
+@app.route('/llms.txt')
+def llms_txt():
+    return send_from_directory(BASE_DIR, 'llms.txt', mimetype='text/plain')
+
 @app.route('/mini-player')
 def mini_player():
     return render_template('mini_player.html')
@@ -363,26 +379,30 @@ def sitemap():
     xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'
     
     # Homepage - highest priority
-    xml += '<url><loc>https://pomodev-omega.vercel.app/</loc><changefreq>daily</changefreq><priority>1.0</priority><lastmod>2024-01-15</lastmod></url>'
+    xml += '<url><loc>https://pomodev-omega.vercel.app/</loc><changefreq>daily</changefreq><priority>1.0</priority><lastmod>2025-12-27</lastmod></url>'
     
     # Static pages - high priority
     routes = [
         ('/blog', 'weekly', '0.9'),
         ('/blog/en-iyi-pomodoro-timer-uygulamalari-2024', 'weekly', '1.0'),
+        ('/blog/ogrenciler-icin-pomodoro-rehberi', 'weekly', '0.9'),
+        ('/blog/programcilar-icin-deep-work', 'weekly', '0.9'),
+        ('/blog/adhd-icin-pomodoro', 'weekly', '0.9'),
         ('/blog/pomodoro-nasil-uygulanir', 'monthly', '0.8'),
         ('/blog/derin-calisma-ipuclari', 'monthly', '0.8'),
         ('/hakkimizda', 'monthly', '0.7'),
         ('/kullanim-kilavuzu', 'monthly', '0.8'),
         ('/gizlilik-politikasi', 'yearly', '0.5'),
         ('/kullanim-sartlari', 'yearly', '0.5'),
-        ('/mini-player', 'monthly', '0.7')
+        ('/mini-player', 'monthly', '0.7'),
+        ('/llms.txt', 'monthly', '0.3')
     ]
     for route, freq, priority in routes:
-        xml += f'<url><loc>https://pomodev-omega.vercel.app{route}</loc><changefreq>{freq}</changefreq><priority>{priority}</priority></url>'
+        xml += f'<url><loc>https://pomodev-omega.vercel.app{route}</loc><changefreq>{freq}</changefreq><priority>{priority}</priority><lastmod>2025-12-27</lastmod></url>'
     
     # Dynamic SEO pages
     for slug in SEO_PAGES:
-         xml += f'<url><loc>https://pomodev-omega.vercel.app/use/{slug}</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>'
+         xml += f'<url><loc>https://pomodev-omega.vercel.app/use/{slug}</loc><changefreq>monthly</changefreq><priority>0.8</priority><lastmod>2025-12-27</lastmod></url>'
 
     xml += '</urlset>'
     return app.response_class(xml, mimetype='application/xml')

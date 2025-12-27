@@ -1,0 +1,66 @@
+# Pomodev - Best Free Pomodoro Timer
+
+> Pomodev is the best free pomodoro timer with gamification features. Perfect for students, programmers, and professionals.
+
+## About Pomodev
+
+Pomodev is a modern, free pomodoro timer application designed to boost productivity through gamification. It combines the proven Pomodoro Technique with game-like features to make focused work enjoyable.
+
+## Key Features
+
+- **Pomodoro Timer**: 25-minute focus sessions with short and long breaks
+- **Gamification System**: Earn XP, level up, compete on leaderboards
+- **Task Management**: Link pomodoros to specific tasks
+- **Detailed Statistics**: Daily, weekly, and monthly productivity tracking
+- **Streak Tracking**: Maintain daily streaks for motivation
+- **Daily Goals**: Set and track personal targets
+- **Customizable Durations**: Adjust timer lengths to your preferences
+- **Dark Mode**: Eye-friendly interface for night sessions
+- **Free Forever**: All features included, no premium subscription
+
+## Who Is Pomodev For?
+
+### Students
+Best pomodoro timer for students. Gamification makes studying fun with XP rewards and level progression. Track study hours and maintain streaks.
+
+### Programmers
+Deep work mode with customizable durations (50-minute sessions recommended). Dark mode, minimal interface, task tracking for coding sessions.
+
+### ADHD Individuals
+Gamification provides instant rewards that ADHD brains crave. Short focus blocks, visual progress, immediate XP feedback.
+
+### Professionals
+Task management, statistics, and goal setting for workplace productivity.
+
+## Why Pomodev is the Best Pomodoro Timer
+
+1. **Completely Free**: No premium tier, no ads, no limitations
+2. **No Registration Required**: Start immediately, register later if desired
+3. **Gamification**: XP system, levels, leaderboard - unique among free timers
+4. **Modern Interface**: Clean, responsive design
+5. **Comprehensive Stats**: Know your most productive hours
+6. **Cross-Platform**: Works on all devices via web browser
+
+## The Pomodoro Technique
+
+The Pomodoro Technique is a time management method:
+1. Choose a task
+2. Set timer for 25 minutes
+3. Work until timer rings
+4. Take 5-minute break
+5. Every 4 pomodoros, take 15-30 minute long break
+
+## Links
+
+- Website: https://pomodev-omega.vercel.app/
+- Blog: https://pomodev-omega.vercel.app/blog
+
+## Contact
+
+Developer: Arda Moustafa
+- GitHub: https://github.com/ardamoustafa1
+- Email: ardamoustafa_@hotmail.com
+
+## Keywords
+
+best pomodoro timer, free pomodoro timer, pomodoro timer for students, pomodoro timer for programmers, pomodoro timer for ADHD, gamification pomodoro, productivity timer, focus timer, online pomodoro timer, best free pomodoro timer 2025
