@@ -100,6 +100,37 @@ class DataManager {
 const dataManager = new DataManager();
 
 // ===== Gamification Logic =====
+
+// 💬 Motivasyon Mesajları
+const MOTIVATION_MESSAGES = [
+    "🔥 Harika! 25 dakika derin odak tamamlandı!",
+    "💪 Muhteşem! Bir pomodoro daha!",
+    "🧠 Beynin güçleniyor! Devam et!",
+    "⚡ Enfes! Odak kasın büyüyor!",
+    "🎯 Hedefine bir adım daha yaklaştın!",
+    "🚀 Roket gibi ilerliyorsun!",
+    "✨ Parlıyorsun! Harika iş!",
+    "🏆 Şampiyonlar gibi çalışıyorsun!",
+    "🌟 Yıldız gibi parla!",
+    "💎 Değerli ilerleme kaydediyorsun!"
+];
+
+const STREAK_MESSAGES = {
+    3: "🔥 3 gün streak! Alışkanlık oluşmaya başladı!",
+    5: "⭐ 5 gün! Harika disiplin!",
+    7: "🌟 1 haftalık streak! Muhteşem!",
+    14: "🏆 2 hafta! Artık bir alışkanlık ustasısın!",
+    21: "💎 3 hafta! Efsanevi disiplin!",
+    30: "👑 1 ay streak! Sen bir efsanesin!"
+};
+
+const COMPARISON_MESSAGES = {
+    better: (percent) => `📈 Dünden %${percent} daha iyisin!`,
+    same: "🎯 Dünkü tempoyu yakaladın!",
+    worse: (needed) => `💪 Dünkü ${needed} pomodoro'yu yakala!`,
+    first: "🌱 İlk günün başarılı geçiyor!"
+};
+
 class GamificationManager {
     constructor() {
         this.levels = [];
@@ -123,10 +154,15 @@ class GamificationManager {
 
     getTitle(level) {
         if (level >= 50) return "Time Lord ⏳";
-        if (level >= 40) return "Grandmaster 🧘‍♂️";
-        if (level >= 30) return "Deep Focus 🧠";
-        if (level >= 20) return "Professional 💼";
+        if (level >= 45) return "Grandmaster 👑";
+        if (level >= 40) return "Zen Ustası 🧘";
+        if (level >= 35) return "Flow Master 🌊";
+        if (level >= 30) return "Deep Worker 🧠";
+        if (level >= 25) return "Productivity Pro 💼";
+        if (level >= 20) return "Focus Expert 🎯";
+        if (level >= 15) return "Odaklanmış 🔥";
         if (level >= 10) return "Apprentice 📚";
+        if (level >= 5) return "Starter 🌿";
         return "Novice 🌱";
     }
 
@@ -145,6 +181,67 @@ class GamificationManager {
         const required = nextLevelXP - currentLevelXP;
         const earned = xp - currentLevelXP;
         return Math.min(100, Math.floor((earned / required) * 100));
+    }
+}
+
+// XP Popup göster
+function showXPGain(amount, reason) {
+    const popup = document.createElement('div');
+    popup.className = 'xp-popup';
+    popup.innerHTML = `<span class="xp-amount">+${amount} XP</span><span class="xp-reason">${reason}</span>`;
+    popup.style.cssText = `
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%) scale(0.8);
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 20px 40px;
+        border-radius: 16px;
+        font-weight: 700;
+        font-size: 1.5rem;
+        text-align: center;
+        z-index: 10000;
+        box-shadow: 0 20px 60px rgba(102, 126, 234, 0.4);
+        animation: xpPopupAnim 2s ease-out forwards;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    `;
+    document.body.appendChild(popup);
+    setTimeout(() => popup.remove(), 2000);
+}
+
+// Motivasyon mesajı göster
+function showMotivationMessage() {
+    const msg = MOTIVATION_MESSAGES[Math.floor(Math.random() * MOTIVATION_MESSAGES.length)];
+    const toast = document.createElement('div');
+    toast.className = 'motivation-toast';
+    toast.textContent = msg;
+    toast.style.cssText = `
+        position: fixed;
+        bottom: 100px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(0, 0, 0, 0.85);
+        color: white;
+        padding: 16px 32px;
+        border-radius: 50px;
+        font-weight: 600;
+        font-size: 1.1rem;
+        z-index: 10000;
+        animation: toastSlide 3s ease-out forwards;
+    `;
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 3000);
+}
+
+// Streak mesajı kontrol
+function checkStreakMilestone(streak) {
+    if (STREAK_MESSAGES[streak]) {
+        setTimeout(() => {
+            showNotification("🔥 Streak Milestone!", STREAK_MESSAGES[streak]);
+        }, 2500);
     }
 }
 
@@ -167,7 +264,6 @@ document.addEventListener('DOMContentLoaded', () => {
     setupShareSettings();
     setupCalendarQuickAdd();
     setupSessionSummary();
-    setupStreakReminder();
     setupStreakReminder();
     setupFloatingMini();
     setupDropdown();
@@ -1881,6 +1977,12 @@ function timerTick() {
             const newXP = dataManager.addXP(baseXP); // Add XP
             checkLevelUp(oldXP, newXP);
             updateGamificationUI();
+
+            // 🎉 Yeni: XP popup ve motivasyon mesajı göster
+            const xpReason = isPotionActive ? "Pomodoro + 2x Potion" : "Pomodoro tamamlandı!";
+            showXPGain(baseXP, xpReason);
+            setTimeout(showMotivationMessage, 500);
+            checkStreakMilestone(currentStreak);
             // ---------------------
 
             // İstatistikleri güncelle
@@ -1999,3 +2101,61 @@ function setupDropdown() {
         }
     });
 }
+
+// ===== ONBOARDING SYSTEM =====
+function setupOnboarding() {
+    const hasSeenOnboarding = localStorage.getItem('pomodev_onboarding_done');
+    if (hasSeenOnboarding) return;
+
+    const modal = document.getElementById('onboardingModal');
+    const nextBtn = document.getElementById('onboardingNext');
+    const skipBtn = document.getElementById('onboardingSkip');
+
+    if (!modal || !nextBtn || !skipBtn) return;
+
+    let currentStep = 1;
+    const totalSteps = 3;
+
+    // Show modal after a short delay
+    setTimeout(() => {
+        modal.classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+    }, 1000);
+
+    function showStep(step) {
+        document.querySelectorAll('.onboarding-step').forEach(s => s.classList.add('hidden'));
+        document.querySelectorAll('.onboarding-dot').forEach(d => d.classList.remove('active'));
+
+        const stepEl = document.querySelector(`.onboarding-step[data-step="${step}"]`);
+        const dotEl = document.querySelector(`.onboarding-dot[data-dot="${step}"]`);
+
+        if (stepEl) stepEl.classList.remove('hidden');
+        if (dotEl) dotEl.classList.add('active');
+
+        if (step === totalSteps) {
+            nextBtn.textContent = 'Başla! 🚀';
+        } else {
+            nextBtn.textContent = 'İleri →';
+        }
+    }
+
+    function closeOnboarding() {
+        modal.classList.add('hidden');
+        document.body.style.overflow = '';
+        localStorage.setItem('pomodev_onboarding_done', 'true');
+    }
+
+    nextBtn.addEventListener('click', () => {
+        if (currentStep < totalSteps) {
+            currentStep++;
+            showStep(currentStep);
+        } else {
+            closeOnboarding();
+        }
+    });
+
+    skipBtn.addEventListener('click', closeOnboarding);
+}
+
+// Call onboarding on page load
+document.addEventListener('DOMContentLoaded', setupOnboarding);

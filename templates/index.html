@@ -595,14 +595,20 @@
   <section class="hero">
     <div class="container hero-inner">
       <div class="hero-copy">
-        <h1>En İyi Pomodoro Timer 2024 - Best Pomodoro Timer Ücretsiz</h1>
-        <p>Pomodev, 2024'ün en iyi ücretsiz pomodoro timer uygulamasıdır (best pomodoro timer). Gamification, detaylı
+        <h1>En İyi Pomodoro Timer 2025 - Best Pomodoro Timer Ücretsiz</h1>
+        <p>Pomodev, 2025'in en iyi ücretsiz pomodoro timer uygulamasıdır (best pomodoro timer). Gamification, detaylı
           istatistikler, görev yönetimi ve XP sistemi ile verimliliğinizi artırın. Kayıt olmadan kullanılabilir, tamamen
           ücretsiz. Best pomodoro timer for students, programmers, and professionals.</p>
         <div class="hero-cta">
           <a href="#workspace" class="btn-cta">En İyi Pomodoro Timer'ı Başlat</a>
           <button id="howItWorksBtn" class="btn-ghost" type="button">Nasıl Çalışır?</button>
           <button id="shareSettingsBtn" class="btn-ghost" type="button" title="Ayarları Paylaş">🔗 Paylaş</button>
+        </div>
+        <!-- 🌍 Social Proof -->
+        <div class="social-proof">
+          <span>🌍 <strong id="totalUsersCount">2,847</strong> kullanıcı</span>
+          <span>⏱️ Bugün <strong id="totalHoursToday">1,234</strong> saat odaklandı</span>
+          <span>🔥 <strong id="activeStreaks">892</strong> aktif streak</span>
         </div>
       </div>
     </div>
@@ -993,6 +999,43 @@
       <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:20px">
         <button class="btn cancel" id="goalCancelBtn" type="button">İptal</button>
         <button class="btn save" id="goalSaveBtn" type="button">Başlat</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 🎓 Onboarding Modal (İlk Giriş) -->
+  <div id="onboardingModal" class="modal hidden" aria-hidden="true">
+    <div class="modal-content" role="dialog" aria-modal="true" style="max-width: 480px; text-align: center;">
+      <!-- Step 1 -->
+      <div class="onboarding-step" data-step="1">
+        <div style="font-size: 4rem; margin-bottom: 16px;">🧠</div>
+        <h2 style="margin-bottom: 12px;">Odak Kasını Geliştir</h2>
+        <p style="color: var(--muted); line-height: 1.6;">Pomodev, 25 dakikalık odak blokları ile dikkatini güçlendirir.
+          Her pomodoro beynini bir adım daha güçlü yapar.</p>
+      </div>
+      <!-- Step 2 -->
+      <div class="onboarding-step hidden" data-step="2">
+        <div style="font-size: 4rem; margin-bottom: 16px;">🎮</div>
+        <h2 style="margin-bottom: 12px;">XP Kazan, Seviye Atla</h2>
+        <p style="color: var(--muted); line-height: 1.6;">Her tamamladığın pomodoro için XP kazan. Seviye atla,
+          streak'ini koru ve liderlik tablosunda yüksel.</p>
+      </div>
+      <!-- Step 3 -->
+      <div class="onboarding-step hidden" data-step="3">
+        <div style="font-size: 4rem; margin-bottom: 16px;">📈</div>
+        <h2 style="margin-bottom: 12px;">İlerlemeni Gör</h2>
+        <p style="color: var(--muted); line-height: 1.6;">Detaylı istatistikler ile günlük, haftalık ve aylık ilerlemeni
+          takip et. Kendinle yarış!</p>
+      </div>
+      <!-- Navigation -->
+      <div style="display: flex; justify-content: center; gap: 8px; margin: 24px 0 16px;">
+        <span class="onboarding-dot active" data-dot="1"></span>
+        <span class="onboarding-dot" data-dot="2"></span>
+        <span class="onboarding-dot" data-dot="3"></span>
+      </div>
+      <div style="display: flex; gap: 12px; justify-content: center;">
+        <button id="onboardingSkip" class="btn cancel" type="button">Geç</button>
+        <button id="onboardingNext" class="btn save" type="button">İleri →</button>
       </div>
     </div>
   </div>
