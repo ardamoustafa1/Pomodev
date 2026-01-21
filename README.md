@@ -1,8 +1,8 @@
-# 🍅 Pomodev - Modern Pomodoro Timer
+# Pomodev - Modern Pomodoro Timer
 
 <div align="center">
 
-![Pomodev Logo](https://img.shields.io/badge/Pomodev-🍅-blue?style=for-the-badge&logo=clock)
+![Pomodev Logo](https://img.shields.io/badge/Pomodev--blue?style=for-the-badge&logo=clock)
 
 **Derin odak için tasarlanmış modern Pomodoro uygulaması**
 
