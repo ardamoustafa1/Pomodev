@@ -97,9 +97,87 @@ app = Flask(__name__,
             static_folder=STATIC_DIR)
 app.config['SECRET_KEY'] = SECRET_KEY
 
-# ... (rest of code)
+# CORS Configuration
+if CORS_AVAILABLE:
+    try:
+        CORS(app, origins=os.environ.get('ALLOWED_ORIGINS', '*').split(','))
+    except Exception:
+        pass
 
-# ...
+# Security Headers
+@app.after_request
+def add_security_headers(response):
+    if not CORS_AVAILABLE:
+        response.headers.add('Access-Control-Allow-Origin', '*')
+        response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
+        response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
+    response.headers['X-Content-Type-Options'] = 'nosniff'
+    response.headers['X-Frame-Options'] = 'SAMEORIGIN'
+    response.headers['X-XSS-Protection'] = '1; mode=block'
+    return response
+
+# Rate Limiting
+if LIMITER_AVAILABLE:
+    limiter = Limiter(
+        app=app,
+        key_func=get_remote_address,
+        default_limits=["200 per day", "50 per hour"],
+        storage_uri="memory://"
+    )
+else:
+    class DummyLimiter:
+        def limit(self, *args, **kwargs):
+            def decorator(f): return f
+            return decorator
+    limiter = DummyLimiter()
+
+# Cache
+if CACHE_AVAILABLE:
+    cache = Cache(app, config={'CACHE_TYPE': 'simple', 'CACHE_DEFAULT_TIMEOUT': 300})
+else:
+    class DummyCache:
+        def cached(self, *args, **kwargs):
+            def decorator(f): return f
+            return decorator
+        def delete(self, *args, **kwargs): pass
+    cache = DummyCache()
+
+# DB Functions
+def get_db():
+    db = getattr(g, '_database', None)
+    if db is None:
+        try:
+            db = g._database = sqlite3.connect(DATABASE)
+            db.row_factory = sqlite3.Row
+        except sqlite3.Error as e:
+            logger.error(f"Database connection error: {str(e)}")
+            raise
+    return db
+
+@app.teardown_appcontext
+def close_connection(exception):
+    db = getattr(g, '_database', None)
+    if db is not None:
+        db.close()
+
+def init_db():
+    with app.app_context():
+        db = get_db()
+        db.execute('CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT UNIQUE NOT NULL, password TEXT NOT NULL, auth_token TEXT, token_expiry TIMESTAMP, level INTEGER DEFAULT 1, xp INTEGER DEFAULT 0, inventory TEXT DEFAULT "[]", stats TEXT DEFAULT "{}", settings TEXT DEFAULT "{}", tasks TEXT DEFAULT "[]", created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)')
+        try:
+            db.execute('ALTER TABLE users ADD COLUMN token_expiry TIMESTAMP')
+        except sqlite3.OperationalError:
+            pass
+        db.execute('CREATE TABLE IF NOT EXISTS sessions (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER NOT NULL, mode TEXT NOT NULL, duration INTEGER NOT NULL, completed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, project TEXT, task_id TEXT, FOREIGN KEY (user_id) REFERENCES users (id))')
+        db.execute('CREATE TABLE IF NOT EXISTS tasks (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER NOT NULL, text TEXT NOT NULL, is_completed BOOLEAN DEFAULT 0, project TEXT DEFAULT "General", created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, FOREIGN KEY (user_id) REFERENCES users (id))')
+        db.execute('CREATE TABLE IF NOT EXISTS notes (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER NOT NULL, content TEXT NOT NULL, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, FOREIGN KEY (user_id) REFERENCES users (id))')
+        db.execute('CREATE TABLE IF NOT EXISTS online_users (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER, ip_address TEXT, last_seen TIMESTAMP DEFAULT CURRENT_TIMESTAMP, mode TEXT DEFAULT "pomodoro")')
+        try:
+            db.execute('CREATE INDEX IF NOT EXISTS idx_user_token ON users(auth_token)')
+        except sqlite3.OperationalError:
+            pass
+        db.commit()
+
 
 # Initialize DB on start with Error Handling
 try:
