@@ -233,10 +233,438 @@ def generate_token_expiry():
 
 # ... existing code ...
 
-# ... (Tasks API) ...
+# ===== INPUT VALIDATION UTILITIES =====
+import re
+import html
+
+def sanitize_string(text, max_length=1000, allow_newlines=False):
+    """Sanitize string input"""
+    if not text:
+        return ""
+    if not isinstance(text, str):
+        return str(text)
+    
+    # Strip whitespace
+    text = text.strip()
+    
+    # Truncate
+    if len(text) > max_length:
+        text = text[:max_length]
+        
+    # Escape HTML
+    text = html.escape(text)
+    
+    return text
+
+def validate_username(username):
+    """Validate username format"""
+    if not username:
+        return False, "Username is required"
+    
+    username = username.strip()
+    
+    if len(username) < 3:
+        return False, "Username must be at least 3 characters"
+    if len(username) > 20:
+        return False, "Username must be at most 20 characters"
+    
+    # Alphanumeric and underscores only
+    if not re.match(r"^[a-zA-Z0-9_]+$", username):
+        return False, "Username can only contain letters, numbers, and underscores"
+        
+    return True, username
+
+def validate_password(password):
+    """Validate password strength"""
+    if not password:
+        return False, "Password is required"
+    
+    if len(password) < 6:
+        return False, "Password must be at least 6 characters"
+    if len(password) > 128:
+        return False, "Password must be at most 128 characters"
+    
+    return True, password
+
+def validate_task_text(text):
+    """Validate task text"""
+    if not text or not isinstance(text, str):
+        return False, "Task text is required"
+    
+    text = sanitize_string(text, max_length=500)
+    
+    if len(text) < 1:
+        return False, "Task text cannot be empty"
+    
+    return True, text
+
+# ===== RESPONSE HELPERS =====
+def success_response(data=None, message="Success", status_code=200):
+    """Standardized success response"""
+    response = {
+        "success": True,
+        "data": data,
+        "message": message,
+        "error": None
+    }
+    return jsonify(response), status_code
+
+def error_response(error="An error occurred", status_code=400, data=None):
+    """Standardized error response"""
+    response = {
+        "success": False,
+        "data": data,
+        "message": None,
+        "error": error
+    }
+    return jsonify(response), status_code
+
+# ===== SOCIAL & MULTIPLAYER API =====
+
+@app.route('/api/social/heartbeat', methods=['POST'])
+@limiter.limit("120 per minute")  # Allow frequent polling (every 30s = 2 per min + buffer)
+def social_heartbeat():
+    """Update user's online status"""
+    try:
+        data = request.get_json() or {}
+        mode = data.get('mode', 'pomodoro')
+        
+        # Try to identify user by token, otherwise by IP
+        token = get_auth_token()
+        user_id = None
+        if token:
+            user, _ = validate_token(token)
+            if user:
+                user_id = user['id']
+        
+        ip_address = get_remote_address()
+        now = datetime.datetime.utcnow()
+        
+        db = get_db()
+        
+        # Check if entry exists for this IP or User
+        if user_id:
+            cursor = db.execute('SELECT id FROM online_users WHERE user_id = ?', (user_id,))
+        else:
+            cursor = db.execute('SELECT id FROM online_users WHERE ip_address = ? AND user_id IS NULL', (ip_address,))
+            
+        entry = cursor.fetchone()
+        
+        if entry:
+            # Update existing
+            db.execute('UPDATE online_users SET last_seen = ?, mode = ?, ip_address = ? WHERE id = ?', 
+                      (now, mode, ip_address, entry['id']))
+        else:
+            # Insert new
+            db.execute('INSERT INTO online_users (user_id, ip_address, last_seen, mode) VALUES (?, ?, ?, ?)',
+                      (user_id, ip_address, now, mode))
+        
+        db.commit()
+        
+        return success_response(None, "Heartbeat received")
+    except Exception as e:
+        logger.error(f"Error in social_heartbeat: {str(e)}", exc_info=True)
+        return error_response("Heartbeat failed", 500)
+
+@app.route('/api/social/status', methods=['GET'])
+@limiter.limit("60 per minute")
+def get_social_status():
+    """Get active user count and stats"""
+    try:
+        db = get_db()
+        
+        # Define "Active" as seen in last 5 minutes
+        threshold = datetime.datetime.utcnow() - datetime.timedelta(minutes=5)
+        
+        # Count active users
+        count = db.execute('SELECT COUNT(*) FROM online_users WHERE last_seen > ?', (threshold,)).fetchone()[0]
+        
+        # Get mode distribution (e.g., how many in pomodoro vs break)
+        modes = db.execute('''
+            SELECT mode, COUNT(*) as count 
+            FROM online_users 
+            WHERE last_seen > ? 
+            GROUP BY mode
+        ''', (threshold,)).fetchall()
+        
+        mode_stats = {row['mode']: row['count'] for row in modes}
+        
+        # Clean up very old entries (older than 1 hour) to keep DB small
+        # In a production app, use a cron job, but here we do lazy cleanup
+        cleanup_threshold = datetime.datetime.utcnow() - datetime.timedelta(hours=1)
+        db.execute('DELETE FROM online_users WHERE last_seen < ?', (cleanup_threshold,))
+        db.commit()
+        
+        return success_response({
+            'active_users': max(1, count), # Always show at least 1 (yourself)
+            'modes': mode_stats
+        }, "Social status retrieved")
+    except Exception as e:
+        logger.error(f"Error in get_social_status: {str(e)}", exc_info=True)
+        return error_response("Failed to get status", 500)
+
+def validate_note_content(content):
+    """Validate note content"""
+    if not content or not isinstance(content, str):
+        return False, "Note content is required"
+    
+    content = sanitize_string(content, max_length=2000, allow_newlines=True)
+    
+    if len(content) < 1:
+        return False, "Note content cannot be empty"
+    
+    return True, content
+
+def validate_integer(value, min_val=None, max_val=None, default=0):
+    """Validate and convert to integer"""
+    try:
+        value = int(value)
+        if min_val is not None and value < min_val:
+            value = min_val
+        if max_val is not None and value > max_val:
+            value = max_val
+        return value
+    except (ValueError, TypeError):
+        return default
+
+def validate_json_string(value, max_length=10000):
+    """Validate JSON string data"""
+    if not value:
+        return True, value
+    
+    if not isinstance(value, str):
+        try:
+            value = json.dumps(value)
+        except (TypeError, ValueError):
+            return False, "Invalid JSON data"
+    
+    if len(value) > max_length:
+        return False, f"Data too large (max {max_length} characters)"
+    
+    # Verify it's valid JSON
+    try:
+        json.loads(value)
+    except json.JSONDecodeError:
+        return False, "Invalid JSON format"
+    
+    return True, value
+
+@app.route('/')
+def index():
+    return render_template('index.html')
+
+@app.route('/blog')
+def blog_index():
+    return render_template('blog.html')
+
+@app.route('/blog/pomodoro-nasil-uygulanir')
+def blog_pomodoro():
+    return render_template('blog_pomodoro.html')
+
+@app.route('/blog/derin-calisma-ipuclari')
+def blog_deepwork():
+    return render_template('blog_deepwork.html')
+
+@app.route('/blog/en-iyi-pomodoro-timer-uygulamalari-2024')
+def blog_best_timers():
+    return render_template('blog_best_pomodoro_timers.html')
+
+@app.route('/blog/ogrenciler-icin-pomodoro-rehberi')
+def blog_students():
+    return render_template('blog_students_guide.html')
+
+@app.route('/blog/programcilar-icin-deep-work')
+def blog_programmers():
+    return render_template('blog_programmers_deepwork.html')
+
+@app.route('/blog/adhd-icin-pomodoro')
+def blog_adhd():
+    return render_template('blog_adhd_pomodoro.html')
+
+@app.route('/llms.txt')
+def llms_txt():
+    return send_from_directory(BASE_DIR, 'llms.txt', mimetype='text/plain')
+
+@app.route('/sitemap.xml')
+def sitemap():
+    """Dynamic sitemap with lastmod dates for SEO"""
+    base_url = os.environ.get('SITE_URL', 'https://pomodev-omega.vercel.app')
+    today = datetime.datetime.utcnow().strftime('%Y-%m-%d')
+    
+    # Pages with lastmod - blog posts can have individual dates
+    pages = [
+        ('/', today, '1.0'),
+        ('/blog', today, '0.9'),
+        ('/blog/pomodoro-nasil-uygulanir', today, '0.8'),
+        ('/blog/derin-calisma-ipuclari', today, '0.8'),
+        ('/blog/en-iyi-pomodoro-timer-uygulamalari-2024', today, '0.8'),
+        ('/blog/ogrenciler-icin-pomodoro-rehberi', today, '0.8'),
+        ('/blog/programcilar-icin-deep-work', today, '0.8'),
+        ('/blog/adhd-icin-pomodoro', today, '0.8'),
+        ('/hakkimizda', today, '0.6'),
+        ('/kullanim-kilavuzu', today, '0.7'),
+        ('/gecmis', today, '0.7'),
+        ('/dashboard', today, '0.7'),
+        ('/mini-player', today, '0.6'),
+        ('/gizlilik-politikasi', today, '0.4'),
+        ('/kullanim-sartlari', today, '0.4'),
+    ]
+    
+    xml = ['<?xml version="1.0" encoding="UTF-8"?>']
+    xml.append('<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">')
+    
+    for path, lastmod, priority in pages:
+        xml.append(f'  <url>')
+        xml.append(f'    <loc>{base_url}{path}</loc>')
+        xml.append(f'    <lastmod>{lastmod}</lastmod>')
+        xml.append(f'    <changefreq>weekly</changefreq>')
+        xml.append(f'    <priority>{priority}</priority>')
+        xml.append(f'  </url>')
+    
+    xml.append('</urlset>')
+    
+    from flask import Response
+    return Response('\n'.join(xml), mimetype='application/xml')
+
+@app.route('/mini-player')
+def mini_player():
+    return render_template('mini_player.html')
+
+@app.route('/hakkimizda')
+def about():
+    return render_template('about.html')
+
+@app.route('/kullanim-kilavuzu')
+def guide():
+    return render_template('guide.html')
+
+@app.route('/gecmis')
+def history():
+    return render_template('history.html')
+
+@app.route('/dashboard')
+def dashboard():
+    return render_template('dashboard.html')
+
+@app.route('/api/calendar/config', methods=['GET'])
+def get_calendar_config():
+    """Get Google Calendar API configuration"""
+    try:
+        # In production, load from environment variables
+        client_id = os.environ.get('GOOGLE_CALENDAR_CLIENT_ID', '')
+        return success_response({
+            'clientId': client_id,
+            'enabled': bool(client_id)
+        }, "Calendar config retrieved")
+    except Exception as e:
+        logger.error(f"Error in get_calendar_config: {str(e)}", exc_info=True)
+        return error_response("Failed to get calendar config", 500)
 
 
-# ===== BRAIN DUMP API =====
+@app.route('/calendar/callback')
+def calendar_callback():
+    """OAuth callback page: reads token from URL hash and sends to opener window."""
+    return render_template('calendar_callback.html')
+
+@app.route('/api/calendar/add-event', methods=['POST'])
+@limiter.limit("30 per hour")
+def add_calendar_event():
+    """Add pomodoro session to Google Calendar via backend proxy"""
+    try:
+        token = get_auth_token()
+        user, error = validate_token(token)
+        if error:
+            return error_response(error, 401 if "No token" in error else 403)
+
+        data = request.get_json()
+        if not data or 'session' not in data or 'calendarToken' not in data:
+            return error_response("Missing session or calendarToken", 400)
+
+        session = data['session']
+        calendar_token = data['calendarToken']
+
+        # Create calendar event
+        start_time = datetime.datetime.fromisoformat(session['timestamp'].replace('Z', '+00:00'))
+        duration = session.get('duration', 25)
+        end_time = start_time + datetime.timedelta(minutes=duration)
+
+        event = {
+            'summary': f"ΓÅ▒ Pomodoro - {session.get('mode', 'pomodoro')}",
+            'description': f"Pomodev ile tamamlanan {duration} dakikal─▒k pomodoro seans─▒",
+            'start': {
+                'dateTime': start_time.isoformat(),
+                'timeZone': 'UTC'
+            },
+            'end': {
+                'dateTime': end_time.isoformat(),
+                'timeZone': 'UTC'
+            }
+        }
+
+        # Make request to Google Calendar API
+        try:
+            import requests
+        except ImportError:
+            return error_response("requests library not installed", 500)
+        
+        response = requests.post(
+            'https://www.googleapis.com/calendar/v3/calendars/primary/events',
+            headers={
+                'Authorization': f'Bearer {calendar_token}',
+                'Content-Type': 'application/json'
+            },
+            json=event,
+            timeout=10
+        )
+
+        if response.status_code != 200:
+            return error_response(f"Calendar API error: {response.text}", 500)
+
+        logger.info(f"User {user['username']} added calendar event")
+        return success_response(response.json(), "Event added to calendar")
+        
+    except Exception as e:
+        logger.error(f"Error in add_calendar_event: {str(e)}", exc_info=True)
+        return error_response("Failed to add calendar event", 500)
+
+@app.route('/gizlilik-politikasi')
+def privacy():
+    return render_template('privacy.html')
+
+@app.route('/kullanim-sartlari')
+def terms():
+    return render_template('terms.html')
+
+@app.route('/static/<path:filename>')
+def static_files(filename):
+    return send_from_directory(STATIC_DIR, filename)
+
+@app.route('/ads.txt')
+def ads_txt():
+    try:
+        # ├ûnce root dizinden dene
+        return send_from_directory(BASE_DIR, 'ads.txt', mimetype='text/plain')
+    except:
+        # Sonra static dizinden dene
+        return send_from_directory(STATIC_DIR, 'ads.txt', mimetype='text/plain')
+
+# ===== Error Handlers =====
+@app.errorhandler(404)
+def not_found(error):
+    logger.warning(f"404 Error: {request.url}")
+    return error_response("Resource not found", 404)
+
+@app.errorhandler(500)
+def internal_error(error):
+    logger.error(f"500 Error: {str(error)}", exc_info=True)
+    return error_response("Internal server error", 500)
+
+@app.errorhandler(Exception)
+def handle_exception(e):
+    logger.error(f"Unhandled exception: {str(e)}", exc_info=True)
+    return error_response("An unexpected error occurred", 500)
+
+# ===== MAIN API ROUTES START HERE =====
 
 @app.route('/api/notes', methods=['GET'])
 @limiter.limit("100 per hour")
