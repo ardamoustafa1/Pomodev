@@ -11,14 +11,26 @@ if root_dir not in sys.path:
     sys.path.insert(0, root_dir)
 
 # Flask app'i import et
+# Flask app'i import et
 try:
     from app import app
-except ImportError as e:
-    # Debug için hata mesajı
+    handler = app
+except Exception as e:
+    # CRITICAL: App failed to start.
+    # Return a fallback WSGI app that displays the error.
     import traceback
-    traceback.print_exc()
-    raise
-
-# Vercel serverless function handler
-# Flask WSGI uygulamasını direkt export et
-handler = app
+    error_trace = traceback.format_exc()
+    
+    # Validation for Vercel logs
+    print("CRITICAL STARTUP ERROR:")
+    print(error_trace)
+    
+    from flask import Flask
+    fallback = Flask(__name__)
+    
+    @fallback.route('/', defaults={'path': ''})
+    @fallback.route('/<path:path>')
+    def catch_all(path):
+        return f"<h1>Application Startup Failed</h1><pre>{error_trace}</pre>", 500
+        
+    handler = fallback
