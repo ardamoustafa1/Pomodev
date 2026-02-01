@@ -78,17 +78,13 @@ if DATABASE_URL:
     if DATABASE.startswith('sqlite:///'):
         DATABASE = DATABASE.replace('sqlite:///', '')
 else:
-    # Fallback logic: Try to guess if we can write to root
-    # If not, use /tmp/pomodev.db (common for request-based serverless)
-    try:
-        test_file = os.path.join(BASE_DIR, '.writable_check')
-        with open(test_file, 'w') as f:
-            f.write('check')
-        os.remove(test_file)
-        DATABASE = os.path.join(BASE_DIR, 'pomodev.db')
-    except (IOError, OSError):
-        # Root is not writable (Vercel/Lambda case)
+    # Check if we are on Vercel (or generally read-only filesystem)
+    # Using /tmp as fallback for serverless environments where root is read-only
+    # We rely on VERCEL env var or if we are in a lambda environment
+    if os.environ.get('VERCEL') or os.environ.get('AWS_LAMBDA_FUNCTION_NAME'):
         DATABASE = '/tmp/pomodev.db'
+    else:
+        DATABASE = os.path.join(BASE_DIR, 'pomodev.db')
 
 print(f"DEBUG: Using database at {DATABASE}") # Stdout log for Vercel
 
