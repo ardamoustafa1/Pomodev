@@ -54,10 +54,28 @@ try:
 except ImportError:
     pass  # python-dotenv not installed, use environment variables directly
 
-DATABASE = os.environ.get('DATABASE_URL', os.path.join(BASE_DIR, 'pomodev.db'))
-# Remove sqlite:/// prefix if present
-if DATABASE.startswith('sqlite:///'):
-    DATABASE = DATABASE.replace('sqlite:///', '')
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+# Database Configuration
+# Priority:
+# 1. DATABASE_URL env var (Production DB like Postgres)
+# 2. Local file if writable (Local development)
+# 3. /tmp/pomodev.db (Vercel/Serverless fallback - ephemeral)
+
+DATABASE_URL = os.environ.get('DATABASE_URL')
+
+if DATABASE_URL:
+    DATABASE = DATABASE_URL
+    if DATABASE.startswith('sqlite:///'):
+        DATABASE = DATABASE.replace('sqlite:///', '')
+else:
+    # Check if we are on Vercel (or generally read-only filesystem)
+    # Using /tmp as fallback for serverless environments where root is read-only
+    if os.environ.get('VERCEL'):
+        DATABASE = '/tmp/pomodev.db'
+    else:
+        DATABASE = os.path.join(BASE_DIR, 'pomodev.db')
+
 SECRET_KEY = os.environ.get('SECRET_KEY', 'dev-secret-key-change-in-production')
 DEBUG = os.environ.get('DEBUG', 'False').lower() == 'true'
 TOKEN_EXPIRY_DAYS = int(os.environ.get('TOKEN_EXPIRY_DAYS', '30'))
