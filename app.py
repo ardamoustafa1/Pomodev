@@ -8,13 +8,19 @@ from flask import g, jsonify
 from werkzeug.security import generate_password_hash, check_password_hash
 
 # Logging yapılandırması (early setup)
+# Logging yapılandırması (early setup)
+handlers = [logging.StreamHandler()]
+# Only add FileHandler if we are locally developing (not on Vercel)
+if not os.environ.get('VERCEL'):
+    try:
+        handlers.append(logging.FileHandler('pomodev.log'))
+    except IOError:
+        pass # Ignore if we can't write to file
+
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    handlers=[
-        logging.FileHandler('pomodev.log'),
-        logging.StreamHandler()
-    ]
+    handlers=handlers
 )
 logger = logging.getLogger(__name__)
 
