@@ -1,0 +1,37 @@
+{
+    "manifest_version": 3,
+    "name": "Pomodev - Pomodoro Timer",
+    "short_name": "Pomodev",
+    "version": "1.0.0",
+    "description": "En iyi Pomodoro Timer - Gamification ile odaklan, XP kazan, seviye atla!",
+    "icons": {
+        "16": "icons/icon16.png",
+        "48": "icons/icon48.png",
+        "128": "icons/icon128.png"
+    },
+    "action": {
+        "default_popup": "popup.html",
+        "default_icon": {
+            "16": "icons/icon16.png",
+            "48": "icons/icon48.png"
+        },
+        "default_title": "Pomodev Timer"
+    },
+    "permissions": [
+        "storage",
+        "notifications",
+        "alarms",
+        "declarativeNetRequest",
+        "tabs"
+    ],
+    "host_permissions": [
+        "<all_urls>"
+    ],
+    "background": {
+        "service_worker": "background.js",
+        "type": "module"
+    },
+    "host_permissions": [
+        "https://pomodev-omega.vercel.app/*"
+    ]
+}

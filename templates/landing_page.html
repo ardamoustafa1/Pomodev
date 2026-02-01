@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }} | Pomodev</title>
+    <meta name="description" content="{{ description }}">
+    <meta name="keywords" content="pomodoro timer, best pomodoro timer, pomodoro tekniği, focus timer, productivity timer, pomodoro app, ücretsiz pomodoro timer">
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+    <link rel="canonical" href="https://pomodev-omega.vercel.app/use/{{ request.path.split('/')[-1] }}">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://pomodev-omega.vercel.app/use/{{ request.path.split('/')[-1] }}" />
+    <meta property="og:title" content="{{ title }} | Pomodev" />
+    <meta property="og:description" content="{{ description }}" />
+    <meta property="og:image" content="https://pomodev-omega.vercel.app/static/cover-image.png" />
+    
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="{{ title }} | Pomodev" />
+    <meta name="twitter:description" content="{{ description }}" />
+    <meta name="twitter:image" content="https://pomodev-omega.vercel.app/static/cover-image.png" />
+    
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="/static/gamification.css">
+    <style>
+        .seo-content {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            text-align: left;
+        }
+
+        .seo-content h1 {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            color: var(--text);
+        }
+
+        .seo-content p {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            color: var(--muted);
+            margin-bottom: 20px;
+        }
+
+        .cta-container {
+            text-align: center;
+            margin: 40px 0;
+        }
+
+        .back-link {
+            display: block;
+            text-align: center;
+            margin-top: 40px;
+            color: var(--primary);
+            text-decoration: none;
+        }
+    </style>
+</head>
+
+<body>
+    <header class="app-header">
+        <div class="container">
+            <div class="logo">✔️ Pomodev</div>
+        </div>
+    </header>
+
+    <main>
+        <section class="hero" style="padding-bottom: 0;">
+            <div class="container hero-inner">
+                <div class="hero-copy">
+                    <h1>{{ title }}</h1>
+                    <p>{{ description }}</p>
+                    <div class="hero-cta">
+                        <a href="/" class="btn-cta">Start Focus Timer Now</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="seo-content">
+            {{ content | safe }}
+        </section>
+
+        <div class="cta-container">
+            <a href="/" class="btn-cta" style="font-size: 1.2rem; padding: 16px 32px;">Launch Pomodev App 🚀</a>
+        </div>
+
+        <a href="/" class="back-link">← Back to Home</a>
+    </main>
+
+    <footer class="site-footer">
+        <div class="container footer-inner">
+            <div class="footer-meta">© {{ year }} Pomodev</div>
+        </div>
+    </footer>
+</body>
+
+</html>
