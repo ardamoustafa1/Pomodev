@@ -5117,167 +5117,170 @@ body.zen-mode .timer-container {
 
 [data-theme="light"] .skeleton-line {
   background: linear-gradient(90deg, rgba(0, 0, 0, 0.05) 25%, rgba(0, 0, 0, 0.08) 50%, rgba(0, 0, 0, 0.05) 75%);
-  /* =========================================
+  background-size: 200% 100%;
+}
+
+/* =========================================
    MOBILE & TABLET OPTIMIZATION (PREMIUM)
    ========================================= */
 
-  /* --- IPAD / TABLET PORTRAIT (768px - 1024px) --- */
-  @media (max-width: 1024px) {
-    .premium-layout {
-      grid-template-columns: 1fr;
-      /* Stack everything */
-      gap: 2rem;
-      padding-bottom: 80px;
-      /* Space for bottom nav if exists */
-    }
-
-    .left-panel,
-    .right-panel {
-      display: none;
-      /* Hide side panels by default on tablet portrait to focus on timer */
-    }
-
-    /* Show panels if specific class added or create a mobile menu approach */
-
-    .main-panel {
-      padding-top: 1rem;
-      width: 100%;
-      max-width: 700px;
-      margin: 0 auto;
-    }
-
-    .timer-time {
-      font-size: 6rem;
-      /* Slightly smaller for tablets */
-    }
-
-    .app-grid {
-      grid-template-columns: 1fr;
-      /* Stack timer and tasks */
-      gap: 2rem;
-    }
+/* --- IPAD / TABLET PORTRAIT (768px - 1024px) --- */
+@media (max-width: 1024px) {
+  .premium-layout {
+    grid-template-columns: 1fr;
+    /* Stack everything */
+    gap: 2rem;
+    padding-bottom: 80px;
+    /* Space for bottom nav if exists */
   }
 
-  /* --- MOBILE LANDSCAPE / SMALL TABLET --- */
-  @media (max-width: 820px) {
-    .container {
-      padding: 0 16px;
-    }
-
-    .timer-container {
-      padding: 2rem 1.5rem;
-    }
-
-    .timer-time {
-      font-size: 5rem;
-    }
-
-    .start-btn,
-    .reset-btn {
-      padding: 1rem 2rem;
-      font-size: 1rem;
-    }
+  .left-panel,
+  .right-panel {
+    display: none;
+    /* Hide side panels by default on tablet portrait to focus on timer */
   }
 
-  /* --- MOBILE PORTRAIT (iPhone, Android) - Max width 480px --- */
-  @media (max-width: 480px) {
+  /* Show panels if specific class added or create a mobile menu approach */
 
-    /* Safe Area for Notch and Home Indicator */
-    body {
-      padding-top: env(safe-area-inset-top);
-      padding-bottom: env(safe-area-inset-bottom);
-    }
-
-    .premium-layout {
-      display: flex;
-      flex-direction: column;
-      margin-top: 0.5rem;
-    }
-
-    .main-panel {
-      padding-top: 0;
-    }
-
-    .timer-container {
-      padding: 1.5rem 1rem;
-      box-shadow: none;
-      /* Flatter look for mobile performance */
-      background: transparent;
-      /* Seamless blend */
-      border: none;
-      backdrop-filter: none;
-    }
-
-    .timer-display {
-      margin: 1.5rem 0;
-    }
-
-    .timer-time {
-      font-size: 4.5rem;
-      /* Fit on narrow screens */
-      letter-spacing: -2px;
-    }
-
-    /* Stack buttons vertically if needed, or keeping row but smaller */
-    .timer-controls {
-      gap: 1rem;
-      margin-top: 2rem;
-    }
-
-    .start-btn {
-      width: 100%;
-      /* Full width main action */
-      padding: 1.2rem;
-      font-size: 1.1rem;
-      box-shadow: 0 4px 15px rgba(var(--primary-rgb), 0.3);
-    }
-
-    .reset-btn {
-      padding: 1rem;
-    }
-
-    /* Improved Touch Targets */
-    button,
-    select,
-    input,
-    .mode {
-      min-height: 48px;
-      /* Easier to tap */
-    }
-
-    .top-buttons {
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 0.5rem;
-    }
-
-    .goal-input-group {
-      flex-direction: column;
-    }
-
-    .goal-btn {
-      width: 100%;
-    }
-
-    /* Fix modal width on mobile */
-    .settings-modal-content {
-      width: 100% !important;
-      height: 100%;
-      max-height: 100%;
-      border-radius: 0;
-    }
-
-    .tasks {
-      padding: 1rem;
-    }
-
-    /* Hide heavy visual elements */
-    .visual-counter {
-      margin-top: 1rem;
-    }
+  .main-panel {
+    padding-top: 1rem;
+    width: 100%;
+    max-width: 700px;
+    margin: 0 auto;
   }
 
-  /* Smooth Scrolling for iOS */
-  html {
-    -webkit-overflow-scrolling: touch;
+  .timer-time {
+    font-size: 6rem;
+    /* Slightly smaller for tablets */
   }
+
+  .app-grid {
+    grid-template-columns: 1fr;
+    /* Stack timer and tasks */
+    gap: 2rem;
+  }
+}
+
+/* --- MOBILE LANDSCAPE / SMALL TABLET --- */
+@media (max-width: 820px) {
+  .container {
+    padding: 0 16px;
+  }
+
+  .timer-container {
+    padding: 2rem 1.5rem;
+  }
+
+  .timer-time {
+    font-size: 5rem;
+  }
+
+  .start-btn,
+  .reset-btn {
+    padding: 1rem 2rem;
+    font-size: 1rem;
+  }
+}
+
+/* --- MOBILE PORTRAIT (iPhone, Android) - Max width 480px --- */
+@media (max-width: 480px) {
+
+  /* Safe Area for Notch and Home Indicator */
+  body {
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .premium-layout {
+    display: flex;
+    flex-direction: column;
+    margin-top: 0.5rem;
+  }
+
+  .main-panel {
+    padding-top: 0;
+  }
+
+  .timer-container {
+    padding: 1.5rem 1rem;
+    box-shadow: none;
+    /* Flatter look for mobile performance */
+    background: transparent;
+    /* Seamless blend */
+    border: none;
+    backdrop-filter: none;
+  }
+
+  .timer-display {
+    margin: 1.5rem 0;
+  }
+
+  .timer-time {
+    font-size: 4.5rem;
+    /* Fit on narrow screens */
+    letter-spacing: -2px;
+  }
+
+  /* Stack buttons vertically if needed, or keeping row but smaller */
+  .timer-controls {
+    gap: 1rem;
+    margin-top: 2rem;
+  }
+
+  .start-btn {
+    width: 100%;
+    /* Full width main action */
+    padding: 1.2rem;
+    font-size: 1.1rem;
+    box-shadow: 0 4px 15px rgba(var(--primary-rgb), 0.3);
+  }
+
+  .reset-btn {
+    padding: 1rem;
+  }
+
+  /* Improved Touch Targets */
+  button,
+  select,
+  input,
+  .mode {
+    min-height: 48px;
+    /* Easier to tap */
+  }
+
+  .top-buttons {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.5rem;
+  }
+
+  .goal-input-group {
+    flex-direction: column;
+  }
+
+  .goal-btn {
+    width: 100%;
+  }
+
+  /* Fix modal width on mobile */
+  .settings-modal-content {
+    width: 100% !important;
+    height: 100%;
+    max-height: 100%;
+    border-radius: 0;
+  }
+
+  .tasks {
+    padding: 1rem;
+  }
+
+  /* Hide heavy visual elements */
+  .visual-counter {
+    margin-top: 1rem;
+  }
+}
+
+/* Smooth Scrolling for iOS */
+html {
+  -webkit-overflow-scrolling: touch;
+}
