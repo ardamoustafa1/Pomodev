@@ -1522,14 +1522,14 @@ function actuallyStartTimer() {
     if (currentMode === 'stopwatch') {
         stopwatchStartTime = Date.now();
         endTimestamp = 0;
-        stopwatchStartTime = Date.now();
-        endTimestamp = 0;
-        // timer = setInterval(timerTick, 250); // Moved to worker
-        displayTime();
+
         displayTime();
         if (window.trackEvent) {
             trackEvent('timer_started', { mode: 'stopwatch' });
         }
+
+        // Critical: Save state immediately for Stopwatch
+        saveData();
         return;
     }
 
