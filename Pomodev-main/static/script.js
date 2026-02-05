@@ -1520,7 +1520,10 @@ function actuallyStartTimer() {
 
     // Kronometre: 0'dan yukarı say, bitiş yok
     if (currentMode === 'stopwatch') {
-        stopwatchStartTime = Date.now();
+        // Eğer restore edilmediyse (0 ise) yeni başlat. Restore edildiyse elleme.
+        if (stopwatchStartTime === 0) {
+            stopwatchStartTime = Date.now();
+        }
         endTimestamp = 0;
 
         displayTime();
@@ -3434,12 +3437,19 @@ function setupPageVisibility() {
     // Sayfa görünürlük değişikliklerini dinle
     document.addEventListener('visibilitychange', handleVisibilityChange);
 
-    // Sayfa kapatılırken veri kaydet
-    window.addEventListener('beforeunload', () => {
-        if (isRunning) {
-            saveData();
-        }
-    });
+    // Sayfa kapatılırken veya gizlenirken veri kaydet (iOS için pagehide kritik)
+    window.addEventListener('beforeunload', () => { if (isRunning) saveData(); });
+    window.addEventListener('pagehide', () => { if (isRunning) saveData(); });
+}
+
+let lastAutoSave = 0;
+function handleAutoSave() {
+    // 5 saniyede bir otomatik kaydet (Crash durumuna karşı koruma)
+    const now = Date.now();
+    if (now - lastAutoSave > 5000) {
+        saveData();
+        lastAutoSave = now;
+    }
 }
 
 function handleVisibilityChange() {
@@ -3617,6 +3627,9 @@ function runTimerCompleteLogic() {
 }
 
 function timerTick() {
+    // Her tick'te otomatik kayıt kontrolü (Stopwatch ve Pomodoro için)
+    handleAutoSave();
+
     if (currentMode === 'stopwatch') {
         displayTime();
         return;
