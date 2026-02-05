@@ -1,0 +1,43 @@
+User-agent: *
+Allow: /
+
+# Google
+User-agent: Googlebot
+Allow: /
+
+# Bing
+User-agent: Bingbot
+Allow: /
+
+# Yandex
+User-agent: Yandex
+Allow: /
+
+# AI Crawlers - Welcome!
+User-agent: GPTBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: Anthropic-AI
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: CCBot
+Allow: /
+
+# Sitemap
+Sitemap: https://pomodev-omega.vercel.app/sitemap.xml
+
+# LLMs.txt for AI assistants
+# See: https://pomodev-omega.vercel.app/llms.txt
+
+# Disallow admin or private areas
+Disallow: /api/
+Disallow: /admin/

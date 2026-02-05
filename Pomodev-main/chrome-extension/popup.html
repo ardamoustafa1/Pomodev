@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pomodev Timer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            width: 320px;
+            min-height: 400px;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(180deg, #0f141a 0%, #1a2332 100%);
+            color: #d6dde6;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #4da3ff, #667eea);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .timer-display {
+            text-align: center;
+            margin: 30px 0;
+        }
+
+        .timer-time {
+            font-size: 56px;
+            font-weight: 700;
+            letter-spacing: -2px;
+            color: #fff;
+        }
+
+        .timer-mode {
+            font-size: 14px;
+            color: #9aa6b2;
+            margin-top: 8px;
+        }
+
+        .mode-switcher {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .mode-btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            color: #9aa6b2;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .mode-btn.active {
+            background: #4da3ff;
+            color: white;
+        }
+
+        .mode-btn:hover {
+            background: rgba(77, 163, 255, 0.3);
+        }
+
+        .controls {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            margin: 20px 0;
+        }
+
+        .btn-primary {
+            padding: 12px 32px;
+            border: none;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #4da3ff, #667eea);
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .btn-primary:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 24px rgba(77, 163, 255, 0.4);
+        }
+
+        .btn-secondary {
+            padding: 12px 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            background: transparent;
+            color: #9aa6b2;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .stat-card {
+            text-align: center;
+            padding: 12px 8px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: #4da3ff;
+        }
+
+        .stat-label {
+            font-size: 10px;
+            color: #9aa6b2;
+            margin-top: 4px;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .footer a {
+            color: #4da3ff;
+            text-decoration: none;
+            font-size: 12px;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+
+        .xp-bar {
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            margin-top: 16px;
+            overflow: hidden;
+        }
+
+        .xp-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4da3ff, #667eea);
+            border-radius: 3px;
+            transition: width 0.3s;
+        }
+
+        .level-info {
+            display: flex;
+            justify-content: space-between;
+            font-size: 11px;
+            color: #9aa6b2;
+            margin-top: 6px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="header">
+        <div class="logo">⏱ Pomodev</div>
+    </div>
+
+    <div class="mode-switcher">
+        <button class="mode-btn active" data-mode="pomodoro">Pomodoro</button>
+        <button class="mode-btn" data-mode="short">Kısa Mola</button>
+        <button class="mode-btn" data-mode="long">Uzun Mola</button>
+    </div>
+
+    <div class="timer-display">
+        <div class="timer-time" id="timer">25:00</div>
+        <div class="timer-mode" id="timerMode">Odaklanma Zamanı</div>
+    </div>
+
+    <div class="controls">
+        <button class="btn-primary" id="startBtn">BAŞLAT</button>
+        <button class="btn-secondary" id="resetBtn">↺</button>
+    </div>
+
+    <div class="stats">
+        <div class="stat-card">
+            <div class="stat-value" id="todayCount">0</div>
+            <div class="stat-label">Bugün</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value" id="weekCount">0</div>
+            <div class="stat-label">Bu Hafta</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value" id="streakCount">0</div>
+            <div class="stat-label">Streak 🔥</div>
+        </div>
+    </div>
+
+    <div class="xp-bar">
+        <div class="xp-fill" id="xpBar" style="width: 45%;"></div>
+    </div>
+    <div class="level-info">
+        <span id="levelText">Lvl 5</span>
+        <span id="xpText">450 / 1000 XP</span>
+    </div>
+
+    <div class="footer">
+        <a href="https://pomodev-omega.vercel.app" target="_blank">Web'de Aç →</a>
+    </div>
+
+    <script src="popup.js"></script>
+</body>
+
+</html>

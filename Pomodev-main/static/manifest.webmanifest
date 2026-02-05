@@ -1,0 +1,15 @@
+{
+  "name": "Pomodev",
+  "short_name": "Pomodev",
+  "description": "Professional Pomodoro Timer for Developers",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0f141a",
+  "theme_color": "#ff4d4f",
+  "orientation": "portrait",
+  "icons": [
+    { "src": "/static/favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" },
+    { "src": "/static/cover-image.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}
+

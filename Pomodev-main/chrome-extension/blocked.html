@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Site Engellendi - Pomodev</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-align: center;
+            padding: 20px;
+        }
+        .container {
+            max-width: 500px;
+        }
+        h1 { font-size: 2.5em; margin-bottom: 20px; }
+        p { font-size: 1.2em; line-height: 1.6; }
+        .timer-info {
+            background: rgba(255,255,255,0.2);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        button {
+            background: white;
+            color: #667eea;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 1em;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+        button:hover {
+            background: #f0f0f0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚫 Site Engellendi</h1>
+        <p>Pomodoro seansı devam ediyor!</p>
+        <div class="timer-info">
+            <p>Odaklanmanı korumak için bu site engellendi.</p>
+            <p id="timerStatus">Timer çalışıyor...</p>
+        </div>
+        <p>Pomodoro tamamlandığında siteye erişebileceksin.</p>
+        <button onclick="window.close()">Pencereyi Kapat</button>
+    </div>
+    <script>
+        // Update timer status
+        chrome.storage.local.get(['remainingTime', 'currentMode'], (data) => {
+            if (data.remainingTime) {
+                const minutes = Math.floor(data.remainingTime / 60);
+                const seconds = data.remainingTime % 60;
+                document.getElementById('timerStatus').textContent = 
+                    `Kalan süre: ${minutes}:${seconds.toString().padStart(2, '0')}`;
+            }
+        });
+        
+        // Update every second
+        setInterval(() => {
+            chrome.storage.local.get(['remainingTime', 'isRunning'], (data) => {
+                if (!data.isRunning || data.remainingTime <= 0) {
+                    window.location.reload();
+                } else {
+                    const minutes = Math.floor(data.remainingTime / 60);
+                    const seconds = data.remainingTime % 60;
+                    document.getElementById('timerStatus').textContent = 
+                        `Kalan süre: ${minutes}:${seconds.toString().padStart(2, '0')}`;
+                }
+            });
+        }, 1000);
+    </script>
+</body>
+</html>

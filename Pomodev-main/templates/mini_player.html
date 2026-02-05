@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>⏱ Pomodoro Mini</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="google-adsense-account" content="ca-pub-9221145906123169">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9221145906123169" crossorigin="anonymous"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --primary:#4da3ff;
+  --primary-strong:#2a7be7;
+  --primary-rgb:77, 163, 255;
+}
+body{
+  font-family:Inter,'Segoe UI',sans-serif;
+  background:rgba(10,8,12,0.95);
+  color:#fff;
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:16px;
+}
+.card{
+  width:280px;
+  background:linear-gradient(180deg, rgba(var(--primary-rgb), 0.15) 0%, #2a1a24 25%, #351e28 60%, rgba(var(--primary-rgb), 0.12) 100%);
+  border-radius:24px;
+  padding:20px;
+  box-shadow:0 25px 50px rgba(0,0,0,0.5),0 0 0 1px rgba(255,255,255,0.06),0 0 40px rgba(var(--primary-rgb), 0.15);
+  position:relative;
+  overflow:hidden;
+}
+.card-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:16px;
+  padding-bottom:12px;
+  border-bottom:1px solid rgba(255,255,255,0.06);
+}
+.card-title{
+  font-size:0.75rem;
+  font-weight:700;
+  letter-spacing:1.5px;
+  text-transform:uppercase;
+  color:rgba(255,255,255,0.85);
+}
+.card-link{
+  width:36px;
+  height:36px;
+  border-radius:10px;
+  background:rgba(255,255,255,0.08);
+  border:1px solid rgba(255,255,255,0.12);
+  color:rgba(255,255,255,0.8);
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:14px;
+  transition:all 0.2s;
+  text-decoration:none;
+}
+.card-link:hover{
+  background:rgba(255,255,255,0.12);
+  border-color:rgba(255,255,255,0.2);
+  color:#fff;
+}
+.time-wrap{
+  text-align:center;
+  margin-bottom:20px;
+  padding:16px 0;
+}
+.time{
+  font-size:3.25rem;
+  font-weight:800;
+  color:#ffffff;
+  letter-spacing:-2px;
+  line-height:1;
+  font-family:Inter,-apple-system,sans-serif;
+}
+.mode{
+  font-size:0.8rem;
+  font-weight:600;
+  text-transform:uppercase;
+  letter-spacing:2px;
+  color:var(--primary);
+  margin-top:8px;
+}
+.buttons{
+  display:flex;
+  gap:10px;
+  align-items:stretch;
+}
+.buttons button{
+  border:none;
+  border-radius:14px;
+  cursor:pointer;
+  font-size:1.1rem;
+  font-weight:600;
+  transition:all 0.25s cubic-bezier(0.4,0,0.2,1);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  min-height:52px;
+}
+#playPause{
+  flex:1;
+  background:linear-gradient(90deg, var(--primary-strong) 0%, var(--primary) 50%, var(--primary) 100%);
+  color:#fff;
+  box-shadow:0 4px 20px rgba(var(--primary-rgb), 0.45);
+}
+#playPause:hover{
+  background:linear-gradient(90deg, var(--primary) 0%, var(--primary-strong) 100%);
+  box-shadow:0 8px 28px rgba(var(--primary-rgb), 0.5);
+  transform:translateY(-2px);
+}
+#closeBtn{
+  flex:0.4;
+  min-width:52px;
+  background:rgba(80,35,45,0.6);
+  border:1px solid rgba(255,255,255,0.08);
+  color:rgba(255,255,255,0.9);
+}
+#closeBtn:hover{
+  background:rgba(100,45,55,0.8);
+  border-color:rgba(255,255,255,0.12);
+}
+.drag-hint{
+  position:absolute;
+  top:0;left:0;right:0;
+  height:20px;
+  cursor:move;
+  font-size:0;
+  border-radius:24px 24px 0 0;
+}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="drag-hint" title="Pencereyi taşımak için başlık çubuğundan sürükleyin"></div>
+  <div class="card-header">
+    <span class="card-title" id="modeTitle">POMODORO</span>
+    <a class="card-link" href="#" title="Ana sayfaya git" id="linkBtn">🔗</a>
+  </div>
+  <div class="time-wrap">
+    <div id="time" class="time">25:00</div>
+    <div id="mode" class="mode">Pomodoro</div>
+  </div>
+  <div class="buttons">
+    <button id="playPause">▶</button>
+    <button id="closeBtn">✕</button>
+  </div>
+</div>
+<script>
+const parentUrl = window.opener ? window.opener.location.href : '';
+let updateInterval;
+
+var MINI_DEFAULT_PRIMARY = '#4da3ff';
+var MINI_DEFAULT_STRONG = '#2a7be7';
+var MINI_DEFAULT_RGB = '77, 163, 255';
+
+function syncThemeFromOpener() {
+  var root = document.documentElement;
+  if (window.opener && !window.opener.closed) {
+    try {
+      var s = window.opener.getComputedStyle(window.opener.document.documentElement);
+      var p = s.getPropertyValue('--primary').trim();
+      var ps = s.getPropertyValue('--primary-strong').trim();
+      var prgb = s.getPropertyValue('--primary-rgb').trim();
+      if (p) root.style.setProperty('--primary', p);
+      if (ps) root.style.setProperty('--primary-strong', ps);
+      if (prgb) root.style.setProperty('--primary-rgb', prgb);
+      return;
+    } catch (e) {}
+  }
+  var accent = localStorage.getItem('accent');
+  var map = { blue: ['#4da3ff','#2a7be7','77, 163, 255'], purple: ['#a78bfa','#7c3aed','167, 139, 250'], coral: ['#fb7185','#e11d48','251, 113, 133'], red: ['#ef4444','#dc2626','239, 68, 68'], green: ['#22c55e','#16a34a','34, 197, 94'], teal: ['#14b8a6','#0d9488','20, 184, 166'], orange: ['#f97316','#ea580c','249, 115, 22'], amber: ['#f59e0b','#d97706','245, 158, 11'], pink: ['#ec4899','#db2777','236, 72, 153'] };
+  var v = map[accent] || map.blue;
+  root.style.setProperty('--primary', v[0]);
+  root.style.setProperty('--primary-strong', v[1]);
+  root.style.setProperty('--primary-rgb', v[2]);
+}
+
+function updateFromParent() {
+  syncThemeFromOpener();
+  if (!window.opener) return;
+  var timer = window.opener.document.getElementById('timer');
+  var currentMode = window.opener.document.getElementById('currentMode');
+  var startBtn = window.opener.document.querySelector('.start-btn');
+  if (timer) document.getElementById('time').textContent = timer.textContent;
+  var modeText = currentMode ? (currentMode.textContent || 'Pomodoro') : 'Pomodoro';
+  document.getElementById('mode').textContent = modeText;
+  document.getElementById('modeTitle').textContent = modeText.toUpperCase().replace(/ı/g,'I');
+  if (startBtn) {
+    var isRunning = startBtn.textContent === 'PAUSE';
+    document.getElementById('playPause').textContent = isRunning ? '⏸' : '▶';
+  }
+}
+
+document.getElementById('playPause').addEventListener('click', () => {
+  if (window.opener) {
+    const startBtn = window.opener.document.querySelector('.start-btn');
+    if (startBtn) startBtn.click();
+  }
+});
+document.getElementById('closeBtn').addEventListener('click', () => window.close());
+
+document.getElementById('linkBtn').addEventListener('click', (e) => {
+  e.preventDefault();
+  if (window.opener) {
+    window.opener.focus();
+    if (parentUrl) window.opener.location.href = parentUrl;
+  }
+});
+
+updateInterval = setInterval(updateFromParent, 500);
+updateFromParent();
+</script>
+</body>
+</html>

@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Pomodev</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .dashboard-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .dashboard-card {
+            background: rgba(255,255,255,0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 24px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .dashboard-card.large {
+            grid-column: span 2;
+        }
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .card-title {
+            font-size: 1.2em;
+            font-weight: 600;
+            color: var(--primary);
+        }
+        .stat-big {
+            font-size: 3em;
+            font-weight: 800;
+            color: var(--primary);
+            line-height: 1;
+            margin: 10px 0;
+        }
+        .stat-label {
+            color: rgba(255,255,255,0.7);
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+        .progress-ring {
+            width: 120px;
+            height: 120px;
+            margin: 0 auto;
+        }
+        .chart-wrapper {
+            height: 300px;
+            margin-top: 20px;
+        }
+        .quick-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 15px;
+        }
+        .quick-stat {
+            text-align: center;
+            padding: 15px;
+            background: rgba(255,255,255,0.03);
+            border-radius: 12px;
+        }
+        .quick-stat-value {
+            font-size: 2em;
+            font-weight: bold;
+            color: var(--primary);
+        }
+        .quick-stat-label {
+            font-size: 0.85em;
+            color: rgba(255,255,255,0.6);
+            margin-top: 5px;
+        }
+        .insight-card {
+            background: rgba(255,255,255,0.03);
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 10px;
+            border-left: 3px solid var(--primary);
+        }
+        .insight-title {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        .insight-text {
+            font-size: 0.9em;
+            color: rgba(255,255,255,0.7);
+        }
+        @media (max-width: 768px) {
+            .dashboard-card.large {
+                grid-column: span 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <div class="dashboard-header">
+            <div>
+                <h1>📊 Dashboard</h1>
+                <p style="color: rgba(255,255,255,0.6); margin-top: 5px;">Üretkenlik özetin ve istatistiklerin</p>
+            </div>
+            <div>
+                <a href="/" class="btn" style="text-decoration: none;">← Ana Sayfaya Dön</a>
+            </div>
+        </div>
+
+        <!-- Quick Stats -->
+        <div class="quick-stats">
+            <div class="quick-stat">
+                <div class="quick-stat-value" id="todayPomodoros">0</div>
+                <div class="quick-stat-label">Bugün</div>
+            </div>
+            <div class="quick-stat">
+                <div class="quick-stat-value" id="weekPomodoros">0</div>
+                <div class="quick-stat-label">Bu Hafta</div>
+            </div>
+            <div class="quick-stat">
+                <div class="quick-stat-value" id="currentStreak">0</div>
+                <div class="quick-stat-label">Streak (Gün)</div>
+            </div>
+            <div class="quick-stat">
+                <div class="quick-stat-value" id="totalXP">0</div>
+                <div class="quick-stat-label">Toplam XP</div>
+            </div>
+            <div class="quick-stat">
+                <div class="quick-stat-value" id="currentLevel">1</div>
+                <div class="quick-stat-label">Level</div>
+            </div>
+            <div class="quick-stat">
+                <div class="quick-stat-value" id="productivityScore">-</div>
+                <div class="quick-stat-label">Üretkenlik Skoru</div>
+            </div>
+        </div>
+
+        <!-- Main Dashboard Grid -->
+        <div class="dashboard-grid">
+            <!-- Daily Goal Progress -->
+            <div class="dashboard-card">
+                <div class="card-header">
+                    <div class="card-title">🎯 Günlük Hedef</div>
+                </div>
+                <div class="progress-ring">
+                    <canvas id="goalChart" width="120" height="120"></canvas>
+                </div>
+                <div style="text-align: center; margin-top: 15px;">
+                    <div class="stat-big" id="goalProgressText">0/8</div>
+                    <div class="stat-label">Pomodoro Tamamlandı</div>
+                </div>
+            </div>
+
+            <!-- Weekly Activity -->
+            <div class="dashboard-card large">
+                <div class="card-header">
+                    <div class="card-title">📈 Haftalık Aktivite</div>
+                </div>
+                <div class="chart-wrapper">
+                    <canvas id="weeklyChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Mode Distribution -->
+            <div class="dashboard-card">
+                <div class="card-header">
+                    <div class="card-title">⏱ Mod Dağılımı</div>
+                </div>
+                <div class="chart-wrapper">
+                    <canvas id="modeChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Productivity Trends -->
+            <div class="dashboard-card large">
+                <div class="card-header">
+                    <div class="card-title">📊 Üretkenlik Trendleri</div>
+                </div>
+                <div class="chart-wrapper">
+                    <canvas id="trendsChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Insights & Recommendations -->
+            <div class="dashboard-card large">
+                <div class="card-header">
+                    <div class="card-title">💡 Öneriler ve İçgörüler</div>
+                </div>
+                <div id="insightsContainer">
+                    <div style="text-align: center; color: rgba(255,255,255,0.5); padding: 20px;">
+                        Yükleniyor...
+                    </div>
+                </div>
+            </div>
+
+            <!-- Best Times -->
+            <div class="dashboard-card">
+                <div class="card-header">
+                    <div class="card-title">⏰ En Verimli Zamanlar</div>
+                </div>
+                <div id="bestTimesContainer">
+                    <div class="insight-card">
+                        <div class="insight-title">En Verimli Gün</div>
+                        <div class="insight-text" id="bestDay">Hesaplanıyor...</div>
+                    </div>
+                    <div class="insight-card">
+                        <div class="insight-title">En Verimli Saat</div>
+                        <div class="insight-text" id="bestHour">Hesaplanıyor...</div>
+                    </div>
+                    <div class="insight-card">
+                        <div class="insight-title">Tutarlılık Skoru</div>
+                        <div class="insight-text" id="consistencyScore">Hesaplanıyor...</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Activity -->
+            <div class="dashboard-card">
+                <div class="card-header">
+                    <div class="card-title">🕐 Son Aktiviteler</div>
+                </div>
+                <div id="recentActivity">
+                    <div style="text-align: center; color: rgba(255,255,255,0.5); padding: 20px;">
+                        Yükleniyor...
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/script.js"></script>
+    <script src="/static/advanced-stats.js"></script>
+    <script>
+        // Load dashboard data
+        function loadDashboard() {
+            const stats = JSON.parse(localStorage.getItem('pomodevData') || '{}');
+            const xp = parseInt(localStorage.getItem('pomodevXP') || '0');
+            
+            // Calculate level
+            let level = 1;
+            let levelXP = 0;
+            for (let i = 1; i <= 50; i++) {
+                const neededXP = 100 * Math.pow(1.1, i - 1);
+                if (xp >= levelXP + neededXP) {
+                    levelXP += neededXP;
+                    level = i + 1;
+                } else {
+                    break;
+                }
+            }
+
+            // Update quick stats
+            document.getElementById('todayPomodoros').textContent = stats.todayPomodoros || 0;
+            document.getElementById('weekPomodoros').textContent = stats.weekPomodoros || 0;
+            document.getElementById('currentStreak').textContent = stats.currentStreak || 0;
+            document.getElementById('totalXP').textContent = xp.toLocaleString();
+            document.getElementById('currentLevel').textContent = level;
+            
+            // Productivity score
+            if (typeof advancedStats !== 'undefined') {
+                const score = advancedStats.getProductivityScore();
+                document.getElementById('productivityScore').textContent = score;
+                document.getElementById('productivityScore').style.color = score >= 80 ? '#2ecc71' : score >= 50 ? '#f39c12' : '#e74c3c';
+            }
+
+            // Daily goal progress
+            const dailyGoal = stats.dailyGoal || 8;
+            const todayPomodoros = stats.todayPomodoros || 0;
+            const progress = Math.min(100, (todayPomodoros / dailyGoal) * 100);
+            document.getElementById('goalProgressText').textContent = `${todayPomodoros}/${dailyGoal}`;
+            
+            // Goal chart
+            const goalCtx = document.getElementById('goalChart').getContext('2d');
+            new Chart(goalCtx, {
+                type: 'doughnut',
+                data: {
+                    datasets: [{
+                        data: [progress, 100 - progress],
+                        backgroundColor: [getComputedStyle(document.documentElement).getPropertyValue('--primary'), 'rgba(255,255,255,0.1)'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    cutout: '75%',
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: { enabled: false }
+                    }
+                }
+            });
+
+            // Weekly activity chart
+            const weeklyData = getWeeklyData(stats);
+            const weeklyCtx = document.getElementById('weeklyChart').getContext('2d');
+            new Chart(weeklyCtx, {
+                type: 'bar',
+                data: {
+                    labels: weeklyData.labels,
+                    datasets: [{
+                        label: 'Pomodoro Sayısı',
+                        data: weeklyData.data,
+                        backgroundColor: getComputedStyle(document.documentElement).getPropertyValue('--primary'),
+                        borderRadius: 8
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: { color: 'rgba(255,255,255,0.6)' },
+                            grid: { color: 'rgba(255,255,255,0.1)' }
+                        },
+                        x: {
+                            ticks: { color: 'rgba(255,255,255,0.6)' },
+                            grid: { color: 'rgba(255,255,255,0.1)' }
+                        }
+                    }
+                }
+            });
+
+            // Mode distribution chart
+            const modeData = getModeDistribution(stats);
+            const modeCtx = document.getElementById('modeChart').getContext('2d');
+            new Chart(modeCtx, {
+                type: 'pie',
+                data: {
+                    labels: ['Pomodoro', 'Kısa Mola', 'Uzun Mola'],
+                    datasets: [{
+                        data: [modeData.pomodoro, modeData.short, modeData.long],
+                        backgroundColor: ['#ff4d4f', '#4da3ff', '#a78bfa'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: { color: 'rgba(255,255,255,0.8)' }
+                        }
+                    }
+                }
+            });
+
+            // Trends chart
+            if (typeof advancedStats !== 'undefined') {
+                const trends = advancedStats.getProductivityTrends(30);
+                const trendsCtx = document.getElementById('trendsChart').getContext('2d');
+                new Chart(trendsCtx, {
+                    type: 'line',
+                    data: {
+                        labels: trends.map(t => new Date(t.date).toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' })),
+                        datasets: [{
+                            label: 'Günlük Pomodoro',
+                            data: trends.map(t => t.count),
+                            borderColor: getComputedStyle(document.documentElement).getPropertyValue('--primary'),
+                            backgroundColor: 'rgba(255, 77, 79, 0.1)',
+                            tension: 0.4,
+                            fill: true
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                labels: { color: 'rgba(255,255,255,0.8)' }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: { color: 'rgba(255,255,255,0.6)' },
+                                grid: { color: 'rgba(255,255,255,0.1)' }
+                            },
+                            x: {
+                                ticks: { color: 'rgba(255,255,255,0.6)' },
+                                grid: { color: 'rgba(255,255,255,0.1)' }
+                            }
+                        }
+                    }
+                });
+            }
+
+            // Insights
+            if (typeof advancedStats !== 'undefined') {
+                const insights = advancedStats.getInsights();
+                const insightsContainer = document.getElementById('insightsContainer');
+                if (insights.length > 0) {
+                    insightsContainer.innerHTML = insights.map(insight => `
+                        <div class="insight-card" style="border-left-color: ${insight.type === 'positive' ? '#2ecc71' : insight.type === 'warning' ? '#e74c3c' : '#3498db'}">
+                            <div class="insight-title">${insight.icon} ${insight.title}</div>
+                            <div class="insight-text">${insight.message}</div>
+                        </div>
+                    `).join('');
+                } else {
+                    insightsContainer.innerHTML = '<div style="text-align: center; color: rgba(255,255,255,0.5); padding: 20px;">Henüz yeterli veri yok. Daha fazla pomodoro tamamladıkça öneriler burada görünecek.</div>';
+                }
+            }
+
+            // Best times
+            if (typeof advancedStats !== 'undefined') {
+                const bestDay = advancedStats.getBestDayOfWeek();
+                const bestTime = advancedStats.getBestTimeOfDay();
+                const trends = advancedStats.getProductivityTrends(30);
+                const consistency = advancedStats.getConsistencyScore(trends);
+
+                document.getElementById('bestDay').textContent = `${bestDay.day} (${bestDay.count} pomodoro)`;
+                document.getElementById('bestHour').textContent = `${bestTime.hour}:00-${bestTime.hour + 1}:00 (${bestTime.count} pomodoro)`;
+                document.getElementById('consistencyScore').textContent = `${consistency}% tutarlılık`;
+            }
+
+            // Recent activity
+            const history = stats.pomodoroHistory || [];
+            const recent = history.slice(-10).reverse();
+            const recentContainer = document.getElementById('recentActivity');
+            if (recent.length > 0) {
+                recentContainer.innerHTML = recent.map(session => {
+                    const date = new Date(session.timestamp);
+                    const mode = session.mode || 'pomodoro';
+                    const modeIcon = mode === 'pomodoro' ? '⏱' : mode === 'short' ? '☕' : '🌴';
+                    return `
+                        <div style="padding: 10px; border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <div style="font-weight: 500;">${modeIcon} ${mode === 'pomodoro' ? 'Pomodoro' : mode === 'short' ? 'Kısa Mola' : 'Uzun Mola'}</div>
+                                <div style="font-size: 0.85em; color: rgba(255,255,255,0.6);">${date.toLocaleDateString('tr-TR')} ${date.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })}</div>
+                            </div>
+                            <div style="color: var(--primary); font-weight: 600;">${session.duration || 25} dk</div>
+                        </div>
+                    `;
+                }).join('');
+            } else {
+                recentContainer.innerHTML = '<div style="text-align: center; color: rgba(255,255,255,0.5); padding: 20px;">Henüz aktivite yok.</div>';
+            }
+        }
+
+        function getWeeklyData(stats) {
+            const history = stats.pomodoroHistory || [];
+            const now = new Date();
+            const days = [];
+            const data = [];
+
+            for (let i = 6; i >= 0; i--) {
+                const date = new Date(now);
+                date.setDate(date.getDate() - i);
+                date.setHours(0, 0, 0, 0);
+                
+                const dayName = date.toLocaleDateString('tr-TR', { weekday: 'short' });
+                days.push(dayName);
+                
+                const dayHistory = history.filter(s => {
+                    const sDate = new Date(s.timestamp);
+                    sDate.setHours(0, 0, 0, 0);
+                    return sDate.getTime() === date.getTime() && s.mode === 'pomodoro';
+                });
+                
+                data.push(dayHistory.length);
+            }
+
+            return { labels: days, data: data };
+        }
+
+        function getModeDistribution(stats) {
+            const history = stats.pomodoroHistory || [];
+            return {
+                pomodoro: history.filter(s => s.mode === 'pomodoro').length,
+                short: history.filter(s => s.mode === 'short').length,
+                long: history.filter(s => s.mode === 'long').length
+            };
+        }
+
+        // Load on page load
+        document.addEventListener('DOMContentLoaded', loadDashboard);
+    </script>
+</body>
+</html>

@@ -1,0 +1,68 @@
+/* ===== New Header Design ===== */
+.app-header .container {
+    padding: 15px 0;
+    justify-content: space-between;
+}
+
+.top-buttons {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+/* Vertical Divider between groups */
+.divider-vertical {
+    width: 1px;
+    height: 24px;
+    background: rgba(255, 255, 255, 0.2);
+    margin: 0 4px;
+}
+
+/* Button Styling */
+.icon-btn {
+    background: rgba(255, 255, 255, 0.05);
+    /* Softer background */
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: var(--text);
+    width: 40px;
+    /* Slightly smaller for compactness */
+    height: 40px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.icon-btn:hover {
+    background: var(--primary);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    border-color: var(--primary);
+}
+
+/* Custom Select Styling */
+.header-select {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: var(--text);
+    padding: 0 12px;
+    height: 40px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    outline: none;
+    transition: all 0.2s ease;
+}
+
+.header-select:hover {
+    border-color: var(--primary);
+}
+
+.header-select option {
+    background: var(--bg);
+    color: var(--text);
+}

@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Google Calendar Bağlantısı</title>
+  <style>
+    body { font-family: system-ui, sans-serif; padding: 24px; text-align: center; max-width: 400px; margin: 40px auto; }
+    .ok { color: #0a0; }
+    .err { color: #c00; }
+    .msg { margin: 16px 0; }
+  </style>
+</head>
+<body>
+  <div id="status" class="msg">Yönlendiriliyorsunuz...</div>
+  <script>
+    (function() {
+      function getHashParams() {
+        var params = {};
+        var hash = window.location.hash.substring(1);
+        if (!hash) return params;
+        hash.split('&').forEach(function(p) {
+          var kv = p.split('=');
+          if (kv.length === 2) params[kv[0]] = decodeURIComponent(kv[1]);
+        });
+        return params;
+      }
+      var params = getHashParams();
+      var token = params.access_token;
+      var error = params.error;
+      var statusEl = document.getElementById('status');
+      if (token && window.opener) {
+        try {
+          window.opener.postMessage({ type: 'google_calendar_token', token: token }, window.location.origin);
+          statusEl.innerHTML = '<span class="ok">✅ Bağlantı başarılı. Bu pencereyi kapatabilirsiniz.</span>';
+        } catch (e) {
+          statusEl.innerHTML = '<span class="err">Token gönderilemedi: ' + e.message + '</span>';
+        }
+      } else if (error) {
+        statusEl.innerHTML = '<span class="err">Hata: ' + (params.error_description || error) + '</span>';
+        if (window.opener) {
+          try {
+            window.opener.postMessage({ type: 'google_calendar_error', error: error }, window.location.origin);
+          } catch (_) {}
+        }
+      } else if (!token) {
+        statusEl.innerHTML = '<span class="err">Token alınamadı. Lütfen tekrar deneyin veya bu pencereyi kapatın.</span>';
+      }
+    })();
+  </script>
+</body>
+</html>
