@@ -1251,6 +1251,9 @@ function startTimer() {
                 time_remaining: remainingTime
             });
         }
+
+        // PAUSE durumunu kaydet
+        saveData();
         return;
     }
 
@@ -1312,6 +1315,9 @@ function resetTimer() {
 
     // Zamanı göster
     displayTime();
+
+    // Resetlenen durumu kaydet (temizle)
+    saveData();
 }
 
 function setMode(mode) {
@@ -1550,6 +1556,9 @@ function actuallyStartTimer() {
             remaining_time: remainingTime
         });
     }
+
+    // Başlar başlamaz durumu kaydet
+    saveData();
 }
 function promptCompletedNote() {
     // Not prompt kaldırıldı
@@ -2872,7 +2881,17 @@ function saveData() {
         alarmRepeat: parseInt(document.getElementById('alarmRepeat')?.value) || 1,
         alarmVolume: parseInt(document.getElementById('alarmVolume')?.value) || 50,
         tickSound: document.getElementById('tickSound')?.value || 'none',
-        tickVolume: parseInt(document.getElementById('tickVolume')?.value) || 50
+        tickVolume: parseInt(document.getElementById('tickVolume')?.value) || 50,
+        // Timer State Persistence
+        timerState: {
+            isRunning: isRunning,
+            mode: currentMode,
+            remainingTime: remainingTime,
+            endTimestamp: endTimestamp,
+            stopwatchElapsed: stopwatchElapsed,
+            stopwatchStartTime: stopwatchStartTime,
+            lastSaveTime: Date.now()
+        }
     };
 
     // Use DataManager
@@ -2932,11 +2951,63 @@ async function loadData() {
             durations.long = data.durations.long || durations.long;
         }
 
-        // Timer state'ini güncelle (her zaman, çalışıyor olsa bile)
-        if (!isRunning) {
-            remainingTime = durations[currentMode] || 1500;
-            endTimestamp = 0;
-            displayTime();
+        // === TIMER STATE RESTORATION ===
+        // Sayfa yenilendiğinde veya geri gelindiğinde timer durumunu kurtar
+        if (data.timerState) {
+            const state = data.timerState;
+            // Modu geri yükle
+            currentMode = state.mode || 'pomodoro';
+            updateModeStyles();
+            updateFocusMessage();
+
+            if (state.isRunning) {
+                // ÇALIŞIYORSA: Geçen süreyi hesapla ve devam et
+                const timePassed = Math.floor((Date.now() - state.lastSaveTime) / 1000);
+
+                if (currentMode === 'stopwatch') {
+                    stopwatchElapsed = (state.stopwatchElapsed || 0) + timePassed;
+                    stopwatchStartTime = Date.now() - (stopwatchElapsed * 1000); // Sanal başlangıç
+                    actuallyStartTimer();
+                } else {
+                    // Countdown modes
+                    remainingTime = (state.remainingTime || durations[currentMode]) - timePassed;
+
+                    if (remainingTime <= 0) {
+                        // Süre dolmuş
+                        remainingTime = 0;
+                        displayTime();
+                        isRunning = false;
+                        endTimestamp = 0;
+                        const startBtn = document.querySelector('.start-btn');
+                        if (startBtn) startBtn.textContent = 'START';
+                    } else {
+                        // Hala süre var, devam et
+                        remainingTime = Math.max(0, remainingTime);
+                        displayTime();
+                        actuallyStartTimer();
+                    }
+                }
+            } else {
+                // PAUSE DURUMUNDAYSA: Olduğu gibi geri yükle (zaman geçmemiş varsay, çünkü duraklatılmıştı)
+                // Kullanıcı durdurup gitti, geri geldiğinde aynen bulmalı.
+                if (currentMode === 'stopwatch') {
+                    stopwatchElapsed = state.stopwatchElapsed || 0;
+                    stopwatchStartTime = 0;
+                    displayTime();
+                } else {
+                    remainingTime = state.remainingTime || durations[currentMode];
+                    endTimestamp = 0;
+                    displayTime();
+                }
+                // Buton zaten START (isRunning=false default)
+            }
+        } else {
+            // Timer verisi yoksa standart yükleme
+            if (!isRunning) {
+                remainingTime = durations[currentMode] || 1500;
+                endTimestamp = 0;
+                displayTime();
+            }
         }
 
         taskHistory = data.taskHistory || [];
@@ -3363,17 +3434,30 @@ function handleVisibilityChange() {
         // Sayfa arka plana alındı
         isPageVisible = false;
         if (isRunning) {
-            // ARKA PLAN PAUSE MANTIĞI KALDIRILDI - Worker devam edecek.
-            console.log('ℹ️ Sayfa arka planda - Worker çalışmaya devam ediyor...');
+            saveData(); // Save state immediately to be safe against reloads/memory clears
         }
     } else {
         // Sayfa tekrar aktif oldu
         isPageVisible = true;
-        // Zamanı güncelle (Worker arka planda güncellemiş olmalı, UI'ı senkronize et)
-        displayTime();
 
-        // Buradaki backgroundDuration hesaplamaları ve otomatik pause mantığı kaldırıldı
-        // çünkü timer artık arka planda durmuyor.
+        // Eğer timer çalışıyorsa, geçen süreyi senkronize et (Worker ölmüş olabilir veya throttle yemiş olabilir)
+        if (isRunning && currentMode !== 'stopwatch' && endTimestamp > 0) {
+            const timeLeft = Math.max(0, Math.floor((endTimestamp - Date.now()) / 1000));
+
+            // Eğer süre ciddi şekilde sapmışsa güncelle
+            if (Math.abs(remainingTime - timeLeft) > 2) {
+                remainingTime = timeLeft;
+                if (remainingTime <= 0) {
+                    // Süre dolmuş
+                    timerTick(); // Bitiş mantığını tetikle
+                } else {
+                    displayTime();
+                }
+            }
+        } else if (isRunning && currentMode === 'stopwatch' && stopwatchStartTime > 0) {
+            // Stopwatch senk
+            displayTime();
+        }
     }
 }
 
