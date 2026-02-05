@@ -2965,8 +2965,12 @@ async function loadData() {
                 const timePassed = Math.floor((Date.now() - state.lastSaveTime) / 1000);
 
                 if (currentMode === 'stopwatch') {
-                    stopwatchElapsed = (state.stopwatchElapsed || 0) + timePassed;
-                    stopwatchStartTime = Date.now() - (stopwatchElapsed * 1000); // Sanal başlangıç
+                    // Start time relative to now for correct display
+                    // Total elapsed = (Previously Accumulated) + (Run duration before save) + (Time since save)
+                    const runDurationBeforeSave = (state.stopwatchStartTime > 0) ? Math.floor((state.lastSaveTime - state.stopwatchStartTime) / 1000) : 0;
+                    stopwatchElapsed = (state.stopwatchElapsed || 0) + runDurationBeforeSave + timePassed;
+
+                    stopwatchStartTime = Date.now() - (stopwatchElapsed * 1000);
                     actuallyStartTimer();
                 } else {
                     // Countdown modes
@@ -2990,7 +2994,16 @@ async function loadData() {
             } else {
                 // PAUSE DURUMUNDAYSA: Olduğu gibi geri yükle (zaman geçmemiş varsay, çünkü duraklatılmıştı)
                 // Kullanıcı durdurup gitti, geri geldiğinde aynen bulmalı.
+                // PAUSE DURUMUNDAYSA: Olduğu gibi geri yükle
                 if (currentMode === 'stopwatch') {
+                    // Eğer duraklatılmışsa, kaydedilen stopwatchElapsed zaten toplam süredir?
+                    // Hayır, eğer pause yapıp save ettiysek stopwatchElapsed güncellenmiştir.
+                    // Ancak 'saveData' fonksiyonu pause anında (beforeunload vs) çağrıldığında
+                    // stopwatchElapsed henüz güncellenmemiş olabilir mi?
+                    // resetTimer içinde güncelleniyor. Ancak visibilityChange'de sadece saveData çağrılıyor.
+                    // Durum: Pause ise stopwatchStartTime 0'dır, stopwatchElapsed günceldir.
+                    // Durum: Çalışıyorken kapandıysa (üstteki if bloğu), ama isRunning false kaydedildiyse?
+                    // isRunning false ise save anında duruktur. O zaman start time 0'dır.
                     stopwatchElapsed = state.stopwatchElapsed || 0;
                     stopwatchStartTime = 0;
                     displayTime();
