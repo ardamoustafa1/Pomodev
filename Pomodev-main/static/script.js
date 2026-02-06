@@ -2977,7 +2977,18 @@ async function loadData() {
                     actuallyStartTimer();
                 } else {
                     // Countdown modes
-                    remainingTime = (state.remainingTime || durations[currentMode]) - timePassed;
+                    // iOS / Safari arka plan senaryolarında daha sağlam olması için mümkünse doğrudan
+                    // endTimestamp üzerinden kalan süreyi hesapla. Bu, worker tamamen öldürülse bile
+                    // gerçek duvar saatine göre zamanın akmasını garanti eder.
+                    if (state.endTimestamp && typeof state.endTimestamp === 'number') {
+                        remainingTime = Math.max(
+                            0,
+                            Math.floor((state.endTimestamp - Date.now()) / 1000)
+                        );
+                    } else {
+                        // Geriye dönük uyumluluk: eski kayıtlarda sadece remainingTime/lastSaveTime olabilir
+                        remainingTime = (state.remainingTime || durations[currentMode]) - timePassed;
+                    }
 
                     if (remainingTime <= 0) {
                         // Süre dolmuş
@@ -2990,6 +3001,8 @@ async function loadData() {
                     } else {
                         // Hala süre var, devam et
                         remainingTime = Math.max(0, remainingTime);
+                        // Yeni endTimestamp'i güncelle ki görünürlük değişimlerinde de duvar saati bazlı çalışsın
+                        endTimestamp = Date.now() + remainingTime * 1000;
                         displayTime();
                         actuallyStartTimer();
                     }
