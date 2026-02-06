@@ -478,6 +478,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 }, 100);
             }
 
+            // iOS Safari için: Her saniye localStorage'a kaydet (arka plana geçince kaybolmasın)
+            if (typeof window !== 'undefined' && window.navigator && /iPad|iPhone|iPod/.test(navigator.userAgent)) {
+                if (window._iosSaveInterval) clearInterval(window._iosSaveInterval);
+                window._iosSaveInterval = setInterval(() => {
+                    if (isRunning) {
+                        saveMinimalTimerState();
+                        saveData();
+                    }
+                }, 1000);
+            }
+
             // Worker'ı başlat
             try {
                 if (timerWorker) timerWorker.postMessage({ action: 'START' });
@@ -493,6 +504,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 timer = setInterval(() => {
                     if (isRunning) timerTick();
                 }, 100);
+            }
+
+            // iOS Safari için: Her saniye localStorage'a kaydet
+            if (typeof window !== 'undefined' && window.navigator && /iPad|iPhone|iPod/.test(navigator.userAgent)) {
+                if (window._iosSaveInterval) clearInterval(window._iosSaveInterval);
+                window._iosSaveInterval = setInterval(() => {
+                    if (isRunning) {
+                        saveMinimalTimerState();
+                        saveData();
+                    }
+                }, 1000);
             }
 
             try {
@@ -4078,83 +4100,61 @@ async function restoreTimerStateFromStorage() {
                     }
                 }
             }
-        } catch (e) {
-            console.error('Timer state restore failed:', e);
         }
+    } catch (e) {
+        console.error('Timer state restore failed:', e);
     }
+}
 
 let lastAutoSave = 0;
-    function handleAutoSave() {
-        // iOS Safari için kritik: Daha sık kaydet (arka plana geçince kaybolmasın)
-        const isIOS = typeof window !== 'undefined' && window.navigator && /iPad|iPhone|iPod/.test(navigator.userAgent);
-        const saveInterval = isIOS ? 2000 : 5000; // iOS'ta 2 saniyede bir, diğerlerinde 5 saniyede bir
+function handleAutoSave() {
+    // iOS Safari için kritik: Daha sık kaydet (arka plana geçince kaybolmasın)
+    const isIOS = typeof window !== 'undefined' && window.navigator && /iPad|iPhone|iPod/.test(navigator.userAgent);
+    const saveInterval = isIOS ? 2000 : 5000; // iOS'ta 2 saniyede bir, diğerlerinde 5 saniyede bir
 
-        const now = Date.now();
-        if (now - lastAutoSave > saveInterval) {
-            saveData();
-            lastAutoSave = now;
-        }
+    const now = Date.now();
+    if (now - lastAutoSave > saveInterval) {
+        saveData();
+        lastAutoSave = now;
     }
+}
 
-    function handleVisibilityChange() {
-        if (document.hidden) {
-            // Sayfa arka plana alındı
-            isPageVisible = false;
-            if (isRunning) {
-                try {
-                    saveMinimalTimerState();
-                    var data = { timerState: { isRunning: isRunning, mode: currentMode, remainingTime: remainingTime, endTimestamp: endTimestamp, stopwatchElapsed: stopwatchElapsed, stopwatchStartTime: stopwatchStartTime, lastSaveTime: Date.now() } };
-                    localStorage.setItem('pomodev_timer_state', JSON.stringify(data));
-                    localStorage.setItem('pomodev_end_timestamp', endTimestamp.toString());
-                } catch (e) { }
-                saveData();
-            }
-        } else {
-            // Sayfa tekrar aktif oldu
-            isPageVisible = true;
+function handleVisibilityChange() {
+    if (document.hidden) {
+        // Sayfa arka plana alındı
+        isPageVisible = false;
+        if (isRunning) {
+            try {
+                saveMinimalTimerState();
+                var data = { timerState: { isRunning: isRunning, mode: currentMode, remainingTime: remainingTime, endTimestamp: endTimestamp, stopwatchElapsed: stopwatchElapsed, stopwatchStartTime: stopwatchStartTime, lastSaveTime: Date.now() } };
+                localStorage.setItem('pomodev_timer_state', JSON.stringify(data));
+                localStorage.setItem('pomodev_end_timestamp', endTimestamp.toString());
+            } catch (e) { }
+            saveData();
+        }
+    } else {
+        // Sayfa tekrar aktif oldu
+        isPageVisible = true;
 
-            // iOS Safari / BFCache: Önce SENKRON restart (setInterval arka planda donmuş olabilir)
-            syncRestartTimerFromStorage();
+        // iOS Safari / BFCache: Önce SENKRON restart (setInterval arka planda donmuş olabilir)
+        syncRestartTimerFromStorage();
 
-            // Eğer hâlâ timer çalışmıyorsa async restore dene
-            if (!isRunning || !timer) {
-                restoreTimerStateFromStorage();
-                return;
-            }
+        // Eğer hâlâ timer çalışmıyorsa async restore dene
+        if (!isRunning || !timer) {
+            restoreTimerStateFromStorage();
+            return;
+        }
 
-            // Eğer timer çalışıyorsa, geçen süreyi senkronize et
-            if (isRunning && currentMode !== 'stopwatch' && endTimestamp > 0) {
-                const timeLeft = Math.max(0, Math.floor((endTimestamp - Date.now()) / 1000));
-                remainingTime = timeLeft;
+        // Eğer timer çalışıyorsa, geçen süreyi senkronize et
+        if (isRunning && currentMode !== 'stopwatch' && endTimestamp > 0) {
+            const timeLeft = Math.max(0, Math.floor((endTimestamp - Date.now()) / 1000));
+            remainingTime = timeLeft;
 
-                if (remainingTime <= 0) {
-                    // Süre dolmuş
-                    timerTick(); // Bitiş mantığını tetikle
-                } else {
-                    endTimestamp = Date.now() + remainingTime * 1000; // endTimestamp'i güncelle
-                    // Timer çalışmıyorsa başlat
-                    if (!timer) {
-                        timer = setInterval(() => {
-                            if (isRunning) {
-                                timerTick();
-                            }
-                        }, 100);
-                    }
-                    // iOS save interval'ı başlat
-                    if (typeof window !== 'undefined' && window.navigator && /iPad|iPhone|iPod/.test(navigator.userAgent)) {
-                        if (window._iosSaveInterval) {
-                            clearInterval(window._iosSaveInterval);
-                        }
-                        window._iosSaveInterval = setInterval(() => {
-                            if (isRunning) {
-                                saveData();
-                            }
-                        }, 1000);
-                    }
-                    displayTime();
-                }
-            } else if (isRunning && currentMode === 'stopwatch' && stopwatchStartTime > 0) {
-                // Stopwatch senk
+            if (remainingTime <= 0) {
+                // Süre dolmuş
+                timerTick(); // Bitiş mantığını tetikle
+            } else {
+                endTimestamp = Date.now() + remainingTime * 1000; // endTimestamp'i güncelle
                 // Timer çalışmıyorsa başlat
                 if (!timer) {
                     timer = setInterval(() => {
@@ -4176,213 +4176,216 @@ let lastAutoSave = 0;
                 }
                 displayTime();
             }
+        } else if (isRunning && currentMode === 'stopwatch' && stopwatchStartTime > 0) {
+            // Stopwatch senk
+            // Timer çalışmıyorsa başlat
+            if (!timer) {
+                timer = setInterval(() => {
+                    if (isRunning) {
+                        timerTick();
+                    }
+                }, 100);
+            }
+            // iOS save interval'ı başlat
+            if (typeof window !== 'undefined' && window.navigator && /iPad|iPhone|iPod/.test(navigator.userAgent)) {
+                if (window._iosSaveInterval) {
+                    clearInterval(window._iosSaveInterval);
+                }
+                window._iosSaveInterval = setInterval(() => {
+                    if (isRunning) {
+                        saveData();
+                    }
+                }, 1000);
+            }
+            displayTime();
         }
     }
+}
 
-    let _lastDisplayedSeconds = -1; // Sadece saniye değişince DOM güncelle (performans)
+let _lastDisplayedSeconds = -1; // Sadece saniye değişince DOM güncelle (performans)
 
-    /** Zamanlayıcı bittiğinde çalıştırılır: alarm, istatistik, otomatik mola/pomodoro başlatma. Hem tick hem visibility (arka plan) bitişinde kullanılır. */
-    function runTimerCompleteLogic() {
-        // iOS save interval'ı temizle
-        if (window._iosSaveInterval) {
-            clearInterval(window._iosSaveInterval);
-            window._iosSaveInterval = null;
-        }
-        document.body.classList.remove('zen-mode');
-        playAlarm();
-        remainingTime = 0;
-        displayTime();
+/** Zamanlayıcı bittiğinde çalıştırılır: alarm, istatistik, otomatik mola/pomodoro başlatma. Hem tick hem visibility (arka plan) bitişinde kullanılır. */
+function runTimerCompleteLogic() {
+    // iOS save interval'ı temizle
+    if (window._iosSaveInterval) {
+        clearInterval(window._iosSaveInterval);
+        window._iosSaveInterval = null;
+    }
+    document.body.classList.remove('zen-mode');
+    playAlarm();
+    remainingTime = 0;
+    displayTime();
 
-        if (currentMode === 'pomodoro') {
-            cycleCount++;
-            todayPomodoros++;
-            weekPomodoros++;
+    if (currentMode === 'pomodoro') {
+        cycleCount++;
+        todayPomodoros++;
+        weekPomodoros++;
 
-            try {
-                // Dispatch custom event for features.js
-                window.dispatchEvent(new CustomEvent('pomodoroComplete', {
-                    detail: {
-                        todayCount: todayPomodoros,
-                        weekCount: weekPomodoros,
-                        cycleCount: cycleCount
-                    }
-                }));
-
-                if (window.trackEvent) {
-                    trackEvent('pomodoro_completed', {
-                        mode: 'pomodoro',
-                        duration: durations.pomodoro / 60,
-                        daily_count: todayPomodoros,
-                        total_count: cycleCount,
-                        goal_set: currentPomodoroGoal ? 'yes' : 'no'
-                    });
+        try {
+            // Dispatch custom event for features.js
+            window.dispatchEvent(new CustomEvent('pomodoroComplete', {
+                detail: {
+                    todayCount: todayPomodoros,
+                    weekCount: weekPomodoros,
+                    cycleCount: cycleCount
                 }
+            }));
 
-                pomodoroHistory.push({
-                    timestamp: new Date().toISOString(),
+            if (window.trackEvent) {
+                trackEvent('pomodoro_completed', {
                     mode: 'pomodoro',
-                    duration: durations.pomodoro / 60
+                    duration: durations.pomodoro / 60,
+                    daily_count: todayPomodoros,
+                    total_count: cycleCount,
+                    goal_set: currentPomodoroGoal ? 'yes' : 'no'
                 });
-                updateStreak();
-
-                let baseXP = 100;
-                const potionEnd = parseInt(localStorage.getItem('xp_potion_end') || '0');
-                if (Date.now() < potionEnd) baseXP *= 2;
-
-                if (typeof dataManager !== 'undefined') {
-                    const oldXP = dataManager.getXP();
-                    const newXP = dataManager.addXP(baseXP);
-                    checkLevelUp(oldXP, newXP);
-                    updateGamificationUI();
-                    if (typeof showXPGain === 'function') showXPGain(baseXP, 'Pomodoro tamamlandı!');
-                    if (typeof showMotivationMessage === 'function') setTimeout(showMotivationMessage, 500);
-                }
-                if (typeof checkStreakMilestone === 'function') checkStreakMilestone(currentStreak);
-                if (typeof updateStatistics === 'function') updateStatistics();
-                saveData();
-                if (typeof promptCompletedNote === 'function') promptCompletedNote();
-                if (typeof syncSession === 'function') syncSession('pomodoro', durations.pomodoro);
-                if (typeof syncProgress === 'function') syncProgress();
-
-                const noAutoSummary = localStorage.getItem('noAutoSummary');
-                if (!noAutoSummary && (todayPomodoros === 1 || todayPomodoros % 4 === 0) && typeof showSessionSummary === 'function') {
-                    setTimeout(showSessionSummary, 1500);
-                }
-
-                if (notificationsEnabled && typeof showNotification === 'function') {
-                    const msg = todayPomodoros > 1
-                        ? `Harika! Bugün ${todayPomodoros} pomodoro tamamladın! Streak: ${currentStreak} gün 🔥`
-                        : `İlk pomodoron tamamlandı! Streak: ${currentStreak} gün 🔥`;
-                    showNotification('Pomodoro Tamamlandı! 🎉', msg);
-                }
-            } catch (e) {
-                console.warn('Pomodoro tamamlanma (XP/bildirim) hatası:', e);
             }
 
-            // Görevleri otomatik işaretle
-            if (autoCheckTasks) {
-                try {
-                    const firstIncomplete = document.querySelector('.task-item:not(.completed)');
-                    if (firstIncomplete) {
-                        const completeBtn = firstIncomplete.querySelector('.complete-btn');
-                        const taskId = parseInt(firstIncomplete.dataset.id || completeBtn?.dataset.taskId || 0);
-                        if (completeBtn && taskId) completeTask(completeBtn, taskId);
-                    }
-                } catch (err) { console.warn('autoCheckTasks:', err); }
+            pomodoroHistory.push({
+                timestamp: new Date().toISOString(),
+                mode: 'pomodoro',
+                duration: durations.pomodoro / 60
+            });
+            updateStreak();
+
+            let baseXP = 100;
+            const potionEnd = parseInt(localStorage.getItem('xp_potion_end') || '0');
+            if (Date.now() < potionEnd) baseXP *= 2;
+
+            if (typeof dataManager !== 'undefined') {
+                const oldXP = dataManager.getXP();
+                const newXP = dataManager.addXP(baseXP);
+                checkLevelUp(oldXP, newXP);
+                updateGamificationUI();
+                if (typeof showXPGain === 'function') showXPGain(baseXP, 'Pomodoro tamamlandı!');
+                if (typeof showMotivationMessage === 'function') setTimeout(showMotivationMessage, 500);
+            }
+            if (typeof checkStreakMilestone === 'function') checkStreakMilestone(currentStreak);
+            if (typeof updateStatistics === 'function') updateStatistics();
+            saveData();
+            if (typeof promptCompletedNote === 'function') promptCompletedNote();
+            if (typeof syncSession === 'function') syncSession('pomodoro', durations.pomodoro);
+            if (typeof syncProgress === 'function') syncProgress();
+
+            const noAutoSummary = localStorage.getItem('noAutoSummary');
+            if (!noAutoSummary && (todayPomodoros === 1 || todayPomodoros % 4 === 0) && typeof showSessionSummary === 'function') {
+                setTimeout(showSessionSummary, 1500);
             }
 
-            // Görevleri otomatik geç: sonraki görevi (ilk tamamlanmamış) vurgula ve görünür yap
-            if (autoSwitchTasks) {
-                try {
-                    const nextTask = document.querySelector('.task-item:not(.completed)');
-                    if (nextTask) {
-                        nextTask.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-                        nextTask.classList.add('task-current');
-                        setTimeout(function () { nextTask.classList.remove('task-current'); }, 2500);
-                    }
-                } catch (err) { console.warn('autoSwitchTasks:', err); }
+            if (notificationsEnabled && typeof showNotification === 'function') {
+                const msg = todayPomodoros > 1
+                    ? `Harika! Bugün ${todayPomodoros} pomodoro tamamladın! Streak: ${currentStreak} gün 🔥`
+                    : `İlk pomodoron tamamlandı! Streak: ${currentStreak} gün 🔥`;
+                showNotification('Pomodoro Tamamlandı! 🎉', msg);
             }
+        } catch (e) {
+            console.warn('Pomodoro tamamlanma (XP/bildirim) hatası:', e);
+        }
 
-            // OTOMATIK MOLA: Her zaman en sonda çalıştır, diğer kodlar hata verse bile
-            var shouldAutoStartBreak = autoStartBreaks || (document.getElementById('autoStartBreaks') && document.getElementById('autoStartBreaks').checked);
-            if (shouldAutoStartBreak) {
-                var interval = longBreakInterval;
-                if (typeof interval !== 'number' || isNaN(interval)) {
-                    var el = document.getElementById('longBreakInterval');
-                    interval = el ? parseInt(el.value, 10) : 4;
-                    if (isNaN(interval)) interval = 4;
+        // Görevleri otomatik işaretle
+        if (autoCheckTasks) {
+            try {
+                const firstIncomplete = document.querySelector('.task-item:not(.completed)');
+                if (firstIncomplete) {
+                    const completeBtn = firstIncomplete.querySelector('.complete-btn');
+                    const taskId = parseInt(firstIncomplete.dataset.id || completeBtn?.dataset.taskId || 0);
+                    if (completeBtn && taskId) completeTask(completeBtn, taskId);
                 }
-                if (cycleCount % interval === 0) {
-                    setMode('long');
-                } else {
-                    setMode('short');
-                }
-                // Doğrudan actuallyStartTimer çağır (startTimer hedef modalı vb. atlayıp kesin başlatsın)
-                if (typeof actuallyStartTimer === 'function') {
-                    actuallyStartTimer();
-                } else {
-                    startTimer();
-                }
-            }
-        } else {
-            // Mola bittiği zaman bildirim gönder
-            if (notificationsEnabled) {
-                if (currentMode === 'short') {
-                    showNotification('Kısa Mola Bitti! ⏰', 'Tekrar çalışmaya hazır mısın?');
-                } else if (currentMode === 'long') {
-                    showNotification('Uzun Mola Bitti! ⏰', 'Tekrar odaklanma zamanı!');
-                }
-            }
+            } catch (err) { console.warn('autoCheckTasks:', err); }
+        }
 
-            var shouldAutoStartPomodoro = autoStartPomodoros || (document.getElementById('autoStartPomodoros') && document.getElementById('autoStartPomodoros').checked);
-            if (shouldAutoStartPomodoro) {
-                setMode('pomodoro');
-                if (typeof actuallyStartTimer === 'function') {
-                    actuallyStartTimer();
-                } else {
-                    startTimer();
+        // Görevleri otomatik geç: sonraki görevi (ilk tamamlanmamış) vurgula ve görünür yap
+        if (autoSwitchTasks) {
+            try {
+                const nextTask = document.querySelector('.task-item:not(.completed)');
+                if (nextTask) {
+                    nextTask.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                    nextTask.classList.add('task-current');
+                    setTimeout(function () { nextTask.classList.remove('task-current'); }, 2500);
                 }
+            } catch (err) { console.warn('autoSwitchTasks:', err); }
+        }
+
+        // OTOMATIK MOLA: Her zaman en sonda çalıştır, diğer kodlar hata verse bile
+        var shouldAutoStartBreak = autoStartBreaks || (document.getElementById('autoStartBreaks') && document.getElementById('autoStartBreaks').checked);
+        if (shouldAutoStartBreak) {
+            var interval = longBreakInterval;
+            if (typeof interval !== 'number' || isNaN(interval)) {
+                var el = document.getElementById('longBreakInterval');
+                interval = el ? parseInt(el.value, 10) : 4;
+                if (isNaN(interval)) interval = 4;
+            }
+            if (cycleCount % interval === 0) {
+                setMode('long');
+            } else {
+                setMode('short');
+            }
+            // Doğrudan actuallyStartTimer çağır (startTimer hedef modalı vb. atlayıp kesin başlatsın)
+            if (typeof actuallyStartTimer === 'function') {
+                actuallyStartTimer();
+            } else {
+                startTimer();
+            }
+        }
+    } else {
+        // Mola bittiği zaman bildirim gönder
+        if (notificationsEnabled) {
+            if (currentMode === 'short') {
+                showNotification('Kısa Mola Bitti! ⏰', 'Tekrar çalışmaya hazır mısın?');
+            } else if (currentMode === 'long') {
+                showNotification('Uzun Mola Bitti! ⏰', 'Tekrar odaklanma zamanı!');
+            }
+        }
+
+        var shouldAutoStartPomodoro = autoStartPomodoros || (document.getElementById('autoStartPomodoros') && document.getElementById('autoStartPomodoros').checked);
+        if (shouldAutoStartPomodoro) {
+            setMode('pomodoro');
+            if (typeof actuallyStartTimer === 'function') {
+                actuallyStartTimer();
+            } else {
+                startTimer();
             }
         }
     }
+}
 
-    function timerTick() {
-        // iOS Safari için KRİTİK: Her zaman endTimestamp'ten kalan süreyi hesapla
-        // Worker öldürülse bile zaman doğru akar
+function timerTick() {
+    // iOS Safari için KRİTİK: Her zaman endTimestamp'ten kalan süreyi hesapla
+    // Worker öldürülse bile zaman doğru akar
 
-        if (currentMode === 'stopwatch') {
-            // Stopwatch için: elapsed time'ı hesapla
-            if (isRunning && stopwatchStartTime > 0) {
-                const elapsed = stopwatchElapsed + Math.floor((Date.now() - stopwatchStartTime) / 1000);
-                const sec = elapsed % 60;
-                if (sec !== _lastDisplayedSeconds) {
-                    _lastDisplayedSeconds = sec;
-                    displayTime();
-                }
-            } else {
-                displayTime();
-            }
-            // Her 5 saniyede bir kaydet
-            handleAutoSave();
-            return;
-        }
-
-        // Countdown modları için: endTimestamp'ten kalan süreyi hesapla
-        if (endTimestamp > 0) {
-            const timeLeft = Math.max(0, Math.floor((endTimestamp - Date.now()) / 1000));
-            remainingTime = timeLeft;
-
-            // Sadece saniye değiştiğinde UI'ı güncelle (performans için)
-            const sec = remainingTime % 60;
+    if (currentMode === 'stopwatch') {
+        // Stopwatch için: elapsed time'ı hesapla
+        if (isRunning && stopwatchStartTime > 0) {
+            const elapsed = stopwatchElapsed + Math.floor((Date.now() - stopwatchStartTime) / 1000);
+            const sec = elapsed % 60;
             if (sec !== _lastDisplayedSeconds) {
                 _lastDisplayedSeconds = sec;
                 displayTime();
             }
-
-            // Süre dolmuş mu kontrol et
-            if (remainingTime <= 0) {
-                _lastDisplayedSeconds = -1;
-                // Timer'ı durdur
-                if (timer) {
-                    clearInterval(timer);
-                    timer = null;
-                }
-                try {
-                    if (timerWorker) {
-                        timerWorker.postMessage({ action: 'STOP' });
-                    }
-                } catch (e) { }
-                isRunning = false;
-                endTimestamp = 0;
-                const startBtn = document.querySelector('.start-btn');
-                if (startBtn) startBtn.textContent = 'START';
-                tickAudio.pause();
-                tickAudio.src = '';
-                runTimerCompleteLogic();
-                return;
-            }
         } else {
-            // endTimestamp yoksa timer durdurulmalı
+            displayTime();
+        }
+        // Her 5 saniyede bir kaydet
+        handleAutoSave();
+        return;
+    }
+
+    // Countdown modları için: endTimestamp'ten kalan süreyi hesapla
+    if (endTimestamp > 0) {
+        const timeLeft = Math.max(0, Math.floor((endTimestamp - Date.now()) / 1000));
+        remainingTime = timeLeft;
+
+        // Sadece saniye değiştiğinde UI'ı güncelle (performans için)
+        const sec = remainingTime % 60;
+        if (sec !== _lastDisplayedSeconds) {
+            _lastDisplayedSeconds = sec;
+            displayTime();
+        }
+
+        // Süre dolmuş mu kontrol et
+        if (remainingTime <= 0) {
+            _lastDisplayedSeconds = -1;
+            // Timer'ı durdur
             if (timer) {
                 clearInterval(timer);
                 timer = null;
@@ -4393,339 +4396,359 @@ let lastAutoSave = 0;
                 }
             } catch (e) { }
             isRunning = false;
+            endTimestamp = 0;
             const startBtn = document.querySelector('.start-btn');
             if (startBtn) startBtn.textContent = 'START';
             tickAudio.pause();
             tickAudio.src = '';
+            runTimerCompleteLogic();
             return;
         }
-
-        // Her 5 saniyede bir otomatik kayıt (iOS Safari için kritik)
-        handleAutoSave();
-
-        // Tick sesi çal (sadece saniye değiştiğinde)
-        const currentSec = remainingTime % 60;
-        if (tickAudio && !tickAudio.paused && _lastDisplayedSeconds !== currentSec) {
-            tickAudio.currentTime = 0;
-            tickAudio.play().catch(() => { });
+    } else {
+        // endTimestamp yoksa timer durdurulmalı
+        if (timer) {
+            clearInterval(timer);
+            timer = null;
         }
-
-        // XP kazanma (her dakika)
-        if (currentMode === 'pomodoro' && remainingTime % 60 === 0 && remainingTime < durations.pomodoro) {
-            const oldXP = dataManager.getXP();
-            const newXP = dataManager.addXP(1);
-            checkLevelUp(oldXP, newXP);
-            updateGamificationUI();
-            saveData();
-        }
+        try {
+            if (timerWorker) {
+                timerWorker.postMessage({ action: 'STOP' });
+            }
+        } catch (e) { }
+        isRunning = false;
+        const startBtn = document.querySelector('.start-btn');
+        if (startBtn) startBtn.textContent = 'START';
+        tickAudio.pause();
+        tickAudio.src = '';
+        return;
     }
 
+    // Her 5 saniyede bir otomatik kayıt (iOS Safari için kritik)
+    handleAutoSave();
 
-    // Sayfa yüklendiğinde filtrelemeyi ayarla
-    document.addEventListener('DOMContentLoaded', () => {
-        setupTaskFiltering();
+    // Tick sesi çal (sadece saniye değiştiğinde)
+    const currentSec = remainingTime % 60;
+    if (tickAudio && !tickAudio.paused && _lastDisplayedSeconds !== currentSec) {
+        tickAudio.currentTime = 0;
+        tickAudio.play().catch(() => { });
+    }
+
+    // XP kazanma (her dakika)
+    if (currentMode === 'pomodoro' && remainingTime % 60 === 0 && remainingTime < durations.pomodoro) {
+        const oldXP = dataManager.getXP();
+        const newXP = dataManager.addXP(1);
+        checkLevelUp(oldXP, newXP);
+        updateGamificationUI();
+        saveData();
+    }
+}
+
+
+// Sayfa yüklendiğinde filtrelemeyi ayarla
+document.addEventListener('DOMContentLoaded', () => {
+    setupTaskFiltering();
+});
+
+
+// ===== Dropdown Logic =====
+function setupDropdown() {
+    const menuBtn = document.getElementById('menuBtn');
+    const dropdown = document.getElementById('headerDropdown');
+
+    if (!menuBtn || !dropdown) return;
+
+    // Toggle
+    menuBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        dropdown.classList.toggle('show');
+        menuBtn.classList.toggle('active');
     });
 
-
-    // ===== Dropdown Logic =====
-    function setupDropdown() {
-        const menuBtn = document.getElementById('menuBtn');
-        const dropdown = document.getElementById('headerDropdown');
-
-        if (!menuBtn || !dropdown) return;
-
-        // Toggle
-        menuBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            dropdown.classList.toggle('show');
-            menuBtn.classList.toggle('active');
-        });
-
-        // Close on click outside
-        document.addEventListener('click', (e) => {
-            if (!dropdown.contains(e.target) && !menuBtn.contains(e.target)) {
-                dropdown.classList.remove('show');
-                menuBtn.classList.remove('active');
-            }
-        });
-
-        // Esc to close
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') {
-                dropdown.classList.remove('show');
-                menuBtn.classList.remove('active');
-            }
-        });
-    }
-
-    // ===== ONBOARDING SYSTEM =====
-    function setupOnboarding() {
-        const hasSeenOnboarding = localStorage.getItem('pomodev_onboarding_done');
-        if (hasSeenOnboarding) return;
-
-        const modal = document.getElementById('onboardingModal');
-        const nextBtn = document.getElementById('onboardingNext');
-        const skipBtn = document.getElementById('onboardingSkip');
-
-        if (!modal || !nextBtn || !skipBtn) return;
-
-        let currentStep = 1;
-        const totalSteps = 3;
-
-        // Show modal after a short delay
-        setTimeout(() => {
-            modal.classList.remove('hidden');
-            document.body.style.overflow = 'hidden';
-        }, 1000);
-
-        function showStep(step) {
-            document.querySelectorAll('.onboarding-step').forEach(s => s.classList.add('hidden'));
-            document.querySelectorAll('.onboarding-dot').forEach(d => d.classList.remove('active'));
-
-            const stepEl = document.querySelector(`.onboarding-step[data-step="${step}"]`);
-            const dotEl = document.querySelector(`.onboarding-dot[data-dot="${step}"]`);
-
-            if (stepEl) stepEl.classList.remove('hidden');
-            if (dotEl) dotEl.classList.add('active');
-
-            if (step === totalSteps) {
-                nextBtn.textContent = 'Başla! 🚀';
-            } else {
-                nextBtn.textContent = 'İleri →';
-            }
+    // Close on click outside
+    document.addEventListener('click', (e) => {
+        if (!dropdown.contains(e.target) && !menuBtn.contains(e.target)) {
+            dropdown.classList.remove('show');
+            menuBtn.classList.remove('active');
         }
+    });
 
-        function closeOnboarding() {
-            modal.classList.add('hidden');
-            document.body.style.overflow = '';
-            localStorage.setItem('pomodev_onboarding_done', 'true');
+    // Esc to close
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            dropdown.classList.remove('show');
+            menuBtn.classList.remove('active');
         }
+    });
+}
 
-        nextBtn.addEventListener('click', () => {
-            if (currentStep < totalSteps) {
-                currentStep++;
-                showStep(currentStep);
-            } else {
-                closeOnboarding();
-            }
-        });
+// ===== ONBOARDING SYSTEM =====
+function setupOnboarding() {
+    const hasSeenOnboarding = localStorage.getItem('pomodev_onboarding_done');
+    if (hasSeenOnboarding) return;
 
-        skipBtn.addEventListener('click', closeOnboarding);
-    }
+    const modal = document.getElementById('onboardingModal');
+    const nextBtn = document.getElementById('onboardingNext');
+    const skipBtn = document.getElementById('onboardingSkip');
 
-    // Call onboarding on page load
-    document.addEventListener('DOMContentLoaded', setupOnboarding);
+    if (!modal || !nextBtn || !skipBtn) return;
 
-    // ===== HEATMAP SYSTEM =====
-    function renderHeatmap() {
-        const container = document.getElementById('heatmapContainer');
-        if (!container) return;
+    let currentStep = 1;
+    const totalSteps = 3;
 
-        container.innerHTML = '';
-        const today = new Date();
-        const days = 28; // 4 weeks
+    // Show modal after a short delay
+    setTimeout(() => {
+        modal.classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+    }, 1000);
 
-        // Get pomodoro data from history
-        const pomodoroData = {};
-        pomodoroHistory.forEach(entry => {
-            const date = new Date(entry.timestamp).toDateString();
-            pomodoroData[date] = (pomodoroData[date] || 0) + 1;
-        });
+    function showStep(step) {
+        document.querySelectorAll('.onboarding-step').forEach(s => s.classList.add('hidden'));
+        document.querySelectorAll('.onboarding-dot').forEach(d => d.classList.remove('active'));
 
-        for (let i = days - 1; i >= 0; i--) {
-            const date = new Date(today);
-            date.setDate(today.getDate() - i);
-            const dateStr = date.toDateString();
-            const count = pomodoroData[dateStr] || 0;
+        const stepEl = document.querySelector(`.onboarding-step[data-step="${step}"]`);
+        const dotEl = document.querySelector(`.onboarding-dot[data-dot="${step}"]`);
 
-            const cell = document.createElement('div');
-            cell.className = 'heatmap-cell';
-            cell.title = `${date.toLocaleDateString('tr-TR')}: ${count} pomodoro`;
+        if (stepEl) stepEl.classList.remove('hidden');
+        if (dotEl) dotEl.classList.add('active');
 
-            // Color intensity based on count
-            if (count === 0) {
-                cell.style.background = 'rgba(255, 255, 255, 0.05)';
-            } else if (count <= 2) {
-                cell.style.background = 'rgba(77, 163, 255, 0.2)';
-            } else if (count <= 4) {
-                cell.style.background = 'rgba(77, 163, 255, 0.4)';
-            } else if (count <= 6) {
-                cell.style.background = 'rgba(77, 163, 255, 0.7)';
-            } else {
-                cell.style.background = 'rgba(77, 163, 255, 1)';
-            }
-
-            container.appendChild(cell);
+        if (step === totalSteps) {
+            nextBtn.textContent = 'Başla! 🚀';
+        } else {
+            nextBtn.textContent = 'İleri →';
         }
     }
 
-    // ===== WEEKLY SUMMARY =====
-    function updateWeeklySummary() {
-        const weeklyHoursEl = document.getElementById('weeklyHours');
-        const weeklyPomodorosEl = document.getElementById('weeklyPomodoros');
-        const comparisonEl = document.getElementById('weeklyComparison');
+    function closeOnboarding() {
+        modal.classList.add('hidden');
+        document.body.style.overflow = '';
+        localStorage.setItem('pomodev_onboarding_done', 'true');
+    }
 
-        if (!weeklyHoursEl || !weeklyPomodorosEl) return;
-
-        // Calculate weekly stats
-        const now = new Date();
-        const weekStart = new Date(now);
-        weekStart.setDate(now.getDate() - 7);
-
-        let weeklyCount = 0;
-        pomodoroHistory.forEach(entry => {
-            const entryDate = new Date(entry.timestamp);
-            if (entryDate >= weekStart) {
-                weeklyCount++;
-            }
-        });
-
-        const weeklyHours = (weeklyCount * 25 / 60).toFixed(1);
-        weeklyHoursEl.textContent = weeklyHours;
-        weeklyPomodorosEl.textContent = weeklyCount;
-
-        // Comparison with last week
-        const lastWeekStart = new Date(weekStart);
-        lastWeekStart.setDate(lastWeekStart.getDate() - 7);
-
-        let lastWeekCount = 0;
-        pomodoroHistory.forEach(entry => {
-            const entryDate = new Date(entry.timestamp);
-            if (entryDate >= lastWeekStart && entryDate < weekStart) {
-                lastWeekCount++;
-            }
-        });
-
-        if (comparisonEl) {
-            if (lastWeekCount === 0) {
-                comparisonEl.textContent = '🌱 İlk haftanı başarıyla tamamlıyorsun!';
-            } else if (weeklyCount > lastWeekCount) {
-                const percent = Math.round(((weeklyCount - lastWeekCount) / lastWeekCount) * 100);
-                comparisonEl.textContent = `📈 Geçen haftadan %${percent} daha iyi!`;
-            } else if (weeklyCount < lastWeekCount) {
-                comparisonEl.textContent = `💪 Geçen hafta ${lastWeekCount} yapmıştın, yakala!`;
-            } else {
-                comparisonEl.textContent = '🎯 Geçen haftayla aynı tempoda!';
-            }
+    nextBtn.addEventListener('click', () => {
+        if (currentStep < totalSteps) {
+            currentStep++;
+            showStep(currentStep);
+        } else {
+            closeOnboarding();
         }
-    }
+    });
 
-    // ===== AMBIENT SOUNDS SYSTEM =====
-    let ambientAudio = null;
-    let currentAmbientSound = null;
+    skipBtn.addEventListener('click', closeOnboarding);
+}
 
-    // Free ambient sound URLs (reliable sources)
-    const AMBIENT_SOUNDS = {
-        rain: 'https://assets.mixkit.co/active_storage/sfx/212/212-preview.mp3',
-        cafe: 'https://assets.mixkit.co/active_storage/sfx/145/145-preview.mp3',
-        fire: 'https://assets.mixkit.co/active_storage/sfx/189/189-preview.mp3',
-        ocean: 'https://assets.mixkit.co/active_storage/sfx/184/184-preview.mp3',
-        forest: 'https://assets.mixkit.co/active_storage/sfx/176/176-preview.mp3'
-    };
+// Call onboarding on page load
+document.addEventListener('DOMContentLoaded', setupOnboarding);
 
-    function setupAmbientSounds() {
-        const buttons = document.querySelectorAll('.ambient-btn');
-        const volumeSlider = document.getElementById('ambientVolume');
-        const stopBtn = document.getElementById('stopAmbient');
+// ===== HEATMAP SYSTEM =====
+function renderHeatmap() {
+    const container = document.getElementById('heatmapContainer');
+    if (!container) return;
 
-        buttons.forEach(btn => {
-            btn.addEventListener('click', () => {
-                const sound = btn.dataset.sound;
-                playAmbientSound(sound, btn);
-            });
-        });
+    container.innerHTML = '';
+    const today = new Date();
+    const days = 28; // 4 weeks
 
-        volumeSlider?.addEventListener('input', () => {
-            if (ambientAudio) {
-                ambientAudio.volume = volumeSlider.value / 100;
-            }
-        });
+    // Get pomodoro data from history
+    const pomodoroData = {};
+    pomodoroHistory.forEach(entry => {
+        const date = new Date(entry.timestamp).toDateString();
+        pomodoroData[date] = (pomodoroData[date] || 0) + 1;
+    });
 
-        stopBtn?.addEventListener('click', stopAmbientSound);
-    }
+    for (let i = days - 1; i >= 0; i--) {
+        const date = new Date(today);
+        date.setDate(today.getDate() - i);
+        const dateStr = date.toDateString();
+        const count = pomodoroData[dateStr] || 0;
 
-    function playAmbientSound(sound, btn) {
-        // Stop current if same button clicked
-        if (currentAmbientSound === sound && ambientAudio) {
-            stopAmbientSound();
-            return;
+        const cell = document.createElement('div');
+        cell.className = 'heatmap-cell';
+        cell.title = `${date.toLocaleDateString('tr-TR')}: ${count} pomodoro`;
+
+        // Color intensity based on count
+        if (count === 0) {
+            cell.style.background = 'rgba(255, 255, 255, 0.05)';
+        } else if (count <= 2) {
+            cell.style.background = 'rgba(77, 163, 255, 0.2)';
+        } else if (count <= 4) {
+            cell.style.background = 'rgba(77, 163, 255, 0.4)';
+        } else if (count <= 6) {
+            cell.style.background = 'rgba(77, 163, 255, 0.7)';
+        } else {
+            cell.style.background = 'rgba(77, 163, 255, 1)';
         }
 
-        stopAmbientSound();
-
-        ambientAudio = new Audio(AMBIENT_SOUNDS[sound]);
-        ambientAudio.loop = true;
-        ambientAudio.volume = (document.getElementById('ambientVolume')?.value || 30) / 100;
-        ambientAudio.play().catch(e => console.warn('Ambient ses çalınamadı:', e));
-
-        currentAmbientSound = sound;
-
-        // Update active state
-        document.querySelectorAll('.ambient-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
+        container.appendChild(cell);
     }
+}
 
-    function stopAmbientSound() {
+// ===== WEEKLY SUMMARY =====
+function updateWeeklySummary() {
+    const weeklyHoursEl = document.getElementById('weeklyHours');
+    const weeklyPomodorosEl = document.getElementById('weeklyPomodoros');
+    const comparisonEl = document.getElementById('weeklyComparison');
+
+    if (!weeklyHoursEl || !weeklyPomodorosEl) return;
+
+    // Calculate weekly stats
+    const now = new Date();
+    const weekStart = new Date(now);
+    weekStart.setDate(now.getDate() - 7);
+
+    let weeklyCount = 0;
+    pomodoroHistory.forEach(entry => {
+        const entryDate = new Date(entry.timestamp);
+        if (entryDate >= weekStart) {
+            weeklyCount++;
+        }
+    });
+
+    const weeklyHours = (weeklyCount * 25 / 60).toFixed(1);
+    weeklyHoursEl.textContent = weeklyHours;
+    weeklyPomodorosEl.textContent = weeklyCount;
+
+    // Comparison with last week
+    const lastWeekStart = new Date(weekStart);
+    lastWeekStart.setDate(lastWeekStart.getDate() - 7);
+
+    let lastWeekCount = 0;
+    pomodoroHistory.forEach(entry => {
+        const entryDate = new Date(entry.timestamp);
+        if (entryDate >= lastWeekStart && entryDate < weekStart) {
+            lastWeekCount++;
+        }
+    });
+
+    if (comparisonEl) {
+        if (lastWeekCount === 0) {
+            comparisonEl.textContent = '🌱 İlk haftanı başarıyla tamamlıyorsun!';
+        } else if (weeklyCount > lastWeekCount) {
+            const percent = Math.round(((weeklyCount - lastWeekCount) / lastWeekCount) * 100);
+            comparisonEl.textContent = `📈 Geçen haftadan %${percent} daha iyi!`;
+        } else if (weeklyCount < lastWeekCount) {
+            comparisonEl.textContent = `💪 Geçen hafta ${lastWeekCount} yapmıştın, yakala!`;
+        } else {
+            comparisonEl.textContent = '🎯 Geçen haftayla aynı tempoda!';
+        }
+    }
+}
+
+// ===== AMBIENT SOUNDS SYSTEM =====
+let ambientAudio = null;
+let currentAmbientSound = null;
+
+// Free ambient sound URLs (reliable sources)
+const AMBIENT_SOUNDS = {
+    rain: 'https://assets.mixkit.co/active_storage/sfx/212/212-preview.mp3',
+    cafe: 'https://assets.mixkit.co/active_storage/sfx/145/145-preview.mp3',
+    fire: 'https://assets.mixkit.co/active_storage/sfx/189/189-preview.mp3',
+    ocean: 'https://assets.mixkit.co/active_storage/sfx/184/184-preview.mp3',
+    forest: 'https://assets.mixkit.co/active_storage/sfx/176/176-preview.mp3'
+};
+
+function setupAmbientSounds() {
+    const buttons = document.querySelectorAll('.ambient-btn');
+    const volumeSlider = document.getElementById('ambientVolume');
+    const stopBtn = document.getElementById('stopAmbient');
+
+    buttons.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const sound = btn.dataset.sound;
+            playAmbientSound(sound, btn);
+        });
+    });
+
+    volumeSlider?.addEventListener('input', () => {
         if (ambientAudio) {
-            ambientAudio.pause();
-            ambientAudio = null;
+            ambientAudio.volume = volumeSlider.value / 100;
         }
-        currentAmbientSound = null;
-        document.querySelectorAll('.ambient-btn').forEach(b => b.classList.remove('active'));
+    });
+
+    stopBtn?.addEventListener('click', stopAmbientSound);
+}
+
+function playAmbientSound(sound, btn) {
+    // Stop current if same button clicked
+    if (currentAmbientSound === sound && ambientAudio) {
+        stopAmbientSound();
+        return;
     }
 
-    // ===== STRICT MODE =====
-    let strictModeEnabled = false;
+    stopAmbientSound();
 
-    function enableStrictMode() {
-        strictModeEnabled = true;
-        window.addEventListener('beforeunload', strictModeWarning);
-        document.getElementById('strictModeIndicator')?.remove();
+    ambientAudio = new Audio(AMBIENT_SOUNDS[sound]);
+    ambientAudio.loop = true;
+    ambientAudio.volume = (document.getElementById('ambientVolume')?.value || 30) / 100;
+    ambientAudio.play().catch(e => console.warn('Ambient ses çalınamadı:', e));
 
-        // Add visual indicator
-        const indicator = document.createElement('div');
-        indicator.id = 'strictModeIndicator';
-        indicator.className = 'strict-mode-indicator';
-        indicator.innerHTML = '🔒 Strict Mode Aktif - Pomodoro tamamlanana kadar ayrılamazsın!';
-        document.body.prepend(indicator);
+    currentAmbientSound = sound;
+
+    // Update active state
+    document.querySelectorAll('.ambient-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+}
+
+function stopAmbientSound() {
+    if (ambientAudio) {
+        ambientAudio.pause();
+        ambientAudio = null;
+    }
+    currentAmbientSound = null;
+    document.querySelectorAll('.ambient-btn').forEach(b => b.classList.remove('active'));
+}
+
+// ===== STRICT MODE =====
+let strictModeEnabled = false;
+
+function enableStrictMode() {
+    strictModeEnabled = true;
+    window.addEventListener('beforeunload', strictModeWarning);
+    document.getElementById('strictModeIndicator')?.remove();
+
+    // Add visual indicator
+    const indicator = document.createElement('div');
+    indicator.id = 'strictModeIndicator';
+    indicator.className = 'strict-mode-indicator';
+    indicator.innerHTML = '🔒 Strict Mode Aktif - Pomodoro tamamlanana kadar ayrılamazsın!';
+    document.body.prepend(indicator);
+}
+
+function disableStrictMode() {
+    strictModeEnabled = false;
+    window.removeEventListener('beforeunload', strictModeWarning);
+    document.getElementById('strictModeIndicator')?.remove();
+}
+
+function strictModeWarning(e) {
+    if (isRunning && currentMode === 'pomodoro') {
+        e.preventDefault();
+        e.returnValue = 'Pomodoro devam ediyor! Ayrılmak istediğinize emin misiniz?';
+        return e.returnValue;
+    }
+}
+
+// ===== WATER REMINDER =====
+let waterReminderInterval = null;
+let waterReminderEnabled = true; // Tercih (kaydedilir)
+
+function setupWaterReminder() {
+    // Clear existing interval if any
+    if (waterReminderInterval) {
+        clearRegisteredInterval(waterReminderInterval);
     }
 
-    function disableStrictMode() {
-        strictModeEnabled = false;
-        window.removeEventListener('beforeunload', strictModeWarning);
-        document.getElementById('strictModeIndicator')?.remove();
-    }
-
-    function strictModeWarning(e) {
-        if (isRunning && currentMode === 'pomodoro') {
-            e.preventDefault();
-            e.returnValue = 'Pomodoro devam ediyor! Ayrılmak istediğinize emin misiniz?';
-            return e.returnValue;
+    // Remind every 30 minutes
+    waterReminderInterval = registerInterval(setInterval(() => {
+        if (isRunning) {
+            showWaterReminder();
         }
-    }
+    }, 30 * 60 * 1000)); // 30 minutes
+}
 
-    // ===== WATER REMINDER =====
-    let waterReminderInterval = null;
-    let waterReminderEnabled = true; // Tercih (kaydedilir)
-
-    function setupWaterReminder() {
-        // Clear existing interval if any
-        if (waterReminderInterval) {
-            clearRegisteredInterval(waterReminderInterval);
-        }
-
-        // Remind every 30 minutes
-        waterReminderInterval = registerInterval(setInterval(() => {
-            if (isRunning) {
-                showWaterReminder();
-            }
-        }, 30 * 60 * 1000)); // 30 minutes
-    }
-
-    function showWaterReminder() {
-        const reminder = document.createElement('div');
-        reminder.className = 'water-reminder';
-        reminder.innerHTML = `
+function showWaterReminder() {
+    const reminder = document.createElement('div');
+    reminder.className = 'water-reminder';
+    reminder.innerHTML = `
         <div style="display: flex; align-items: center; gap: 12px;">
             <span style="font-size: 2rem;">💧</span>
             <div>
@@ -4735,77 +4758,77 @@ let lastAutoSave = 0;
             <button onclick="this.parentElement.parentElement.remove()" style="background: rgba(255,255,255,0.2); border: none; color: white; padding: 8px; border-radius: 8px; cursor: pointer;">✕</button>
         </div>
     `;
-        document.body.appendChild(reminder);
+    document.body.appendChild(reminder);
 
-        // Auto remove after 10 seconds
-        setTimeout(() => reminder.remove(), 10000);
+    // Auto remove after 10 seconds
+    setTimeout(() => reminder.remove(), 10000);
+}
+
+// ===== INITIALIZE NEW FEATURES =====
+document.addEventListener('DOMContentLoaded', () => {
+    // Core Features
+    setupHowItWorks();
+    setupThemeControls();
+    setupGoalNotesInit(); // Critical for timer start
+    setupTimerControls(); // Explicitly bound now
+
+    // UI & Tools
+    setupFullscreen();
+    setupSettingsModal();
+    setupKeyboardShortcuts();
+    setupPageVisibility();
+    setupFloatingMini();
+    setupBrainDump();
+    setupShareSettings();
+    setupCalendarQuickAdd();
+    setupSessionSummary();
+    setupDragAndArchive();
+
+    // Notifications & Environment
+    setupNotifications();
+    setupAmbientSounds();
+    setupWaterReminder();
+    setupDropdown();
+
+    // Data Loading
+    loadData();
+    loadTasks();
+    loadNotes();
+
+    // Visuals
+    renderHeatmap();
+    updateWeeklySummary();
+
+    // Enable strict mode when timer starts (optional - can be toggled)
+    // Comment out if you don't want strict mode by default
+    // enableStrictMode();
+});
+
+// updateStatistics tek tanım 2590'da; burada sarmalayıcı yok (sonsuz döngüyü önlemek için kaldırıldı)
+
+// ===== HABITS IN SETTINGS =====
+function renderHabitsInSettings() {
+    const container = document.getElementById('habitsListSettings');
+    if (!container) return;
+
+    // Check if habitTracker exists
+    if (typeof habitTracker === 'undefined') {
+        container.innerHTML = '<p style="color: var(--muted); text-align: center; padding: 20px;">Alışkanlık sistemi yükleniyor...</p>';
+        return;
     }
 
-    // ===== INITIALIZE NEW FEATURES =====
-    document.addEventListener('DOMContentLoaded', () => {
-        // Core Features
-        setupHowItWorks();
-        setupThemeControls();
-        setupGoalNotesInit(); // Critical for timer start
-        setupTimerControls(); // Explicitly bound now
+    const habits = habitTracker.getHabits();
 
-        // UI & Tools
-        setupFullscreen();
-        setupSettingsModal();
-        setupKeyboardShortcuts();
-        setupPageVisibility();
-        setupFloatingMini();
-        setupBrainDump();
-        setupShareSettings();
-        setupCalendarQuickAdd();
-        setupSessionSummary();
-        setupDragAndArchive();
+    if (habits.length === 0) {
+        container.innerHTML = '<p style="color: var(--muted); text-align: center; padding: 20px;">Henüz alışkanlık eklenmedi. Yukarıdan yeni bir alışkanlık ekleyin.</p>';
+        return;
+    }
 
-        // Notifications & Environment
-        setupNotifications();
-        setupAmbientSounds();
-        setupWaterReminder();
-        setupDropdown();
+    container.innerHTML = habits.map(habit => {
+        const isCompleted = habitTracker.isCompletedToday(habit.id);
+        const completionRate = habitTracker.getCompletionRate(habit.id);
 
-        // Data Loading
-        loadData();
-        loadTasks();
-        loadNotes();
-
-        // Visuals
-        renderHeatmap();
-        updateWeeklySummary();
-
-        // Enable strict mode when timer starts (optional - can be toggled)
-        // Comment out if you don't want strict mode by default
-        // enableStrictMode();
-    });
-
-    // updateStatistics tek tanım 2590'da; burada sarmalayıcı yok (sonsuz döngüyü önlemek için kaldırıldı)
-
-    // ===== HABITS IN SETTINGS =====
-    function renderHabitsInSettings() {
-        const container = document.getElementById('habitsListSettings');
-        if (!container) return;
-
-        // Check if habitTracker exists
-        if (typeof habitTracker === 'undefined') {
-            container.innerHTML = '<p style="color: var(--muted); text-align: center; padding: 20px;">Alışkanlık sistemi yükleniyor...</p>';
-            return;
-        }
-
-        const habits = habitTracker.getHabits();
-
-        if (habits.length === 0) {
-            container.innerHTML = '<p style="color: var(--muted); text-align: center; padding: 20px;">Henüz alışkanlık eklenmedi. Yukarıdan yeni bir alışkanlık ekleyin.</p>';
-            return;
-        }
-
-        container.innerHTML = habits.map(habit => {
-            const isCompleted = habitTracker.isCompletedToday(habit.id);
-            const completionRate = habitTracker.getCompletionRate(habit.id);
-
-            return `
+        return `
             <div class="habit-item-settings ${isCompleted ? 'completed' : ''}" data-habit-id="${habit.id}">
                 <div class="habit-left">
                     <button class="habit-checkbox-settings" onclick="toggleHabitFromSettings(${habit.id})">
@@ -4822,207 +4845,165 @@ let lastAutoSave = 0;
                 <button class="habit-delete-settings" onclick="deleteHabitFromSettings(${habit.id})" title="Sil">🗑️</button>
             </div>
         `;
-        }).join('');
+    }).join('');
+}
+
+function addHabitFromSettings() {
+    const nameInput = document.getElementById('newHabitName');
+    const iconInput = document.getElementById('newHabitIcon');
+
+    if (!nameInput) return;
+
+    const name = nameInput.value.trim();
+    const icon = iconInput?.value.trim() || '✅';
+
+    if (!name) {
+        showNotification('⚠️ Hata', 'Lütfen bir alışkanlık adı girin.');
+        return;
     }
 
-    function addHabitFromSettings() {
-        const nameInput = document.getElementById('newHabitName');
-        const iconInput = document.getElementById('newHabitIcon');
-
-        if (!nameInput) return;
-
-        const name = nameInput.value.trim();
-        const icon = iconInput?.value.trim() || '✅';
-
-        if (!name) {
-            showNotification('⚠️ Hata', 'Lütfen bir alışkanlık adı girin.');
-            return;
-        }
-
-        if (typeof habitTracker !== 'undefined') {
-            habitTracker.addHabit(name, icon);
-            renderHabitsInSettings();
-            showNotification('✅ Alışkanlık eklendi', name);
-            nameInput.value = '';
-            if (iconInput) iconInput.value = '';
-        }
-    }
-
-    function toggleHabitFromSettings(habitId) {
-        if (typeof habitTracker === 'undefined') return;
-
-        const isCompleted = habitTracker.isCompletedToday(habitId);
-
-        if (isCompleted) {
-            habitTracker.uncompleteHabit(habitId);
-        } else {
-            habitTracker.completeHabit(habitId);
-            showNotification('✅ Alışkanlık tamamlandı!', '');
-        }
-
+    if (typeof habitTracker !== 'undefined') {
+        habitTracker.addHabit(name, icon);
         renderHabitsInSettings();
+        showNotification('✅ Alışkanlık eklendi', name);
+        nameInput.value = '';
+        if (iconInput) iconInput.value = '';
+    }
+}
+
+function toggleHabitFromSettings(habitId) {
+    if (typeof habitTracker === 'undefined') return;
+
+    const isCompleted = habitTracker.isCompletedToday(habitId);
+
+    if (isCompleted) {
+        habitTracker.uncompleteHabit(habitId);
+    } else {
+        habitTracker.completeHabit(habitId);
+        showNotification('✅ Alışkanlık tamamlandı!', '');
     }
 
-    function deleteHabitFromSettings(habitId) {
-        if (typeof habitTracker === 'undefined') return;
+    renderHabitsInSettings();
+}
 
-        const habit = habitTracker.getHabit(habitId);
-        if (!habit) return;
+function deleteHabitFromSettings(habitId) {
+    if (typeof habitTracker === 'undefined') return;
 
-        if (confirm(`"${habit.name}" alışkanlığını silmek istediğinize emin misiniz?`)) {
-            habitTracker.deleteHabit(habitId);
-            renderHabitsInSettings();
-            showNotification('🗑️ Alışkanlık silindi', '');
-        }
+    const habit = habitTracker.getHabit(habitId);
+    if (!habit) return;
+
+    if (confirm(`"${habit.name}" alışkanlığını silmek istediğinize emin misiniz?`)) {
+        habitTracker.deleteHabit(habitId);
+        renderHabitsInSettings();
+        showNotification('🗑️ Alışkanlık silindi', '');
     }
+}
 
-    function setHabitIconSettings(icon) {
-        const iconInput = document.getElementById('newHabitIcon');
-        if (iconInput) {
-            iconInput.value = icon;
-        }
+function setHabitIconSettings(icon) {
+    const iconInput = document.getElementById('newHabitIcon');
+    if (iconInput) {
+        iconInput.value = icon;
     }
+}
 
-    // Make functions globally available
-    window.addHabitFromSettings = addHabitFromSettings;
-    window.toggleHabitFromSettings = toggleHabitFromSettings;
-    window.deleteHabitFromSettings = deleteHabitFromSettings;
-    window.setHabitIconSettings = setHabitIconSettings;
-    window.renderHabitsInSettings = renderHabitsInSettings;
+// Make functions globally available
+window.addHabitFromSettings = addHabitFromSettings;
+window.toggleHabitFromSettings = toggleHabitFromSettings;
+window.deleteHabitFromSettings = deleteHabitFromSettings;
+window.setHabitIconSettings = setHabitIconSettings;
+window.renderHabitsInSettings = renderHabitsInSettings;
 
-    // ===== GOOGLE CALENDAR FUNCTIONS =====
-    function connectGoogleCalendar() {
-        if (typeof calendarManager === 'undefined') {
-            showNotification('⚠️ Uyarı', 'Calendar sistemi henüz yüklenmedi. Sayfayı yenileyin.');
-            return;
-        }
-        calendarManager.authorize()
-            .then(() => {
-                updateCalendarStatusInSettings();
-                showNotification('✅ Google Calendar bağlantısı başarılı', '');
-            })
-            .catch((error) => {
-                const msg = error && error.message ? error.message : 'Bağlantı kurulamadı';
-                showNotification('❌ Bağlantı hatası', msg);
-            });
+// ===== GOOGLE CALENDAR FUNCTIONS =====
+function connectGoogleCalendar() {
+    if (typeof calendarManager === 'undefined') {
+        showNotification('⚠️ Uyarı', 'Calendar sistemi henüz yüklenmedi. Sayfayı yenileyin.');
+        return;
     }
-
-    function connectGoogleCalendarWithToken() {
-        if (typeof calendarManager === 'undefined') {
-            showNotification('⚠️ Uyarı', 'Calendar sistemi henüz yüklenmedi. Sayfayı yenileyin.');
-            return;
-        }
-        const token = prompt('Google Calendar access token yapıştırın (OAuth Playground veya benzeri ile alın):');
-        if (!token || !token.trim()) return;
-        if (window.setGoogleCalendarToken && window.setGoogleCalendarToken(token)) {
+    calendarManager.authorize()
+        .then(() => {
             updateCalendarStatusInSettings();
-            showNotification('✅ Google Calendar token kaydedildi', '');
-        } else {
-            showNotification('❌ Hata', 'Token kaydedilemedi');
-        }
+            showNotification('✅ Google Calendar bağlantısı başarılı', '');
+        })
+        .catch((error) => {
+            const msg = error && error.message ? error.message : 'Bağlantı kurulamadı';
+            showNotification('❌ Bağlantı hatası', msg);
+        });
+}
+
+function connectGoogleCalendarWithToken() {
+    if (typeof calendarManager === 'undefined') {
+        showNotification('⚠️ Uyarı', 'Calendar sistemi henüz yüklenmedi. Sayfayı yenileyin.');
+        return;
+    }
+    const token = prompt('Google Calendar access token yapıştırın (OAuth Playground veya benzeri ile alın):');
+    if (!token || !token.trim()) return;
+    if (window.setGoogleCalendarToken && window.setGoogleCalendarToken(token)) {
+        updateCalendarStatusInSettings();
+        showNotification('✅ Google Calendar token kaydedildi', '');
+    } else {
+        showNotification('❌ Hata', 'Token kaydedilemedi');
+    }
+}
+
+function disconnectGoogleCalendar() {
+    if (typeof calendarManager !== 'undefined') {
+        calendarManager.disconnect();
+        updateCalendarStatusInSettings();
+    }
+}
+
+function updateCalendarStatusInSettings() {
+    const statusText = document.getElementById('calendarStatusText');
+    const connectBtn = document.getElementById('calendarConnectBtn');
+    const disconnectBtn = document.getElementById('calendarDisconnectBtn');
+
+    if (!statusText) return;
+
+    let isAuthorized = false;
+    if (typeof calendarManager !== 'undefined') {
+        const status = calendarManager.getStatus();
+        isAuthorized = status.authorized;
     }
 
-    function disconnectGoogleCalendar() {
-        if (typeof calendarManager !== 'undefined') {
-            calendarManager.disconnect();
-            updateCalendarStatusInSettings();
-        }
+    if (isAuthorized) {
+        statusText.innerHTML = '✅ <strong>Bağlı</strong> - Pomodoro\'lar takvime eklenecek';
+        if (connectBtn) connectBtn.style.display = 'none';
+        if (disconnectBtn) disconnectBtn.style.display = 'flex';
+    } else {
+        statusText.innerHTML = '❌ <strong>Bağlı Değil</strong> - Bağlanmak için butona tıklayın';
+        if (connectBtn) connectBtn.style.display = 'flex';
+        if (disconnectBtn) disconnectBtn.style.display = 'none';
     }
+}
 
-    function updateCalendarStatusInSettings() {
-        const statusText = document.getElementById('calendarStatusText');
-        const connectBtn = document.getElementById('calendarConnectBtn');
-        const disconnectBtn = document.getElementById('calendarDisconnectBtn');
+window.connectGoogleCalendar = connectGoogleCalendar;
+window.connectGoogleCalendarWithToken = connectGoogleCalendarWithToken;
+window.disconnectGoogleCalendar = disconnectGoogleCalendar;
+window.updateCalendarStatusInSettings = updateCalendarStatusInSettings;
 
-        if (!statusText) return;
+// ===== BLOCKING SETTINGS FUNCTIONS =====
+function loadBlockListInSettings() {
+    const textarea = document.getElementById('blockListTextarea');
+    const checkbox = document.getElementById('blockingEnabled');
 
-        let isAuthorized = false;
-        if (typeof calendarManager !== 'undefined') {
-            const status = calendarManager.getStatus();
-            isAuthorized = status.authorized;
+    if (!textarea) return;
+
+    const saved = localStorage.getItem('pomodev_blockList');
+    const enabled = localStorage.getItem('pomodev_blockingEnabled') !== 'false';
+
+    if (saved) {
+        try {
+            const sites = JSON.parse(saved);
+            // Convert patterns back to simple domain format for display
+            textarea.value = sites.map(s => {
+                return s.replace('*://*.', '').replace('/*', '');
+            }).join('\n');
+        } catch (e) {
+            textarea.value = '';
         }
-
-        if (isAuthorized) {
-            statusText.innerHTML = '✅ <strong>Bağlı</strong> - Pomodoro\'lar takvime eklenecek';
-            if (connectBtn) connectBtn.style.display = 'none';
-            if (disconnectBtn) disconnectBtn.style.display = 'flex';
-        } else {
-            statusText.innerHTML = '❌ <strong>Bağlı Değil</strong> - Bağlanmak için butona tıklayın';
-            if (connectBtn) connectBtn.style.display = 'flex';
-            if (disconnectBtn) disconnectBtn.style.display = 'none';
-        }
-    }
-
-    window.connectGoogleCalendar = connectGoogleCalendar;
-    window.connectGoogleCalendarWithToken = connectGoogleCalendarWithToken;
-    window.disconnectGoogleCalendar = disconnectGoogleCalendar;
-    window.updateCalendarStatusInSettings = updateCalendarStatusInSettings;
-
-    // ===== BLOCKING SETTINGS FUNCTIONS =====
-    function loadBlockListInSettings() {
-        const textarea = document.getElementById('blockListTextarea');
-        const checkbox = document.getElementById('blockingEnabled');
-
-        if (!textarea) return;
-
-        const saved = localStorage.getItem('pomodev_blockList');
-        const enabled = localStorage.getItem('pomodev_blockingEnabled') !== 'false';
-
-        if (saved) {
-            try {
-                const sites = JSON.parse(saved);
-                // Convert patterns back to simple domain format for display
-                textarea.value = sites.map(s => {
-                    return s.replace('*://*.', '').replace('/*', '');
-                }).join('\n');
-            } catch (e) {
-                textarea.value = '';
-            }
-        } else {
-            // Default list
-            textarea.value = [
-                'facebook.com',
-                'twitter.com',
-                'instagram.com',
-                'youtube.com',
-                'reddit.com',
-                'tiktok.com',
-                'netflix.com',
-                'twitch.tv'
-            ].join('\n');
-        }
-
-        if (checkbox) {
-            checkbox.checked = enabled;
-        }
-    }
-
-    // Override the existing saveBlockList and resetBlockList to use our new location
-    window.saveBlockList = function () {
-        const textarea = document.getElementById('blockListTextarea');
-        const checkbox = document.getElementById('blockingEnabled');
-
-        if (!textarea || !checkbox) return;
-
-        const sites = textarea.value
-            .split('\n')
-            .map(s => s.trim())
-            .filter(s => s.length > 0)
-            .map(s => {
-                if (!s.includes('*')) {
-                    return `*://*.${s}/*`;
-                }
-                return s;
-            });
-
-        localStorage.setItem('pomodev_blockList', JSON.stringify(sites));
-        localStorage.setItem('pomodev_blockingEnabled', checkbox.checked.toString());
-
-        showNotification('✅ Engel Listesi Kaydedildi', 'Ayarlar güncellendi');
-    };
-
-    window.resetBlockList = function () {
-        const defaultList = [
+    } else {
+        // Default list
+        textarea.value = [
             'facebook.com',
             'twitter.com',
             'instagram.com',
@@ -5031,277 +5012,319 @@ let lastAutoSave = 0;
             'tiktok.com',
             'netflix.com',
             'twitch.tv'
-        ];
-
-        const textarea = document.getElementById('blockListTextarea');
-        if (textarea) {
-            textarea.value = defaultList.join('\n');
-        }
-        showNotification('🔄 Varsayılanlar Yüklendi', '');
-    };
-
-    // ===== INIT SETTINGS TABS DATA =====
-    function initSettingsTabsData() {
-        // Load blocking list
-        loadBlockListInSettings();
-
-        // Render habits
-        renderHabitsInSettings();
-
-        // Update calendar status
-        updateCalendarStatusInSettings();
+        ].join('\n');
     }
 
-    // Call on settings modal open
-    const originalSettingsClick = document.getElementById('settingsBtn')?.onclick;
-    document.addEventListener('DOMContentLoaded', () => {
-        const settingsBtn = document.getElementById('settingsBtn');
-        if (settingsBtn) {
-            const originalHandler = settingsBtn.onclick;
-            settingsBtn.addEventListener('click', () => {
-                setTimeout(initSettingsTabsData, 100);
-            });
-        }
-    });
+    if (checkbox) {
+        checkbox.checked = enabled;
+    }
+}
 
-    // ===== SOCIAL MANAGER =====
-    class SocialManager {
-        constructor() {
-            this.heartbeatInterval = null;
-            this.pollInterval = null;
-            this.badge = document.getElementById('liveUsersBadge');
-            this.countEl = document.getElementById('liveUsersCount');
+// Override the existing saveBlockList and resetBlockList to use our new location
+window.saveBlockList = function () {
+    const textarea = document.getElementById('blockListTextarea');
+    const checkbox = document.getElementById('blockingEnabled');
 
-            this.init();
-        }
+    if (!textarea || !checkbox) return;
 
-        init() {
-            // Initial heartbeat
-            this.sendHeartbeat();
-            this.fetchStatus();
-
-            // Start loops
-            this.heartbeatInterval = setInterval(() => this.sendHeartbeat(), 30000); // 30s
-            this.pollInterval = setInterval(() => this.fetchStatus(), 30000); // 30s
-        }
-
-        async sendHeartbeat() {
-            if (!document.hasFocus()) return; // Don't spam if tab is backgrounded
-
-            try {
-                const token = localStorage.getItem('auth_token');
-                await fetch('/api/social/heartbeat', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': token ? `Bearer ${token}` : ''
-                    },
-                    body: JSON.stringify({ mode: currentMode })
-                });
-            } catch (e) {
-                console.warn('Heartbeat failed', e);
+    const sites = textarea.value
+        .split('\n')
+        .map(s => s.trim())
+        .filter(s => s.length > 0)
+        .map(s => {
+            if (!s.includes('*')) {
+                return `*://*.${s}/*`;
             }
-        }
+            return s;
+        });
 
-        async fetchStatus() {
-            if (document.hidden) return; // Don't poll if backgrounded
+    localStorage.setItem('pomodev_blockList', JSON.stringify(sites));
+    localStorage.setItem('pomodev_blockingEnabled', checkbox.checked.toString());
 
-            try {
-                const res = await fetch('/api/social/status');
-                if (res.ok) {
-                    const data = await res.json();
-                    if (data.success) {
-                        this.updateUI(data.data);
-                    }
-                }
-            } catch (e) {
-                console.warn('Social poll failed', e);
-            }
-        }
+    showNotification('✅ Engel Listesi Kaydedildi', 'Ayarlar güncellendi');
+};
 
-        updateUI(data) {
-            if (!this.badge || !this.countEl) return;
+window.resetBlockList = function () {
+    const defaultList = [
+        'facebook.com',
+        'twitter.com',
+        'instagram.com',
+        'youtube.com',
+        'reddit.com',
+        'tiktok.com',
+        'netflix.com',
+        'twitch.tv'
+    ];
 
-            const count = data.active_users || 1;
-            this.countEl.textContent = count;
+    const textarea = document.getElementById('blockListTextarea');
+    if (textarea) {
+        textarea.value = defaultList.join('\n');
+    }
+    showNotification('🔄 Varsayılanlar Yüklendi', '');
+};
 
-            // Show badge if count > 1 (meaning other people are online)
-            // Or always show it to make the app feel alive (Strategy: Always show)
-            this.badge.style.display = 'flex';
+// ===== INIT SETTINGS TABS DATA =====
+function initSettingsTabsData() {
+    // Load blocking list
+    loadBlockListInSettings();
 
-            // Optional snippet: Update title with count? 
-            // document.title = `(${count}) Pomodev`;
-        }
+    // Render habits
+    renderHabitsInSettings();
+
+    // Update calendar status
+    updateCalendarStatusInSettings();
+}
+
+// Call on settings modal open
+const originalSettingsClick = document.getElementById('settingsBtn')?.onclick;
+document.addEventListener('DOMContentLoaded', () => {
+    const settingsBtn = document.getElementById('settingsBtn');
+    if (settingsBtn) {
+        const originalHandler = settingsBtn.onclick;
+        settingsBtn.addEventListener('click', () => {
+            setTimeout(initSettingsTabsData, 100);
+        });
+    }
+});
+
+// ===== SOCIAL MANAGER =====
+class SocialManager {
+    constructor() {
+        this.heartbeatInterval = null;
+        this.pollInterval = null;
+        this.badge = document.getElementById('liveUsersBadge');
+        this.countEl = document.getElementById('liveUsersCount');
+
+        this.init();
     }
 
-    // Init Social Manager
-    const socialManager = new SocialManager();
-    window.socialManager = socialManager;
+    init() {
+        // Initial heartbeat
+        this.sendHeartbeat();
+        this.fetchStatus();
 
-    // ===== AI TASK BREAKDOWN =====
-    let generatedSubtasks = [];
+        // Start loops
+        this.heartbeatInterval = setInterval(() => this.sendHeartbeat(), 30000); // 30s
+        this.pollInterval = setInterval(() => this.fetchStatus(), 30000); // 30s
+    }
 
-    async function triggerAIMagic() {
-        const titleInput = document.getElementById('taskTitle');
-        if (!titleInput || !titleInput.value.trim()) {
-            showNotification('⚠️ Uyarı', 'Lütfen önce bir görev başlığı yazın');
-            return;
-        }
-
-        const taskText = titleInput.value.trim();
-        const btn = document.querySelector('.ai-magic-btn');
-
-        // UI Loading
-        if (btn) btn.classList.add('loading');
+    async sendHeartbeat() {
+        if (!document.hasFocus()) return; // Don't spam if tab is backgrounded
 
         try {
             const token = localStorage.getItem('auth_token');
-            const res = await fetch('/api/ai/breakdown-task', {
+            await fetch('/api/social/heartbeat', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': token ? `Bearer ${token}` : ''
                 },
-                body: JSON.stringify({ text: taskText })
+                body: JSON.stringify({ mode: currentMode })
             });
-
-            const data = await res.json();
-
-            if (res.ok && data.success) {
-                generatedSubtasks = data.data.subtasks || [];
-                showAIModal(generatedSubtasks);
-            } else {
-                showNotification('❌ Hata', data.error || 'AI yanıt vermedi');
-            }
         } catch (e) {
-            console.error("AI Error:", e);
-            showNotification('❌ Hata', 'Sunucu hatası');
-        } finally {
-            if (btn) btn.classList.remove('loading');
+            console.warn('Heartbeat failed', e);
         }
     }
 
-    function showAIModal(subtasks) {
-        const modal = document.getElementById('aiModal');
-        const list = document.getElementById('aiResultsList');
-        if (!modal || !list) return;
-
-        list.innerHTML = '';
-
-        subtasks.forEach(sub => {
-            const div = document.createElement('div');
-            div.style.padding = '8px';
-            div.style.borderBottom = '1px solid rgba(255,255,255,0.1)';
-            div.style.display = 'flex';
-            div.style.alignItems = 'center';
-            div.innerHTML = `
-            <span style="color:#22c55e; margin-right:8px;">↳</span>
-            <span style="color:var(--text-primary);">${sub}</span>
-        `;
-            list.appendChild(div);
-        });
-
-        modal.classList.remove('hidden');
-    }
-
-    function closeAIModal() {
-        const modal = document.getElementById('aiModal');
-        if (modal) modal.classList.add('hidden');
-    }
-
-    async function acceptAISubtasks() {
-        const title = document.getElementById('taskTitle').value;
-        const project = document.getElementById('taskProject').value || 'AI Breakdown';
-        const category = document.getElementById('taskCategory').value || 'work';
-
-        closeAIModal();
-        // closeTaskModal(); // Keep open or close? Let's close for now as requested in flow
-        if (typeof closeTaskModal === 'function') closeTaskModal();
-
-        showNotification('✨', `${generatedSubtasks.length} alt görev oluşturuluyor...`);
-
-        // Add Main Parent Task
-        if (title) {
-            await addTaskDirectly(title, project, category);
-        }
-
-        // Add Subtasks
-        for (const sub of generatedSubtasks) {
-            await new Promise(r => setTimeout(r, 150)); // stagger
-            await addTaskDirectly(sub, project, category);
-        }
-
-        showNotification('✅ Tamamlandı', 'Tüm görevler eklendi');
-    }
-
-    // Helper to add task without UI interaction
-    async function addTaskDirectly(text, project, category) {
-        const token = localStorage.getItem('auth_token');
-        if (!token) return;
+    async fetchStatus() {
+        if (document.hidden) return; // Don't poll if backgrounded
 
         try {
-            await fetch('/api/tasks', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                body: JSON.stringify({
-                    text: text,
-                    est_pomodoros: 1,
-                    project: project,
-                    category: category,
-                    priority: 'normal'
-                })
-            });
-            if (typeof loadTasks === 'function') loadTasks();
-        } catch (e) {
-            console.error("Add task failed", e);
-        }
-    }
-
-    // Expose
-    window.triggerAIMagic = triggerAIMagic;
-    window.closeAIModal = closeAIModal;
-    window.acceptAISubtasks = acceptAISubtasks;
-
-    // ===== TODOIST INTEGRATION =====
-    async function importFromTodoist() {
-        let token = localStorage.getItem('todoist_token');
-
-        // Always check for token or prompt
-        if (!token) {
-            token = prompt("Lütfen Todoist API Token'ınızı girin:\n(Todoist Ayarlar > Entegrasyonlar > API Token)");
-            if (!token) return; // User cancelled
-            localStorage.setItem('todoist_token', token);
-        }
-
-        showNotification('⏳', 'Todoist görevleri alınıyor...');
-
-        try {
-            const authToken = localStorage.getItem('auth_token');
-            const res = await fetch('/api/integrations/todoist/import', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': authToken ? `Bearer ${authToken}` : ''
-                },
-                body: JSON.stringify({ todoistToken: token })
-            });
-
-            const data = await res.json();
-
+            const res = await fetch('/api/social/status');
             if (res.ok) {
-                showNotification('✅ Başarılı', `${data.data.count} yeni görev eklendi!`);
-                if (typeof loadTasks === 'function') loadTasks();
-            } else {
-                showNotification('❌ Hata', data.error || 'İçe aktarma başarısız');
-                // Clear invalid token so they can try again
-                if (res.status === 400 && data.error.includes('token')) {
-                    localStorage.removeItem('todoist_token');
+                const data = await res.json();
+                if (data.success) {
+                    this.updateUI(data.data);
                 }
             }
         } catch (e) {
-            console.error("Todoist Error:", e);
-            showNotification('❌ Hata', 'Sunucu hatası');
+            console.warn('Social poll failed', e);
         }
     }
 
-    window.importFromTodoist = importFromTodoist;
+    updateUI(data) {
+        if (!this.badge || !this.countEl) return;
+
+        const count = data.active_users || 1;
+        this.countEl.textContent = count;
+
+        // Show badge if count > 1 (meaning other people are online)
+        // Or always show it to make the app feel alive (Strategy: Always show)
+        this.badge.style.display = 'flex';
+
+        // Optional snippet: Update title with count? 
+        // document.title = `(${count}) Pomodev`;
+    }
+}
+
+// Init Social Manager
+const socialManager = new SocialManager();
+window.socialManager = socialManager;
+
+// ===== AI TASK BREAKDOWN =====
+let generatedSubtasks = [];
+
+async function triggerAIMagic() {
+    const titleInput = document.getElementById('taskTitle');
+    if (!titleInput || !titleInput.value.trim()) {
+        showNotification('⚠️ Uyarı', 'Lütfen önce bir görev başlığı yazın');
+        return;
+    }
+
+    const taskText = titleInput.value.trim();
+    const btn = document.querySelector('.ai-magic-btn');
+
+    // UI Loading
+    if (btn) btn.classList.add('loading');
+
+    try {
+        const token = localStorage.getItem('auth_token');
+        const res = await fetch('/api/ai/breakdown-task', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': token ? `Bearer ${token}` : ''
+            },
+            body: JSON.stringify({ text: taskText })
+        });
+
+        const data = await res.json();
+
+        if (res.ok && data.success) {
+            generatedSubtasks = data.data.subtasks || [];
+            showAIModal(generatedSubtasks);
+        } else {
+            showNotification('❌ Hata', data.error || 'AI yanıt vermedi');
+        }
+    } catch (e) {
+        console.error("AI Error:", e);
+        showNotification('❌ Hata', 'Sunucu hatası');
+    } finally {
+        if (btn) btn.classList.remove('loading');
+    }
+}
+
+function showAIModal(subtasks) {
+    const modal = document.getElementById('aiModal');
+    const list = document.getElementById('aiResultsList');
+    if (!modal || !list) return;
+
+    list.innerHTML = '';
+
+    subtasks.forEach(sub => {
+        const div = document.createElement('div');
+        div.style.padding = '8px';
+        div.style.borderBottom = '1px solid rgba(255,255,255,0.1)';
+        div.style.display = 'flex';
+        div.style.alignItems = 'center';
+        div.innerHTML = `
+            <span style="color:#22c55e; margin-right:8px;">↳</span>
+            <span style="color:var(--text-primary);">${sub}</span>
+        `;
+        list.appendChild(div);
+    });
+
+    modal.classList.remove('hidden');
+}
+
+function closeAIModal() {
+    const modal = document.getElementById('aiModal');
+    if (modal) modal.classList.add('hidden');
+}
+
+async function acceptAISubtasks() {
+    const title = document.getElementById('taskTitle').value;
+    const project = document.getElementById('taskProject').value || 'AI Breakdown';
+    const category = document.getElementById('taskCategory').value || 'work';
+
+    closeAIModal();
+    // closeTaskModal(); // Keep open or close? Let's close for now as requested in flow
+    if (typeof closeTaskModal === 'function') closeTaskModal();
+
+    showNotification('✨', `${generatedSubtasks.length} alt görev oluşturuluyor...`);
+
+    // Add Main Parent Task
+    if (title) {
+        await addTaskDirectly(title, project, category);
+    }
+
+    // Add Subtasks
+    for (const sub of generatedSubtasks) {
+        await new Promise(r => setTimeout(r, 150)); // stagger
+        await addTaskDirectly(sub, project, category);
+    }
+
+    showNotification('✅ Tamamlandı', 'Tüm görevler eklendi');
+}
+
+// Helper to add task without UI interaction
+async function addTaskDirectly(text, project, category) {
+    const token = localStorage.getItem('auth_token');
+    if (!token) return;
+
+    try {
+        await fetch('/api/tasks', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+            body: JSON.stringify({
+                text: text,
+                est_pomodoros: 1,
+                project: project,
+                category: category,
+                priority: 'normal'
+            })
+        });
+        if (typeof loadTasks === 'function') loadTasks();
+    } catch (e) {
+        console.error("Add task failed", e);
+    }
+}
+
+// Expose
+window.triggerAIMagic = triggerAIMagic;
+window.closeAIModal = closeAIModal;
+window.acceptAISubtasks = acceptAISubtasks;
+
+// ===== TODOIST INTEGRATION =====
+async function importFromTodoist() {
+    let token = localStorage.getItem('todoist_token');
+
+    // Always check for token or prompt
+    if (!token) {
+        token = prompt("Lütfen Todoist API Token'ınızı girin:\n(Todoist Ayarlar > Entegrasyonlar > API Token)");
+        if (!token) return; // User cancelled
+        localStorage.setItem('todoist_token', token);
+    }
+
+    showNotification('⏳', 'Todoist görevleri alınıyor...');
+
+    try {
+        const authToken = localStorage.getItem('auth_token');
+        const res = await fetch('/api/integrations/todoist/import', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': authToken ? `Bearer ${authToken}` : ''
+            },
+            body: JSON.stringify({ todoistToken: token })
+        });
+
+        const data = await res.json();
+
+        if (res.ok) {
+            showNotification('✅ Başarılı', `${data.data.count} yeni görev eklendi!`);
+            if (typeof loadTasks === 'function') loadTasks();
+        } else {
+            showNotification('❌ Hata', data.error || 'İçe aktarma başarısız');
+            // Clear invalid token so they can try again
+            if (res.status === 400 && data.error.includes('token')) {
+                localStorage.removeItem('todoist_token');
+            }
+        }
+    } catch (e) {
+        console.error("Todoist Error:", e);
+        showNotification('❌ Hata', 'Sunucu hatası');
+    }
+}
+
+window.importFromTodoist = importFromTodoist;
