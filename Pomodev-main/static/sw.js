@@ -12,8 +12,8 @@ const STATIC_ASSETS = [
   '/static/new_ui.css',
   '/static/layout-improvements.css',
   '/static/auth.js',
-  '/static/shop.js',
-  '/static/leaderboard.js',
+  '/static/advanced-stats-v5.js',
+  '/static/features.js',
   '/static/manifest.webmanifest'
 ];
 

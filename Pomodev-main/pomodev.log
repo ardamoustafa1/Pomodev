@@ -138,3 +138,8 @@
 2026-02-07 00:57:41,724 - werkzeug - INFO -  * Restarting with watchdog (windowsapi)
 2026-02-07 00:57:42,913 - werkzeug - WARNING -  * Debugger is active!
 2026-02-07 00:57:42,924 - werkzeug - INFO -  * Debugger PIN: 117-135-016
+2026-02-07 01:04:58,945 - werkzeug - INFO -  * Detected change in 'C:\\Users\\ARDA\\OneDrive\\Masaüstü\\Pomodev-main\\wsgi.py', reloading
+2026-02-07 01:04:58,988 - werkzeug - INFO -  * Detected change in 'C:\\Users\\ARDA\\OneDrive\\Masaüstü\\Pomodev-main\\app.py', reloading
+2026-02-07 01:04:59,176 - werkzeug - INFO -  * Restarting with watchdog (windowsapi)
+2026-02-07 01:05:01,971 - werkzeug - WARNING -  * Debugger is active!
+2026-02-07 01:05:01,979 - werkzeug - INFO -  * Debugger PIN: 117-135-016
