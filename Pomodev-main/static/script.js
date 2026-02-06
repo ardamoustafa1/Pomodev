@@ -1228,8 +1228,22 @@ function startTimer() {
 
     if (isRunning) {
         // PAUSE
-        // clearInterval(timer); // Worker kullanıyoruz
-        timerWorker.postMessage({ action: 'PAUSE' });
+        // Worker'ı durdur
+        try {
+            if (timerWorker) {
+                timerWorker.postMessage({ action: 'PAUSE' });
+            }
+        } catch (e) {}
+        // Timer'ı durdur
+        if (timer) {
+            clearInterval(timer);
+            timer = null;
+        }
+        // iOS save interval'ı temizle
+        if (window._iosSaveInterval) {
+            clearInterval(window._iosSaveInterval);
+            window._iosSaveInterval = null;
+        }
         isRunning = false;
         startBtn.textContent = 'START';
         tickAudio.pause();
@@ -1285,10 +1299,21 @@ function startTimer() {
 }
 
 function resetTimer() {
-    if (isRunning || timerWorker) {
-        // clearInterval(timer);
-        timerWorker.postMessage({ action: 'STOP' });
+    // Worker'ı durdur
+    try {
+        if (timerWorker) {
+            timerWorker.postMessage({ action: 'STOP' });
+        }
+    } catch (e) {}
+    // Timer'ı durdur
+    if (timer) {
+        clearInterval(timer);
         timer = null;
+    }
+    // iOS save interval'ı temizle
+    if (window._iosSaveInterval) {
+        clearInterval(window._iosSaveInterval);
+        window._iosSaveInterval = null;
     }
     isRunning = false;
     if (currentMode === 'stopwatch') {
@@ -1327,8 +1352,22 @@ function resetTimer() {
 function setMode(mode) {
     // Önce timer'ı durdur
     if (isRunning) {
-        // clearInterval(timer);
-        timerWorker.postMessage({ action: 'PAUSE' }); // Stop/Pause worker
+        // Worker'ı durdur
+        try {
+            if (timerWorker) {
+                timerWorker.postMessage({ action: 'PAUSE' });
+            }
+        } catch (e) {}
+        // Timer'ı durdur
+        if (timer) {
+            clearInterval(timer);
+            timer = null;
+        }
+        // iOS save interval'ı temizle
+        if (window._iosSaveInterval) {
+            clearInterval(window._iosSaveInterval);
+            window._iosSaveInterval = null;
+        }
         isRunning = false;
         document.querySelector('.start-btn').textContent = 'START';
         tickAudio.pause();
@@ -1512,8 +1551,24 @@ function actuallyStartTimer() {
         startBtn.textContent = 'PAUSE';
     }
 
-    // Start Worker
-    timerWorker.postMessage({ action: 'START' });
+    // iOS Safari için kritik: Worker'ı tamamen kaldırıp sadece setInterval kullan
+    // Worker iOS Safari'de öldürülebilir, bu yüzden setInterval daha güvenilir
+    if (!timer) {
+        timer = setInterval(() => {
+            if (isRunning) {
+                timerTick();
+            }
+        }, 100); // 100ms interval ile daha hassas güncelleme
+    }
+
+    // Worker'ı da başlat (UI güncellemesi için, ama asıl zaman hesaplaması endTimestamp'ten)
+    try {
+        if (timerWorker) {
+            timerWorker.postMessage({ action: 'START' });
+        }
+    } catch (e) {
+        console.warn('Worker başlatılamadı, setInterval kullanılacak:', e);
+    }
 
     updateTickSound();
 
@@ -1541,10 +1596,8 @@ function actuallyStartTimer() {
     }
 
     // Wall-clock based timer: bitiş zamanını hesapla (milisaniye hassasiyeti)
+    // iOS Safari için kritik: endTimestamp her zaman kaydedilmeli
     endTimestamp = Date.now() + remainingTime * 1000;
-
-    // Worker handle edeceği için buradaki setInterval kaldırıldı
-    // timer = setInterval(timerTick, 250);
 
     // İlk gösterimi hemen yap
     displayTime();
@@ -1564,8 +1617,20 @@ function actuallyStartTimer() {
         });
     }
 
-    // Başlar başlamaz durumu kaydet
+    // Başlar başlamaz durumu kaydet (iOS Safari için kritik)
     saveData();
+    
+    // iOS Safari için: Her saniye localStorage'a kaydet (arka plana geçince kaybolmasın)
+    if (typeof window !== 'undefined' && window.navigator && /iPad|iPhone|iPod/.test(navigator.userAgent)) {
+        if (window._iosSaveInterval) {
+            clearInterval(window._iosSaveInterval);
+        }
+        window._iosSaveInterval = setInterval(() => {
+            if (isRunning) {
+                saveData();
+            }
+        }, 1000); // Her saniye kaydet
+    }
 }
 function promptCompletedNote() {
     // Not prompt kaldırıldı
@@ -2978,7 +3043,36 @@ async function loadData() {
                     stopwatchElapsed = (state.stopwatchElapsed || 0) + runDurationBeforeSave + timePassed;
 
                     stopwatchStartTime = Date.now() - (stopwatchElapsed * 1000);
-                    actuallyStartTimer();
+                    // actuallyStartTimer() çağrısı yerine doğrudan timer'ı başlat
+                    isRunning = true;
+                    const startBtn = document.querySelector('.start-btn');
+                    if (startBtn) startBtn.textContent = 'PAUSE';
+                    // Worker'ı başlat
+                    try {
+                        if (timerWorker) {
+                            timerWorker.postMessage({ action: 'START' });
+                        }
+                    } catch (e) {}
+                    // Timer'ı başlat
+                    if (!timer) {
+                        timer = setInterval(() => {
+                            if (isRunning) {
+                                timerTick();
+                            }
+                        }, 100);
+                    }
+                    // iOS save interval'ı başlat
+                    if (typeof window !== 'undefined' && window.navigator && /iPad|iPhone|iPod/.test(navigator.userAgent)) {
+                        if (window._iosSaveInterval) {
+                            clearInterval(window._iosSaveInterval);
+                        }
+                        window._iosSaveInterval = setInterval(() => {
+                            if (isRunning) {
+                                saveData();
+                            }
+                        }, 1000);
+                    }
+                    displayTime();
                 } else {
                     // Countdown modes
                     // iOS / Safari arka plan senaryolarında daha sağlam olması için mümkünse doğrudan
@@ -3007,12 +3101,36 @@ async function loadData() {
                         remainingTime = Math.max(0, remainingTime);
                         // Yeni endTimestamp'i güncelle ki görünürlük değişimlerinde de duvar saati bazlı çalışsın
                         endTimestamp = Date.now() + remainingTime * 1000;
-                        displayTime();
-                        // Worker'ı yeniden başlat (iOS Safari'de worker ölmüş olabilir)
-                        if (timerWorker) {
-                            timerWorker.postMessage({ action: 'START' });
+                        // actuallyStartTimer() çağrısı yerine doğrudan timer'ı başlat
+                        isRunning = true;
+                        const startBtn = document.querySelector('.start-btn');
+                        if (startBtn) startBtn.textContent = 'PAUSE';
+                        // Worker'ı başlat
+                        try {
+                            if (timerWorker) {
+                                timerWorker.postMessage({ action: 'START' });
+                            }
+                        } catch (e) {}
+                        // Timer'ı başlat
+                        if (!timer) {
+                            timer = setInterval(() => {
+                                if (isRunning) {
+                                    timerTick();
+                                }
+                            }, 100);
                         }
-                        actuallyStartTimer();
+                        // iOS save interval'ı başlat
+                        if (typeof window !== 'undefined' && window.navigator && /iPad|iPhone|iPod/.test(navigator.userAgent)) {
+                            if (window._iosSaveInterval) {
+                                clearInterval(window._iosSaveInterval);
+                            }
+                            window._iosSaveInterval = setInterval(() => {
+                                if (isRunning) {
+                                    saveData();
+                                }
+                            }, 1000);
+                        }
+                        displayTime();
                     }
                 }
             } else {
@@ -3477,13 +3595,11 @@ function setupPageVisibility() {
 // iOS Safari için kritik: Sayfa geri geldiğinde timer state'i kontrol et ve restore et
 function handlePageShow(event) {
     // iOS'ta sayfa arka plandan geri geldiğinde timer state'i kontrol et
-    if (event.persisted) {
-        // Sayfa cache'den yüklendi, timer state'i restore et
+    // Her durumda timer state'i kontrol et (iOS Safari'de sayfa yeniden yüklenebilir)
+    setTimeout(() => {
         restoreTimerStateFromStorage();
-    } else {
-        // Normal yükleme, visibilitychange handler zaten çalışacak
         handleVisibilityChange();
-    }
+    }, 100);
 }
 
 // Timer state'i localStorage'dan restore et (iOS Safari için kritik)
@@ -3509,13 +3625,37 @@ async function restoreTimerStateFromStorage() {
                 const runDurationBeforeSave = (state.stopwatchStartTime > 0) ? Math.floor((state.lastSaveTime - state.stopwatchStartTime) / 1000) : 0;
                 stopwatchElapsed = (state.stopwatchElapsed || 0) + runDurationBeforeSave + timePassed;
                 stopwatchStartTime = Date.now() - (stopwatchElapsed * 1000);
+                // actuallyStartTimer() çağrısı yerine doğrudan timer'ı başlat
                 isRunning = true;
-                // Worker'ı başlat (iOS Safari'de worker ölmüş olabilir)
-                if (timerWorker) {
-                    timerWorker.postMessage({ action: 'START' });
-                }
-                actuallyStartTimer();
-            } else {
+                const startBtn = document.querySelector('.start-btn');
+                if (startBtn) startBtn.textContent = 'PAUSE';
+                // Worker'ı başlat
+                try {
+                    if (timerWorker) {
+                        timerWorker.postMessage({ action: 'START' });
+                    }
+                } catch (e) {}
+                    // Timer'ı başlat
+                    if (!timer) {
+                        timer = setInterval(() => {
+                            if (isRunning) {
+                                timerTick();
+                            }
+                        }, 100);
+                    }
+                    // iOS save interval'ı başlat
+                    if (typeof window !== 'undefined' && window.navigator && /iPad|iPhone|iPod/.test(navigator.userAgent)) {
+                        if (window._iosSaveInterval) {
+                            clearInterval(window._iosSaveInterval);
+                        }
+                        window._iosSaveInterval = setInterval(() => {
+                            if (isRunning) {
+                                saveData();
+                            }
+                        }, 1000);
+                    }
+                    displayTime();
+                } else {
                 // Countdown modes
                 if (state.endTimestamp && typeof state.endTimestamp === 'number') {
                     remainingTime = Math.max(0, Math.floor((state.endTimestamp - Date.now()) / 1000));
@@ -3525,12 +3665,36 @@ async function restoreTimerStateFromStorage() {
 
                 if (remainingTime > 0) {
                     endTimestamp = Date.now() + remainingTime * 1000;
+                    // actuallyStartTimer() çağrısı yerine doğrudan timer'ı başlat
                     isRunning = true;
-                    // Worker'ı başlat (iOS Safari'de worker ölmüş olabilir)
-                    if (timerWorker) {
-                        timerWorker.postMessage({ action: 'START' });
+                    const startBtn = document.querySelector('.start-btn');
+                    if (startBtn) startBtn.textContent = 'PAUSE';
+                    // Worker'ı başlat
+                    try {
+                        if (timerWorker) {
+                            timerWorker.postMessage({ action: 'START' });
+                        }
+                    } catch (e) {}
+                    // Timer'ı başlat
+                    if (!timer) {
+                        timer = setInterval(() => {
+                            if (isRunning) {
+                                timerTick();
+                            }
+                        }, 100);
                     }
-                    actuallyStartTimer();
+                    // iOS save interval'ı başlat
+                    if (typeof window !== 'undefined' && window.navigator && /iPad|iPhone|iPod/.test(navigator.userAgent)) {
+                        if (window._iosSaveInterval) {
+                            clearInterval(window._iosSaveInterval);
+                        }
+                        window._iosSaveInterval = setInterval(() => {
+                            if (isRunning) {
+                                saveData();
+                            }
+                        }, 1000);
+                    }
+                    displayTime();
                 } else {
                     remainingTime = 0;
                     displayTime();
@@ -3548,9 +3712,30 @@ async function restoreTimerStateFromStorage() {
                     runTimerCompleteLogic();
                 } else {
                     endTimestamp = Date.now() + remainingTime * 1000;
-                    // Worker'ı başlat (iOS Safari'de worker ölmüş olabilir)
-                    if (timerWorker) {
-                        timerWorker.postMessage({ action: 'START' });
+                    // Worker'ı başlat
+                    try {
+                        if (timerWorker) {
+                            timerWorker.postMessage({ action: 'START' });
+                        }
+                    } catch (e) {}
+                    // Timer'ı başlat
+                    if (!timer) {
+                        timer = setInterval(() => {
+                            if (isRunning) {
+                                timerTick();
+                            }
+                        }, 100);
+                    }
+                    // iOS save interval'ı başlat
+                    if (typeof window !== 'undefined' && window.navigator && /iPad|iPhone|iPod/.test(navigator.userAgent)) {
+                        if (window._iosSaveInterval) {
+                            clearInterval(window._iosSaveInterval);
+                        }
+                        window._iosSaveInterval = setInterval(() => {
+                            if (isRunning) {
+                                saveData();
+                            }
+                        }, 1000);
                     }
                     displayTime();
                 }
@@ -3563,9 +3748,12 @@ async function restoreTimerStateFromStorage() {
 
 let lastAutoSave = 0;
 function handleAutoSave() {
-    // 5 saniyede bir otomatik kaydet (Crash durumuna karşı koruma)
+    // iOS Safari için kritik: Daha sık kaydet (arka plana geçince kaybolmasın)
+    const isIOS = typeof window !== 'undefined' && window.navigator && /iPad|iPhone|iPod/.test(navigator.userAgent);
+    const saveInterval = isIOS ? 2000 : 5000; // iOS'ta 2 saniyede bir, diğerlerinde 5 saniyede bir
+    
     const now = Date.now();
-    if (now - lastAutoSave > 5000) {
+    if (now - lastAutoSave > saveInterval) {
         saveData();
         lastAutoSave = now;
     }
@@ -3604,15 +3792,61 @@ function handleVisibilityChange() {
                     timerTick(); // Bitiş mantığını tetikle
                 } else {
                     endTimestamp = Date.now() + remainingTime * 1000; // endTimestamp'i güncelle
+                    // Timer çalışmıyorsa başlat
+                    if (!timer) {
+                        timer = setInterval(() => {
+                            if (isRunning) {
+                                timerTick();
+                            }
+                        }, 100);
+                    }
+                    // iOS save interval'ı başlat
+                    if (typeof window !== 'undefined' && window.navigator && /iPad|iPhone|iPod/.test(navigator.userAgent)) {
+                        if (window._iosSaveInterval) {
+                            clearInterval(window._iosSaveInterval);
+                        }
+                        window._iosSaveInterval = setInterval(() => {
+                            if (isRunning) {
+                                saveData();
+                            }
+                        }, 1000);
+                    }
                     displayTime();
                 }
             } else {
                 // Küçük sapmalar için de endTimestamp'i güncelle
                 endTimestamp = Date.now() + remainingTime * 1000;
+                // Timer çalışmıyorsa başlat
+                if (!timer) {
+                    timer = setInterval(() => {
+                        if (isRunning) {
+                            timerTick();
+                        }
+                    }, 250);
+                }
             }
         } else if (isRunning && currentMode === 'stopwatch' && stopwatchStartTime > 0) {
             // Stopwatch senk
-            displayTime();
+                // Timer çalışmıyorsa başlat
+                if (!timer) {
+                    timer = setInterval(() => {
+                        if (isRunning) {
+                            timerTick();
+                        }
+                    }, 100);
+                }
+                // iOS save interval'ı başlat
+                if (typeof window !== 'undefined' && window.navigator && /iPad|iPhone|iPod/.test(navigator.userAgent)) {
+                    if (window._iosSaveInterval) {
+                        clearInterval(window._iosSaveInterval);
+                    }
+                    window._iosSaveInterval = setInterval(() => {
+                        if (isRunning) {
+                            saveData();
+                        }
+                    }, 1000);
+                }
+                displayTime();
         }
     }
 }
@@ -3621,6 +3855,11 @@ let _lastDisplayedSeconds = -1; // Sadece saniye değişince DOM güncelle (perf
 
 /** Zamanlayıcı bittiğinde çalıştırılır: alarm, istatistik, otomatik mola/pomodoro başlatma. Hem tick hem visibility (arka plan) bitişinde kullanılır. */
 function runTimerCompleteLogic() {
+    // iOS save interval'ı temizle
+    if (window._iosSaveInterval) {
+        clearInterval(window._iosSaveInterval);
+        window._iosSaveInterval = null;
+    }
     document.body.classList.remove('zen-mode');
     playAlarm();
     remainingTime = 0;
@@ -3760,25 +3999,71 @@ function runTimerCompleteLogic() {
 }
 
 function timerTick() {
-    // Her tick'te otomatik kayıt kontrolü (Stopwatch ve Pomodoro için)
-    handleAutoSave();
-
+    // iOS Safari için kritik: Her zaman endTimestamp'ten kalan süreyi hesapla
+    // Worker öldürülse bile zaman doğru akar
+    
     if (currentMode === 'stopwatch') {
-        displayTime();
+        // Stopwatch için: elapsed time'ı hesapla
+        if (isRunning && stopwatchStartTime > 0) {
+            const elapsed = stopwatchElapsed + Math.floor((Date.now() - stopwatchStartTime) / 1000);
+            const sec = elapsed % 60;
+            if (sec !== _lastDisplayedSeconds) {
+                _lastDisplayedSeconds = sec;
+                displayTime();
+            }
+        } else {
+            displayTime();
+        }
+        // Her 5 saniyede bir kaydet
+        handleAutoSave();
         return;
     }
 
+    // Countdown modları için: endTimestamp'ten kalan süreyi hesapla
     if (endTimestamp > 0) {
         const timeLeft = Math.max(0, Math.floor((endTimestamp - Date.now()) / 1000));
         remainingTime = timeLeft;
+        
+        // Sadece saniye değiştiğinde UI'ı güncelle (performans için)
         const sec = remainingTime % 60;
         if (sec !== _lastDisplayedSeconds) {
             _lastDisplayedSeconds = sec;
             displayTime();
         }
+        
+        // Süre dolmuş mu kontrol et
+        if (remainingTime <= 0) {
+            _lastDisplayedSeconds = -1;
+            // Timer'ı durdur
+            if (timer) {
+                clearInterval(timer);
+                timer = null;
+            }
+            try {
+                if (timerWorker) {
+                    timerWorker.postMessage({ action: 'STOP' });
+                }
+            } catch (e) {}
+            isRunning = false;
+            endTimestamp = 0;
+            const startBtn = document.querySelector('.start-btn');
+            if (startBtn) startBtn.textContent = 'START';
+            tickAudio.pause();
+            tickAudio.src = '';
+            runTimerCompleteLogic();
+            return;
+        }
     } else {
-        // if (timer) { clearInterval(timer); timer = null; } // Managed by worker
-        timerWorker.postMessage({ action: 'STOP' });
+        // endTimestamp yoksa timer durdurulmalı
+        if (timer) {
+            clearInterval(timer);
+            timer = null;
+        }
+        try {
+            if (timerWorker) {
+                timerWorker.postMessage({ action: 'STOP' });
+            }
+        } catch (e) {}
         isRunning = false;
         const startBtn = document.querySelector('.start-btn');
         if (startBtn) startBtn.textContent = 'START';
@@ -3787,25 +4072,17 @@ function timerTick() {
         return;
     }
 
-    if (remainingTime <= 0) {
-        _lastDisplayedSeconds = -1;
-        // if (timer) { clearInterval(timer); timer = null; }
-        timerWorker.postMessage({ action: 'STOP' });
-        isRunning = false;
-        endTimestamp = 0;
-        const startBtn = document.querySelector('.start-btn');
-        if (startBtn) startBtn.textContent = 'START';
-        tickAudio.pause();
-        tickAudio.src = '';
-        runTimerCompleteLogic();
-        return;
-    }
-
-    displayTime();
-    if (tickAudio && !tickAudio.paused) {
+    // Her 5 saniyede bir otomatik kayıt (iOS Safari için kritik)
+    handleAutoSave();
+    
+    // Tick sesi çal (sadece saniye değiştiğinde)
+    const currentSec = remainingTime % 60;
+    if (tickAudio && !tickAudio.paused && _lastDisplayedSeconds !== currentSec) {
         tickAudio.currentTime = 0;
         tickAudio.play().catch(() => { });
     }
+    
+    // XP kazanma (her dakika)
     if (currentMode === 'pomodoro' && remainingTime % 60 === 0 && remainingTime < durations.pomodoro) {
         const oldXP = dataManager.getXP();
         const newXP = dataManager.addXP(1);
