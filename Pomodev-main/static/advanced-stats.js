@@ -96,7 +96,7 @@ class AdvancedStats {
 
         const bestDay = dayKeys.reduce((a, b) =>
             dayStats[a] > dayStats[b] ? a : b
-        );
+            , dayKeys[0] || 'Henüz veri yok');
 
         return {
             day: bestDay,
@@ -126,7 +126,7 @@ class AdvancedStats {
 
         const bestHour = hourKeys.reduce((a, b) =>
             hourStats[a] > hourStats[b] ? a : b
-        );
+            , hourKeys[0] || "0");
 
         return {
             hour: parseInt(bestHour),

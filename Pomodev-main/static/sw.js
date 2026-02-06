@@ -1,6 +1,6 @@
-const CACHE_NAME = 'pomodev-v7';
-const STATIC_CACHE = 'pomodev-static-v7';
-const DYNAMIC_CACHE = 'pomodev-dynamic-v7';
+const CACHE_NAME = 'pomodev-v8';
+const STATIC_CACHE = 'pomodev-static-v8';
+const DYNAMIC_CACHE = 'pomodev-dynamic-v8';
 
 // Critical assets to pre-cache
 const STATIC_ASSETS = [
@@ -97,7 +97,7 @@ async function cacheFirst(request) {
   if (cachedResponse) {
     return cachedResponse;
   }
-  
+
   try {
     const networkResponse = await fetch(request);
     if (networkResponse.ok) {
@@ -117,7 +117,7 @@ async function cacheFirstWithNetworkFallback(request) {
   if (cachedResponse) {
     return cachedResponse;
   }
-  
+
   try {
     const networkResponse = await fetch(request);
     if (networkResponse.ok) {
@@ -145,12 +145,12 @@ async function networkFirstWithCacheFallback(request) {
     if (cachedResponse) {
       return cachedResponse;
     }
-    
+
     // Return offline page for navigation requests
     if (request.mode === 'navigate') {
       return caches.match('/');
     }
-    
+
     return new Response('Offline', { status: 503 });
   }
 }
@@ -160,8 +160,8 @@ self.addEventListener('message', event => {
   if (event.data.action === 'skipWaiting') {
     self.skipWaiting();
   }
-  
-  if (event.data.action === 'clearCache') {
+
+  if (event.data.action === 'clearCache' || event.data.action === 'forceUpdate') {
     caches.keys().then(keys => {
       keys.forEach(key => caches.delete(key));
     });
