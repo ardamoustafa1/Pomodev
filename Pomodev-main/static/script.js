@@ -575,6 +575,10 @@ document.addEventListener('DOMContentLoaded', () => {
         setupBrainDump(); // New
         loadNotes();      // New
         updateTimeline(); // New
+        // iOS Safari için: Sayfa yüklendiğinde timer state'i kontrol et
+        setTimeout(() => {
+            restoreTimerStateFromStorage();
+        }, 100);
         window.PomodoroVisualCounter?.render(); // Sync visual counter
     });
     const yearSpan = document.getElementById('year');
@@ -3004,6 +3008,10 @@ async function loadData() {
                         // Yeni endTimestamp'i güncelle ki görünürlük değişimlerinde de duvar saati bazlı çalışsın
                         endTimestamp = Date.now() + remainingTime * 1000;
                         displayTime();
+                        // Worker'ı yeniden başlat (iOS Safari'de worker ölmüş olabilir)
+                        if (timerWorker) {
+                            timerWorker.postMessage({ action: 'START' });
+                        }
                         actuallyStartTimer();
                     }
                 }
@@ -3450,9 +3458,107 @@ function setupPageVisibility() {
     // Sayfa görünürlük değişikliklerini dinle
     document.addEventListener('visibilitychange', handleVisibilityChange);
 
+    // iOS Safari için kritik: pageshow event'i sayfa geri geldiğinde tetiklenir
+    window.addEventListener('pageshow', handlePageShow);
+
     // Sayfa kapatılırken veya gizlenirken veri kaydet (iOS için pagehide kritik)
     window.addEventListener('beforeunload', () => { if (isRunning) saveData(); });
-    window.addEventListener('pagehide', () => { if (isRunning) saveData(); });
+    window.addEventListener('pagehide', () => { 
+        if (isRunning) {
+            saveData(); // Synchronous save for iOS
+            // iOS'ta localStorage'a yazma garantisi için ekstra kontrol
+            try {
+                localStorage.setItem('pomodev_last_save', Date.now().toString());
+            } catch(e) {}
+        }
+    });
+}
+
+// iOS Safari için kritik: Sayfa geri geldiğinde timer state'i kontrol et ve restore et
+function handlePageShow(event) {
+    // iOS'ta sayfa arka plandan geri geldiğinde timer state'i kontrol et
+    if (event.persisted) {
+        // Sayfa cache'den yüklendi, timer state'i restore et
+        restoreTimerStateFromStorage();
+    } else {
+        // Normal yükleme, visibilitychange handler zaten çalışacak
+        handleVisibilityChange();
+    }
+}
+
+// Timer state'i localStorage'dan restore et (iOS Safari için kritik)
+async function restoreTimerStateFromStorage() {
+    try {
+        const data = await dataManager.load();
+        if (!data || !data.timerState) return;
+
+        const state = data.timerState;
+        
+        // Eğer timer çalışıyorsa ve şu an çalışmıyorsa, restore et
+        if (state.isRunning && !isRunning) {
+            const timePassed = Math.floor((Date.now() - state.lastSaveTime) / 1000);
+            
+            // Modu geri yükle
+            if (state.mode) {
+                currentMode = state.mode;
+                updateModeStyles();
+                updateFocusMessage();
+            }
+
+            if (currentMode === 'stopwatch') {
+                const runDurationBeforeSave = (state.stopwatchStartTime > 0) ? Math.floor((state.lastSaveTime - state.stopwatchStartTime) / 1000) : 0;
+                stopwatchElapsed = (state.stopwatchElapsed || 0) + runDurationBeforeSave + timePassed;
+                stopwatchStartTime = Date.now() - (stopwatchElapsed * 1000);
+                isRunning = true;
+                // Worker'ı başlat (iOS Safari'de worker ölmüş olabilir)
+                if (timerWorker) {
+                    timerWorker.postMessage({ action: 'START' });
+                }
+                actuallyStartTimer();
+            } else {
+                // Countdown modes
+                if (state.endTimestamp && typeof state.endTimestamp === 'number') {
+                    remainingTime = Math.max(0, Math.floor((state.endTimestamp - Date.now()) / 1000));
+                } else {
+                    remainingTime = (state.remainingTime || durations[currentMode]) - timePassed;
+                }
+
+                if (remainingTime > 0) {
+                    endTimestamp = Date.now() + remainingTime * 1000;
+                    isRunning = true;
+                    // Worker'ı başlat (iOS Safari'de worker ölmüş olabilir)
+                    if (timerWorker) {
+                        timerWorker.postMessage({ action: 'START' });
+                    }
+                    actuallyStartTimer();
+                } else {
+                    remainingTime = 0;
+                    displayTime();
+                }
+            }
+        } else if (state.isRunning && isRunning) {
+            // Timer zaten çalışıyor ama senkronize et
+            if (currentMode !== 'stopwatch' && state.endTimestamp) {
+                const timeLeft = Math.max(0, Math.floor((state.endTimestamp - Date.now()) / 1000));
+                remainingTime = timeLeft;
+                if (remainingTime <= 0) {
+                    remainingTime = 0;
+                    isRunning = false;
+                    endTimestamp = 0;
+                    runTimerCompleteLogic();
+                } else {
+                    endTimestamp = Date.now() + remainingTime * 1000;
+                    // Worker'ı başlat (iOS Safari'de worker ölmüş olabilir)
+                    if (timerWorker) {
+                        timerWorker.postMessage({ action: 'START' });
+                    }
+                    displayTime();
+                }
+            }
+        }
+    } catch (e) {
+        console.error('Timer state restore failed:', e);
+    }
 }
 
 let lastAutoSave = 0;
@@ -3471,10 +3577,20 @@ function handleVisibilityChange() {
         isPageVisible = false;
         if (isRunning) {
             saveData(); // Save state immediately to be safe against reloads/memory clears
+            // iOS için ekstra güvenlik: localStorage'a timestamp kaydet
+            try {
+                localStorage.setItem('pomodev_last_save', Date.now().toString());
+            } catch(e) {}
         }
     } else {
         // Sayfa tekrar aktif oldu
         isPageVisible = true;
+
+        // iOS Safari için kritik: Eğer timer çalışmıyorsa ama localStorage'da çalışıyor gözüküyorsa restore et
+        if (!isRunning) {
+            restoreTimerStateFromStorage();
+            return;
+        }
 
         // Eğer timer çalışıyorsa, geçen süreyi senkronize et (Worker ölmüş olabilir veya throttle yemiş olabilir)
         if (isRunning && currentMode !== 'stopwatch' && endTimestamp > 0) {
@@ -3487,8 +3603,12 @@ function handleVisibilityChange() {
                     // Süre dolmuş
                     timerTick(); // Bitiş mantığını tetikle
                 } else {
+                    endTimestamp = Date.now() + remainingTime * 1000; // endTimestamp'i güncelle
                     displayTime();
                 }
+            } else {
+                // Küçük sapmalar için de endTimestamp'i güncelle
+                endTimestamp = Date.now() + remainingTime * 1000;
             }
         } else if (isRunning && currentMode === 'stopwatch' && stopwatchStartTime > 0) {
             // Stopwatch senk
