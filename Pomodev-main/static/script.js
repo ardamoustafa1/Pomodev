@@ -431,7 +431,12 @@ document.addEventListener('DOMContentLoaded', () => {
         stopwatchElapsed = 0;
         stopwatchStartTime = 0;
         endTimestamp = 0;
-    } else {
+    }
+    
+    // iOS Safari için KRİTİK: Sayfa yüklendiğinde timer state'i mutlaka restore et
+    setTimeout(() => {
+        restoreTimerStateFromStorage();
+    }, 200); else {
         remainingTime = durations[currentMode];
         endTimestamp = 0;
     }
@@ -575,10 +580,10 @@ document.addEventListener('DOMContentLoaded', () => {
         setupBrainDump(); // New
         loadNotes();      // New
         updateTimeline(); // New
-        // iOS Safari için: Sayfa yüklendiğinde timer state'i kontrol et
+        // iOS Safari için KRİTİK: Sayfa yüklendiğinde timer state'i mutlaka restore et
         setTimeout(() => {
             restoreTimerStateFromStorage();
-        }, 100);
+        }, 300);
         window.PomodoroVisualCounter?.render(); // Sync visual counter
     });
     const yearSpan = document.getElementById('year');
@@ -3606,12 +3611,25 @@ function handlePageShow(event) {
 async function restoreTimerStateFromStorage() {
     try {
         const data = await dataManager.load();
-        if (!data || !data.timerState) return;
+        if (!data || !data.timerState) {
+            // Timer state yoksa, mevcut timer'ı durdur
+            if (isRunning) {
+                if (timer) {
+                    clearInterval(timer);
+                    timer = null;
+                }
+                isRunning = false;
+            }
+            return;
+        }
 
         const state = data.timerState;
         
+        // iOS Safari için KRİTİK: Timer state varsa mutlaka kontrol et ve restore et
         // Eğer timer çalışıyorsa ve şu an çalışmıyorsa, restore et
-        if (state.isRunning && !isRunning) {
+        if (state.isRunning) {
+            // Timer çalışıyor olmalı ama çalışmıyor - restore et
+            if (!isRunning || !timer) {
             const timePassed = Math.floor((Date.now() - state.lastSaveTime) / 1000);
             
             // Modu geri yükle
@@ -3764,69 +3782,41 @@ function handleVisibilityChange() {
         // Sayfa arka plana alındı
         isPageVisible = false;
         if (isRunning) {
-            saveData(); // Save state immediately to be safe against reloads/memory clears
+            // iOS Safari için KRİTİK: Hemen kaydet
+            saveData();
             // iOS için ekstra güvenlik: localStorage'a timestamp kaydet
             try {
                 localStorage.setItem('pomodev_last_save', Date.now().toString());
+                // endTimestamp'i de ayrı kaydet (çift kontrol)
+                localStorage.setItem('pomodev_end_timestamp', endTimestamp.toString());
             } catch(e) {}
         }
     } else {
         // Sayfa tekrar aktif oldu
         isPageVisible = true;
 
-        // iOS Safari için kritik: Eğer timer çalışmıyorsa ama localStorage'da çalışıyor gözüküyorsa restore et
-        if (!isRunning) {
+        // iOS Safari için KRİTİK: Her zaman timer state'i kontrol et ve restore et
+        // Timer çalışmıyorsa veya timer çalışıyor ama localStorage'daki state farklıysa restore et
+        setTimeout(() => {
+            restoreTimerStateFromStorage();
+        }, 50);
+        
+        // Eğer timer çalışmıyorsa restore et
+        if (!isRunning || !timer) {
             restoreTimerStateFromStorage();
             return;
         }
 
-        // Eğer timer çalışıyorsa, geçen süreyi senkronize et (Worker ölmüş olabilir veya throttle yemiş olabilir)
+        // Eğer timer çalışıyorsa, geçen süreyi senkronize et
         if (isRunning && currentMode !== 'stopwatch' && endTimestamp > 0) {
             const timeLeft = Math.max(0, Math.floor((endTimestamp - Date.now()) / 1000));
-
-            // Eğer süre ciddi şekilde sapmışsa güncelle
-            if (Math.abs(remainingTime - timeLeft) > 2) {
-                remainingTime = timeLeft;
-                if (remainingTime <= 0) {
-                    // Süre dolmuş
-                    timerTick(); // Bitiş mantığını tetikle
-                } else {
-                    endTimestamp = Date.now() + remainingTime * 1000; // endTimestamp'i güncelle
-                    // Timer çalışmıyorsa başlat
-                    if (!timer) {
-                        timer = setInterval(() => {
-                            if (isRunning) {
-                                timerTick();
-                            }
-                        }, 100);
-                    }
-                    // iOS save interval'ı başlat
-                    if (typeof window !== 'undefined' && window.navigator && /iPad|iPhone|iPod/.test(navigator.userAgent)) {
-                        if (window._iosSaveInterval) {
-                            clearInterval(window._iosSaveInterval);
-                        }
-                        window._iosSaveInterval = setInterval(() => {
-                            if (isRunning) {
-                                saveData();
-                            }
-                        }, 1000);
-                    }
-                    displayTime();
-                }
+            remainingTime = timeLeft;
+            
+            if (remainingTime <= 0) {
+                // Süre dolmuş
+                timerTick(); // Bitiş mantığını tetikle
             } else {
-                // Küçük sapmalar için de endTimestamp'i güncelle
-                endTimestamp = Date.now() + remainingTime * 1000;
-                // Timer çalışmıyorsa başlat
-                if (!timer) {
-                    timer = setInterval(() => {
-                        if (isRunning) {
-                            timerTick();
-                        }
-                    }, 250);
-                }
-            }
-        } else if (isRunning && currentMode === 'stopwatch' && stopwatchStartTime > 0) {
-            // Stopwatch senk
+                endTimestamp = Date.now() + remainingTime * 1000; // endTimestamp'i güncelle
                 // Timer çalışmıyorsa başlat
                 if (!timer) {
                     timer = setInterval(() => {
@@ -3847,6 +3837,29 @@ function handleVisibilityChange() {
                     }, 1000);
                 }
                 displayTime();
+            }
+        } else if (isRunning && currentMode === 'stopwatch' && stopwatchStartTime > 0) {
+            // Stopwatch senk
+            // Timer çalışmıyorsa başlat
+            if (!timer) {
+                timer = setInterval(() => {
+                    if (isRunning) {
+                        timerTick();
+                    }
+                }, 100);
+            }
+            // iOS save interval'ı başlat
+            if (typeof window !== 'undefined' && window.navigator && /iPad|iPhone|iPod/.test(navigator.userAgent)) {
+                if (window._iosSaveInterval) {
+                    clearInterval(window._iosSaveInterval);
+                }
+                window._iosSaveInterval = setInterval(() => {
+                    if (isRunning) {
+                        saveData();
+                    }
+                }, 1000);
+            }
+            displayTime();
         }
     }
 }
@@ -3999,7 +4012,7 @@ function runTimerCompleteLogic() {
 }
 
 function timerTick() {
-    // iOS Safari için kritik: Her zaman endTimestamp'ten kalan süreyi hesapla
+    // iOS Safari için KRİTİK: Her zaman endTimestamp'ten kalan süreyi hesapla
     // Worker öldürülse bile zaman doğru akar
     
     if (currentMode === 'stopwatch') {
