@@ -616,6 +616,32 @@ document.addEventListener('DOMContentLoaded', () => {
             timerTick();
         }
     };
+    
+    // iOS Safari için KRİTİK: Sayfa yüklendiğinde timer state'i kontrol et
+    // Hem DOMContentLoaded hem de window.onload'da kontrol et
+    const checkTimerOnLoad = () => {
+        setTimeout(() => {
+            restoreTimerStateFromStorage();
+        }, 100);
+    };
+    
+    checkTimerOnLoad();
+    window.addEventListener('load', checkTimerOnLoad);
+    
+    // iOS Safari için: Her 2 saniyede bir timer state'i kontrol et (sayfa yüklenirken)
+    if (typeof window !== 'undefined' && window.navigator && /iPad|iPhone|iPod/.test(navigator.userAgent)) {
+        let checkCount = 0;
+        const checkInterval = setInterval(() => {
+            checkCount++;
+            if (!isRunning || !timer) {
+                restoreTimerStateFromStorage();
+            }
+            // 10 kez kontrol ettikten sonra durdur (20 saniye)
+            if (checkCount >= 10) {
+                clearInterval(checkInterval);
+            }
+        }, 2000);
+    }
 });
 
 // ===== ANALYTICS MANAGER =====
@@ -2971,7 +2997,24 @@ function saveData() {
         }
     };
 
-    // Use DataManager
+    // iOS Safari için KRİTİK: Synchronous localStorage yazma
+    // Async kayıt tamamlanmadan sayfa kapanabilir
+    const isIOS = typeof window !== 'undefined' && window.navigator && /iPad|iPhone|iPod/.test(navigator.userAgent);
+    
+    if (isIOS && isRunning) {
+        // iOS'ta timer çalışıyorsa synchronous olarak localStorage'a yaz
+        try {
+            const jsonData = JSON.stringify(data);
+            localStorage.setItem('pomodevData', jsonData);
+            // endTimestamp'i ayrı kaydet (çift kontrol)
+            localStorage.setItem('pomodev_end_timestamp', endTimestamp.toString());
+            localStorage.setItem('pomodev_last_save', Date.now().toString());
+        } catch (e) {
+            console.error('iOS synchronous save failed:', e);
+        }
+    }
+
+    // Normal async kayıt (diğer platformlar için)
     dataManager.save(data).then(success => {
         if (!success) console.warn("Save operation had issues.");
     });
@@ -3588,11 +3631,27 @@ function setupPageVisibility() {
     window.addEventListener('beforeunload', () => { if (isRunning) saveData(); });
     window.addEventListener('pagehide', () => { 
         if (isRunning) {
-            saveData(); // Synchronous save for iOS
-            // iOS'ta localStorage'a yazma garantisi için ekstra kontrol
+            // iOS Safari için KRİTİK: Synchronous save
             try {
+                const data = {
+                    timerState: {
+                        isRunning: isRunning,
+                        mode: currentMode,
+                        remainingTime: remainingTime,
+                        endTimestamp: endTimestamp,
+                        stopwatchElapsed: stopwatchElapsed,
+                        stopwatchStartTime: stopwatchStartTime,
+                        lastSaveTime: Date.now()
+                    }
+                };
+                const jsonData = JSON.stringify(data);
+                localStorage.setItem('pomodev_timer_state', jsonData);
+                localStorage.setItem('pomodev_end_timestamp', endTimestamp.toString());
                 localStorage.setItem('pomodev_last_save', Date.now().toString());
-            } catch(e) {}
+            } catch(e) {
+                console.error('pagehide save failed:', e);
+            }
+            saveData(); // Normal save
         }
     });
 }
@@ -3610,13 +3669,55 @@ function handlePageShow(event) {
 // Timer state'i localStorage'dan restore et (iOS Safari için kritik)
 async function restoreTimerStateFromStorage() {
     try {
-        const data = await dataManager.load();
+        // iOS Safari için: Önce synchronous localStorage'dan oku
+        const isIOS = typeof window !== 'undefined' && window.navigator && /iPad|iPhone|iPod/.test(navigator.userAgent);
+        let data = null;
+        
+        if (isIOS) {
+            try {
+                // Önce timer state'i kontrol et (pagehide'da kaydedilen)
+                const timerStateData = localStorage.getItem('pomodev_timer_state');
+                if (timerStateData) {
+                    const timerState = JSON.parse(timerStateData);
+                    // Timer state'i ana data'ya ekle
+                    const savedData = localStorage.getItem('pomodevData');
+                    if (savedData) {
+                        data = JSON.parse(savedData);
+                        // Timer state'i güncelle
+                        if (timerState.timerState) {
+                            data.timerState = timerState.timerState;
+                        }
+                    } else {
+                        // Sadece timer state varsa onu kullan
+                        data = timerState;
+                    }
+                } else {
+                    // Normal data'yı oku
+                    const savedData = localStorage.getItem('pomodevData');
+                    if (savedData) {
+                        data = JSON.parse(savedData);
+                    }
+                }
+            } catch (e) {
+                console.error('iOS synchronous load failed:', e);
+            }
+        }
+        
+        // Eğer synchronous okuma başarısız olduysa async oku
+        if (!data) {
+            data = await dataManager.load();
+        }
+        
         if (!data || !data.timerState) {
             // Timer state yoksa, mevcut timer'ı durdur
             if (isRunning) {
                 if (timer) {
                     clearInterval(timer);
                     timer = null;
+                }
+                if (window._iosSaveInterval) {
+                    clearInterval(window._iosSaveInterval);
+                    window._iosSaveInterval = null;
                 }
                 isRunning = false;
             }
@@ -3782,14 +3883,27 @@ function handleVisibilityChange() {
         // Sayfa arka plana alındı
         isPageVisible = false;
         if (isRunning) {
-            // iOS Safari için KRİTİK: Hemen kaydet
-            saveData();
-            // iOS için ekstra güvenlik: localStorage'a timestamp kaydet
+            // iOS Safari için KRİTİK: Synchronous save
             try {
-                localStorage.setItem('pomodev_last_save', Date.now().toString());
-                // endTimestamp'i de ayrı kaydet (çift kontrol)
+                const data = {
+                    timerState: {
+                        isRunning: isRunning,
+                        mode: currentMode,
+                        remainingTime: remainingTime,
+                        endTimestamp: endTimestamp,
+                        stopwatchElapsed: stopwatchElapsed,
+                        stopwatchStartTime: stopwatchStartTime,
+                        lastSaveTime: Date.now()
+                    }
+                };
+                const jsonData = JSON.stringify(data);
+                localStorage.setItem('pomodev_timer_state', jsonData);
                 localStorage.setItem('pomodev_end_timestamp', endTimestamp.toString());
-            } catch(e) {}
+                localStorage.setItem('pomodev_last_save', Date.now().toString());
+            } catch(e) {
+                console.error('visibilitychange save failed:', e);
+            }
+            saveData(); // Normal save
         }
     } else {
         // Sayfa tekrar aktif oldu
