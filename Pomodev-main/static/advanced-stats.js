@@ -18,8 +18,8 @@ class AdvancedStats {
         const history = this.stats.pomodoroHistory || [];
         const now = new Date();
         const cutoffDate = new Date(now.getTime() - days * 24 * 60 * 60 * 1000);
-        
-        const recentHistory = history.filter(session => 
+
+        const recentHistory = history.filter(session =>
             new Date(session.timestamp) >= cutoffDate
         );
 
@@ -54,7 +54,7 @@ class AdvancedStats {
         const totalPomodoros = trends.reduce((sum, day) => sum + day.count, 0);
         const avgPerDay = totalPomodoros / trends.length;
         const consistency = this.getConsistencyScore(trends);
-        
+
         // Score based on average pomodoros per day and consistency
         const score = Math.min(100, (avgPerDay * 10) + (consistency * 0.5));
         return Math.round(score);
@@ -63,12 +63,12 @@ class AdvancedStats {
     // Get consistency score (0-100)
     getConsistencyScore(trends) {
         if (trends.length < 7) return 0;
-        
+
         const counts = trends.map(t => t.count);
         const avg = counts.reduce((a, b) => a + b, 0) / counts.length;
         const variance = counts.reduce((sum, count) => sum + Math.pow(count - avg, 2), 0) / counts.length;
         const stdDev = Math.sqrt(variance);
-        
+
         // Lower stdDev = higher consistency
         const consistency = Math.max(0, 100 - (stdDev * 10));
         return Math.round(consistency);
@@ -77,19 +77,24 @@ class AdvancedStats {
     // Get best day of week
     getBestDayOfWeek() {
         const history = this.stats.pomodoroHistory || [];
+        if (history.length === 0) return { day: 'Henüz veri yok', count: 0 };
+
         const dayStats = {};
-        
+
         history.forEach(session => {
             const date = new Date(session.timestamp);
             const dayName = date.toLocaleDateString('tr-TR', { weekday: 'long' });
-            
+
             if (!dayStats[dayName]) {
                 dayStats[dayName] = 0;
             }
             dayStats[dayName]++;
         });
 
-        const bestDay = Object.keys(dayStats).reduce((a, b) => 
+        const dayKeys = Object.keys(dayStats);
+        if (dayKeys.length === 0) return { day: 'Henüz veri yok', count: 0 };
+
+        const bestDay = dayKeys.reduce((a, b) =>
             dayStats[a] > dayStats[b] ? a : b
         );
 
@@ -102,19 +107,24 @@ class AdvancedStats {
     // Get best time of day
     getBestTimeOfDay() {
         const history = this.stats.pomodoroHistory || [];
+        if (history.length === 0) return { hour: 0, count: 0 };
+
         const hourStats = {};
-        
+
         history.forEach(session => {
             const date = new Date(session.timestamp);
             const hour = date.getHours();
-            
+
             if (!hourStats[hour]) {
                 hourStats[hour] = 0;
             }
             hourStats[hour]++;
         });
 
-        const bestHour = Object.keys(hourStats).reduce((a, b) => 
+        const hourKeys = Object.keys(hourStats);
+        if (hourKeys.length === 0) return { hour: 0, count: 0 };
+
+        const bestHour = hourKeys.reduce((a, b) =>
             hourStats[a] > hourStats[b] ? a : b
         );
 
@@ -129,14 +139,14 @@ class AdvancedStats {
         const now = new Date();
         const currentStart = new Date(now.getTime() - currentDays * 24 * 60 * 60 * 1000);
         const previousStart = new Date(currentStart.getTime() - previousDays * 24 * 60 * 60 * 1000);
-        
+
         const history = this.stats.pomodoroHistory || [];
-        
-        const current = history.filter(s => 
+
+        const current = history.filter(s =>
             new Date(s.timestamp) >= currentStart
         );
-        
-        const previous = history.filter(s => 
+
+        const previous = history.filter(s =>
             new Date(s.timestamp) >= previousStart && new Date(s.timestamp) < currentStart
         );
 
