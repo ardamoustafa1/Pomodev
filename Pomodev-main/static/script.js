@@ -26,6 +26,32 @@ let endTimestamp = 0; // Wall-clock based timer için bitiş zamanı
 let stopwatchElapsed = 0;   // Birikmiş saniye (pause'larda)
 let stopwatchStartTime = 0; // Başlangıç zamanı (çalışırken)
 
+// iOS Safari: Script yüklenir yüklenmez localStorage'dan timer state oku (minimal key'ler)
+(function () {
+    try {
+        if (localStorage.getItem('pdev_run') !== '1') return;
+        var mode = localStorage.getItem('pdev_mode') || 'pomodoro';
+        var now = Date.now();
+        if (mode === 'stopwatch') {
+            var swEl = parseInt(localStorage.getItem('pdev_sw_elapsed') || '0', 10);
+            var saveTs = parseInt(localStorage.getItem('pdev_ts') || '0', 10);
+            stopwatchElapsed = saveTs > 0 ? swEl + Math.floor((now - saveTs) / 1000) : swEl;
+            stopwatchStartTime = now - (stopwatchElapsed * 1000);
+            currentMode = 'stopwatch';
+            isRunning = true;
+            endTimestamp = 0;
+        } else {
+            var et = parseInt(localStorage.getItem('pdev_et') || '0', 10);
+            if (et > now) {
+                currentMode = mode;
+                endTimestamp = et;
+                remainingTime = Math.max(0, Math.floor((et - now) / 1000));
+                isRunning = true;
+            }
+        }
+    } catch (e) {}
+})();
+
 // Ayar değişkenleri
 let autoStartBreaks = false;
 let autoStartPomodoros = false;
@@ -1656,10 +1682,12 @@ function actuallyStartTimer() {
         }
         window._iosSaveInterval = setInterval(() => {
             if (isRunning) {
+                saveMinimalTimerState();
                 saveData();
             }
-        }, 1000); // Her saniye kaydet
+        }, 1000);
     }
+    saveMinimalTimerState();
 }
 function promptCompletedNote() {
     // Not prompt kaldırıldı
@@ -3661,66 +3689,89 @@ function previewSound(soundType, soundName) {
     }, 2000);
 }
 
+// Minimal timer state kaydet (iOS Safari - kısa key'ler, hızlı yazma)
+function saveMinimalTimerState() {
+    try {
+        if (!isRunning) {
+            localStorage.setItem('pdev_run', '0');
+            return;
+        }
+        var ts = Date.now();
+        localStorage.setItem('pdev_run', '1');
+        localStorage.setItem('pdev_mode', currentMode);
+        localStorage.setItem('pdev_ts', ts.toString());
+        if (currentMode === 'stopwatch') {
+            var el = stopwatchStartTime > 0 ? stopwatchElapsed + Math.floor((ts - stopwatchStartTime) / 1000) : stopwatchElapsed;
+            localStorage.setItem('pdev_sw_elapsed', el.toString());
+        } else {
+            localStorage.setItem('pdev_et', endTimestamp.toString());
+        }
+    } catch (e) {}
+}
+
 // ===== ARKA PLAN KONTROLÜ =====
 function setupPageVisibility() {
-    // Sayfa görünürlük değişikliklerini dinle
     document.addEventListener('visibilitychange', handleVisibilityChange);
-
-    // iOS Safari için kritik: pageshow event'i sayfa geri geldiğinde tetiklenir
     window.addEventListener('pageshow', handlePageShow);
 
-    // Sayfa kapatılırken veya gizlenirken veri kaydet (iOS için pagehide kritik)
-    window.addEventListener('beforeunload', () => { if (isRunning) saveData(); });
+    window.addEventListener('beforeunload', () => { if (isRunning) { saveMinimalTimerState(); saveData(); } });
     window.addEventListener('pagehide', () => { 
         if (isRunning) {
-            // iOS Safari için KRİTİK: Synchronous save
             try {
-                const data = {
-                    timerState: {
-                        isRunning: isRunning,
-                        mode: currentMode,
-                        remainingTime: remainingTime,
-                        endTimestamp: endTimestamp,
-                        stopwatchElapsed: stopwatchElapsed,
-                        stopwatchStartTime: stopwatchStartTime,
-                        lastSaveTime: Date.now()
-                    }
-                };
-                const jsonData = JSON.stringify(data);
-                localStorage.setItem('pomodev_timer_state', jsonData);
+                saveMinimalTimerState();
+                var data = { timerState: { isRunning: isRunning, mode: currentMode, remainingTime: remainingTime, endTimestamp: endTimestamp, stopwatchElapsed: stopwatchElapsed, stopwatchStartTime: stopwatchStartTime, lastSaveTime: Date.now() } };
+                localStorage.setItem('pomodev_timer_state', JSON.stringify(data));
                 localStorage.setItem('pomodev_end_timestamp', endTimestamp.toString());
-                localStorage.setItem('pomodev_last_save', Date.now().toString());
-            } catch(e) {
-                console.error('pagehide save failed:', e);
-            }
-            saveData(); // Normal save
+            } catch(e) {}
+            saveData();
         }
     });
 }
 
 // iOS Safari / BFCache: Sayfa geri geldiğinde SENKRON olarak timer'ı duvar saatine göre yeniden başlat.
-// setInterval arka planda donduğu için mutlaka yeniden başlatılmalı.
 function syncRestartTimerFromStorage() {
     try {
-        const raw = localStorage.getItem('pomodev_timer_state');
-        if (!raw) return;
-        const parsed = JSON.parse(raw);
-        const state = parsed && parsed.timerState;
-        if (!state || !state.isRunning) return;
+        var state = null;
+        var raw = localStorage.getItem('pomodev_timer_state');
+        if (raw) {
+            var parsed = JSON.parse(raw);
+            state = parsed && parsed.timerState;
+        }
+        // Minimal key'lerden restore et (pomodev_timer_state yoksa)
+        if (!state || !state.isRunning) {
+            if (localStorage.getItem('pdev_run') !== '1') return;
+            var mode = localStorage.getItem('pdev_mode') || 'pomodoro';
+            var now = Date.now();
+            state = { isRunning: true, mode: mode };
+            if (mode === 'stopwatch') {
+                var swEl = parseInt(localStorage.getItem('pdev_sw_elapsed') || '0', 10);
+                var saveTs = parseInt(localStorage.getItem('pdev_ts') || '0', 10);
+                state.stopwatchElapsed = saveTs > 0 ? swEl + Math.floor((now - saveTs) / 1000) : swEl;
+                state.stopwatchStartTime = now - (state.stopwatchElapsed * 1000);
+            } else {
+                state.endTimestamp = parseInt(localStorage.getItem('pdev_et') || '0', 10);
+                if (state.endTimestamp <= now) return;
+            }
+        } else if (!state.isRunning) return;
 
         currentMode = state.mode || currentMode;
         if (typeof updateModeStyles === 'function') updateModeStyles();
         if (typeof updateFocusMessage === 'function') updateFocusMessage();
 
         if (currentMode === 'stopwatch') {
-            const lastSave = state.lastSaveTime || 0;
-            const runBefore = (state.stopwatchStartTime > 0) ? Math.floor((lastSave - state.stopwatchStartTime) / 1000) : 0;
-            const elapsedSince = Math.floor((Date.now() - lastSave) / 1000);
-            stopwatchElapsed = (state.stopwatchElapsed || 0) + runBefore + elapsedSince;
-            stopwatchStartTime = Date.now() - (stopwatchElapsed * 1000);
+            if (state.stopwatchElapsed != null && state.stopwatchStartTime != null) {
+                stopwatchElapsed = state.stopwatchElapsed;
+                stopwatchStartTime = state.stopwatchStartTime;
+            } else {
+                var lastSave = state.lastSaveTime || 0;
+                var runBefore = (state.stopwatchStartTime > 0) ? Math.floor((lastSave - state.stopwatchStartTime) / 1000) : 0;
+                var elapsedSince = Math.floor((Date.now() - lastSave) / 1000);
+                stopwatchElapsed = (state.stopwatchElapsed || 0) + runBefore + elapsedSince;
+                stopwatchStartTime = Date.now() - (stopwatchElapsed * 1000);
+            }
             endTimestamp = 0;
         } else {
-            const endTs = state.endTimestamp || parseInt(localStorage.getItem('pomodev_end_timestamp') || '0', 10);
+            var endTs = state.endTimestamp || parseInt(localStorage.getItem('pdev_et') || localStorage.getItem('pomodev_end_timestamp') || '0', 10);
             if (!endTs) return;
             remainingTime = Math.max(0, Math.floor((endTs - Date.now()) / 1000));
             if (remainingTime <= 0) {
@@ -3990,27 +4041,13 @@ function handleVisibilityChange() {
         // Sayfa arka plana alındı
         isPageVisible = false;
         if (isRunning) {
-            // iOS Safari için KRİTİK: Synchronous save
             try {
-                const data = {
-                    timerState: {
-                        isRunning: isRunning,
-                        mode: currentMode,
-                        remainingTime: remainingTime,
-                        endTimestamp: endTimestamp,
-                        stopwatchElapsed: stopwatchElapsed,
-                        stopwatchStartTime: stopwatchStartTime,
-                        lastSaveTime: Date.now()
-                    }
-                };
-                const jsonData = JSON.stringify(data);
-                localStorage.setItem('pomodev_timer_state', jsonData);
+                saveMinimalTimerState();
+                var data = { timerState: { isRunning: isRunning, mode: currentMode, remainingTime: remainingTime, endTimestamp: endTimestamp, stopwatchElapsed: stopwatchElapsed, stopwatchStartTime: stopwatchStartTime, lastSaveTime: Date.now() } };
+                localStorage.setItem('pomodev_timer_state', JSON.stringify(data));
                 localStorage.setItem('pomodev_end_timestamp', endTimestamp.toString());
-                localStorage.setItem('pomodev_last_save', Date.now().toString());
-            } catch(e) {
-                console.error('visibilitychange save failed:', e);
-            }
-            saveData(); // Normal save
+            } catch(e) {}
+            saveData();
         }
     } else {
         // Sayfa tekrar aktif oldu
