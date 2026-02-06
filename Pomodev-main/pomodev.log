@@ -126,3 +126,15 @@
 2026-02-07 00:53:50,488 - werkzeug - INFO - 127.0.0.1 - - [07/Feb/2026 00:53:50] "[36mGET /static/manifest.webmanifest HTTP/1.1[0m" 304 -
 2026-02-07 00:53:50,629 - werkzeug - INFO - 127.0.0.1 - - [07/Feb/2026 00:53:50] "[36mGET /favicon.ico HTTP/1.1[0m" 304 -
 2026-02-07 00:53:50,632 - werkzeug - INFO - 127.0.0.1 - - [07/Feb/2026 00:53:50] "[36mGET /static/favicon.svg HTTP/1.1[0m" 304 -
+2026-02-07 00:57:00,212 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5001
+2026-02-07 00:57:00,214 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2026-02-07 00:57:10,538 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5001
+2026-02-07 00:57:10,539 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2026-02-07 00:57:41,687 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5001
+2026-02-07 00:57:41,689 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2026-02-07 00:57:41,724 - werkzeug - INFO -  * Restarting with watchdog (windowsapi)
+2026-02-07 00:57:42,913 - werkzeug - WARNING -  * Debugger is active!
+2026-02-07 00:57:42,924 - werkzeug - INFO -  * Debugger PIN: 117-135-016
