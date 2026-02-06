@@ -27,6 +27,9 @@ let stopwatchElapsed = 0;   // Birikmiş saniye (pause'larda)
 let stopwatchStartTime = 0; // Başlangıç zamanı (çalışırken)
 
 // iOS Safari: Script yüklenir yüklenmez localStorage'dan timer state oku (minimal key'ler)
+// Bu IIFE sadece değerleri restore eder, timer DOMContentLoaded'da başlatılır
+window.__needsTimerRestart = false;
+window.__restoredStopwatchElapsed = 0;
 (function () {
     try {
         if (localStorage.getItem('pdev_run') !== '1') return;
@@ -35,21 +38,27 @@ let stopwatchStartTime = 0; // Başlangıç zamanı (çalışırken)
         if (mode === 'stopwatch') {
             var swEl = parseInt(localStorage.getItem('pdev_sw_elapsed') || '0', 10);
             var saveTs = parseInt(localStorage.getItem('pdev_ts') || '0', 10);
-            stopwatchElapsed = saveTs > 0 ? swEl + Math.floor((now - saveTs) / 1000) : swEl;
-            stopwatchStartTime = now - (stopwatchElapsed * 1000);
+            // Toplam geçen süreyi hesapla: kaydedilen süre + kaydedilmeden geçen süre
+            var totalElapsed = saveTs > 0 ? swEl + Math.floor((now - saveTs) / 1000) : swEl;
+            // Değerleri global olarak kaydet, timer DOMContentLoaded'da başlatılacak
+            window.__restoredStopwatchElapsed = totalElapsed;
+            stopwatchElapsed = totalElapsed;
+            stopwatchStartTime = 0; // Başlatılmadı olarak işaretle
             currentMode = 'stopwatch';
-            isRunning = true;
+            isRunning = false; // Timer henüz başlamadı, DOMContentLoaded'da başlatılacak
             endTimestamp = 0;
+            window.__needsTimerRestart = true; // Timer'ın yeniden başlatılması gerektiğini işaretle
         } else {
             var et = parseInt(localStorage.getItem('pdev_et') || '0', 10);
             if (et > now) {
                 currentMode = mode;
                 endTimestamp = et;
                 remainingTime = Math.max(0, Math.floor((et - now) / 1000));
-                isRunning = true;
+                isRunning = false; // Timer henüz başlamadı
+                window.__needsTimerRestart = true;
             }
         }
-    } catch (e) { }
+    } catch (e) { console.error('IIFE restore error:', e); }
 })();
 
 // Ayar değişkenleri
@@ -452,17 +461,61 @@ function checkStreakMilestone(streak) {
 const gameManager = new GamificationManager();
 
 document.addEventListener('DOMContentLoaded', () => {
-    // iOS Safari: İlk iş olarak senkron restore dene (timer arka planda çalışıyorsa devam etsin)
-    if (typeof syncRestartTimerFromStorage === 'function') {
-        syncRestartTimerFromStorage();
+    // iOS Safari: IIFE'de restore edilen timer'ı yeniden başlat
+    if (window.__needsTimerRestart) {
+        console.log('iOS Safari: Timer restart from IIFE, mode:', currentMode);
+        if (currentMode === 'stopwatch') {
+            // Stopwatch: IIFE'de hesaplanan elapsed time'ı kullan ve timer'ı başlat
+            stopwatchElapsed = window.__restoredStopwatchElapsed || stopwatchElapsed;
+            stopwatchStartTime = Date.now(); // Şimdi başlat
+            isRunning = true;
+            endTimestamp = 0;
+
+            // Timer interval'ı başlat
+            if (!timer) {
+                timer = setInterval(() => {
+                    if (isRunning) timerTick();
+                }, 100);
+            }
+
+            // Worker'ı başlat
+            try {
+                if (timerWorker) timerWorker.postMessage({ action: 'START' });
+            } catch (e) { }
+
+            console.log('Stopwatch restored with elapsed:', stopwatchElapsed);
+        } else if (endTimestamp > Date.now()) {
+            // Countdown timer: endTimestamp'ten devam et
+            remainingTime = Math.max(0, Math.floor((endTimestamp - Date.now()) / 1000));
+            isRunning = true;
+
+            if (!timer) {
+                timer = setInterval(() => {
+                    if (isRunning) timerTick();
+                }, 100);
+            }
+
+            try {
+                if (timerWorker) timerWorker.postMessage({ action: 'START' });
+            } catch (e) { }
+        }
+        window.__needsTimerRestart = false;
+    } else {
+        // Normal başlangıç: syncRestartTimerFromStorage dene
+        if (typeof syncRestartTimerFromStorage === 'function') {
+            syncRestartTimerFromStorage();
+        }
     }
 
     // Timer restore edilmediyse varsayılan state
+    // ANCAK: stopwatch modunda ve elapsed > 0 ise sıfırlama!
     if (!isRunning) {
         if (currentMode === 'stopwatch') {
-            stopwatchElapsed = 0;
-            stopwatchStartTime = 0;
-            endTimestamp = 0;
+            // Sadece elapsed 0 ise sıfırla, değilse koru (pause durumu)
+            if (stopwatchElapsed === 0) {
+                stopwatchStartTime = 0;
+                endTimestamp = 0;
+            }
         } else {
             remainingTime = durations[currentMode] || 1500;
             endTimestamp = 0;
