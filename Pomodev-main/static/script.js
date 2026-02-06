@@ -426,26 +426,25 @@ function checkStreakMilestone(streak) {
 const gameManager = new GamificationManager();
 
 document.addEventListener('DOMContentLoaded', () => {
-    // İlk olarak timer state'ini ayarla
-    if (currentMode === 'stopwatch') {
-        stopwatchElapsed = 0;
-        stopwatchStartTime = 0;
-        endTimestamp = 0;
+    // iOS Safari: İlk iş olarak senkron restore dene (timer arka planda çalışıyorsa devam etsin)
+    if (typeof syncRestartTimerFromStorage === 'function') {
+        syncRestartTimerFromStorage();
     }
-    
-    // iOS Safari için KRİTİK: Sayfa yüklendiğinde timer state'i mutlaka restore et
-    setTimeout(() => {
-        restoreTimerStateFromStorage();
-    }, 200); else {
-        remainingTime = durations[currentMode];
-        endTimestamp = 0;
-    }
-    isRunning = false;
 
-    // Timer'ı temizle (güvenlik için)
-    if (timer) {
-        clearInterval(timer);
-        timer = null;
+    // Timer restore edilmediyse varsayılan state
+    if (!isRunning) {
+        if (currentMode === 'stopwatch') {
+            stopwatchElapsed = 0;
+            stopwatchStartTime = 0;
+            endTimestamp = 0;
+        } else {
+            remainingTime = durations[currentMode] || 1500;
+            endTimestamp = 0;
+        }
+        if (timer) {
+            clearInterval(timer);
+            timer = null;
+        }
     }
 
     // UI'ı güncelle
@@ -453,10 +452,9 @@ document.addEventListener('DOMContentLoaded', () => {
     updateFocusMessage();
     updateModeStyles();
 
-    // Start butonunu kontrol et
     const startBtn = document.querySelector('.start-btn');
     if (startBtn) {
-        startBtn.textContent = 'START';
+        startBtn.textContent = isRunning ? 'PAUSE' : 'START';
     }
 
     // Diğer setup'ları yap
@@ -3700,11 +3698,76 @@ function setupPageVisibility() {
     });
 }
 
+// iOS Safari / BFCache: Sayfa geri geldiğinde SENKRON olarak timer'ı duvar saatine göre yeniden başlat.
+// setInterval arka planda donduğu için mutlaka yeniden başlatılmalı.
+function syncRestartTimerFromStorage() {
+    try {
+        const raw = localStorage.getItem('pomodev_timer_state');
+        if (!raw) return;
+        const parsed = JSON.parse(raw);
+        const state = parsed && parsed.timerState;
+        if (!state || !state.isRunning) return;
+
+        currentMode = state.mode || currentMode;
+        if (typeof updateModeStyles === 'function') updateModeStyles();
+        if (typeof updateFocusMessage === 'function') updateFocusMessage();
+
+        if (currentMode === 'stopwatch') {
+            const lastSave = state.lastSaveTime || 0;
+            const runBefore = (state.stopwatchStartTime > 0) ? Math.floor((lastSave - state.stopwatchStartTime) / 1000) : 0;
+            const elapsedSince = Math.floor((Date.now() - lastSave) / 1000);
+            stopwatchElapsed = (state.stopwatchElapsed || 0) + runBefore + elapsedSince;
+            stopwatchStartTime = Date.now() - (stopwatchElapsed * 1000);
+            endTimestamp = 0;
+        } else {
+            const endTs = state.endTimestamp || parseInt(localStorage.getItem('pomodev_end_timestamp') || '0', 10);
+            if (!endTs) return;
+            remainingTime = Math.max(0, Math.floor((endTs - Date.now()) / 1000));
+            if (remainingTime <= 0) {
+                remainingTime = 0;
+                endTimestamp = 0;
+                isRunning = false;
+                if (timer) { clearInterval(timer); timer = null; }
+                if (window._iosSaveInterval) { clearInterval(window._iosSaveInterval); window._iosSaveInterval = null; }
+                if (typeof displayTime === 'function') displayTime();
+                const startBtn = document.querySelector('.start-btn');
+                if (startBtn) startBtn.textContent = 'START';
+                if (typeof runTimerCompleteLogic === 'function') runTimerCompleteLogic();
+                return;
+            }
+            endTimestamp = Date.now() + remainingTime * 1000;
+        }
+
+        isRunning = true;
+        const startBtn = document.querySelector('.start-btn');
+        if (startBtn) startBtn.textContent = 'PAUSE';
+
+        if (timer) { clearInterval(timer); timer = null; }
+        timer = setInterval(function () {
+            if (isRunning) timerTick();
+        }, 100);
+
+        try {
+            if (timerWorker) timerWorker.postMessage({ action: 'START' });
+        } catch (e) {}
+
+        if (typeof window !== 'undefined' && window.navigator && /iPad|iPhone|iPod/.test(navigator.userAgent)) {
+            if (window._iosSaveInterval) clearInterval(window._iosSaveInterval);
+            window._iosSaveInterval = setInterval(function () {
+                if (isRunning) saveData();
+            }, 1000);
+        }
+        if (typeof displayTime === 'function') displayTime();
+    } catch (e) {
+        console.error('syncRestartTimerFromStorage failed:', e);
+    }
+}
+
 // iOS Safari için kritik: Sayfa geri geldiğinde timer state'i kontrol et ve restore et
 function handlePageShow(event) {
-    // iOS'ta sayfa arka plandan geri geldiğinde timer state'i kontrol et
-    // Her durumda timer state'i kontrol et (iOS Safari'de sayfa yeniden yüklenebilir)
-    setTimeout(() => {
+    // BFCache'den döndüyse veya normal geri geliş: Önce SENKRON restart (setInterval donmuş olabilir)
+    syncRestartTimerFromStorage();
+    setTimeout(function () {
         restoreTimerStateFromStorage();
         handleVisibilityChange();
     }, 100);
@@ -3953,13 +4016,10 @@ function handleVisibilityChange() {
         // Sayfa tekrar aktif oldu
         isPageVisible = true;
 
-        // iOS Safari için KRİTİK: Her zaman timer state'i kontrol et ve restore et
-        // Timer çalışmıyorsa veya timer çalışıyor ama localStorage'daki state farklıysa restore et
-        setTimeout(() => {
-            restoreTimerStateFromStorage();
-        }, 50);
-        
-        // Eğer timer çalışmıyorsa restore et
+        // iOS Safari / BFCache: Önce SENKRON restart (setInterval arka planda donmuş olabilir)
+        syncRestartTimerFromStorage();
+
+        // Eğer hâlâ timer çalışmıyorsa async restore dene
         if (!isRunning || !timer) {
             restoreTimerStateFromStorage();
             return;
