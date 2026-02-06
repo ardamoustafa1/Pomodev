@@ -3073,13 +3073,42 @@ async function loadData() {
 
         // === TIMER STATE RESTORATION ===
         // Sayfa yenilendiğinde veya geri gelindiğinde timer durumunu kurtar
-        if (data.timerState) {
-            const state = data.timerState;
+        // iOS Safari için KRİTİK: Timer state'i önce synchronous olarak kontrol et
+        const isIOS = typeof window !== 'undefined' && window.navigator && /iPad|iPhone|iPod/.test(navigator.userAgent);
+        let timerState = data.timerState;
+        
+        if (isIOS) {
+            try {
+                // Önce synchronous timer state'i kontrol et
+                const timerStateData = localStorage.getItem('pomodev_timer_state');
+                if (timerStateData) {
+                    const syncState = JSON.parse(timerStateData);
+                    if (syncState.timerState) {
+                        // Synchronous timer state daha güncel olabilir
+                        timerState = syncState.timerState;
+                    }
+                }
+                // endTimestamp'i de kontrol et
+                const endTimestampStr = localStorage.getItem('pomodev_end_timestamp');
+                if (endTimestampStr && timerState) {
+                    const savedEndTimestamp = parseInt(endTimestampStr);
+                    if (!isNaN(savedEndTimestamp) && savedEndTimestamp > 0) {
+                        timerState.endTimestamp = savedEndTimestamp;
+                    }
+                }
+            } catch (e) {
+                console.error('iOS timer state check failed:', e);
+            }
+        }
+        
+        if (timerState) {
+            const state = timerState;
             // Modu geri yükle
             currentMode = state.mode || 'pomodoro';
             updateModeStyles();
             updateFocusMessage();
 
+            // iOS Safari için KRİTİK: Timer çalışıyorsa mutlaka restore et
             if (state.isRunning) {
                 // ÇALIŞIYORSA: Geçen süreyi hesapla ve devam et
                 const timePassed = Math.floor((Date.now() - state.lastSaveTime) / 1000);
@@ -3205,6 +3234,21 @@ async function loadData() {
                 // Buton zaten START (isRunning=false default)
             }
         } else {
+            // iOS Safari için KRİTİK: Timer state yoksa bile synchronous kontrol et
+            if (isIOS) {
+                try {
+                    const timerStateData = localStorage.getItem('pomodev_timer_state');
+                    if (timerStateData) {
+                        const syncState = JSON.parse(timerStateData);
+                        if (syncState.timerState && syncState.timerState.isRunning) {
+                            // Timer çalışıyor ama data.timerState yok - restore et
+                            restoreTimerStateFromStorage();
+                        }
+                    }
+                } catch (e) {
+                    console.error('iOS timer state fallback check failed:', e);
+                }
+            }
             // Timer verisi yoksa standart yükleme
             if (!isRunning) {
                 remainingTime = durations[currentMode] || 1500;
